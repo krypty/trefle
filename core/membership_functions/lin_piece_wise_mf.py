@@ -20,7 +20,7 @@ class LinPWMF(FreeShapeMF):
     Feel free to derive this class to create a TriangularMF, LinearMF,...
     """
 
-    def __init__(self, *p_args, n_points=50):
+    def __init__(self, *p_args, n_points=30):
         """
         Create a "linear piece-wise function"-like membership function
         :param p_args: this should at least contain 2 items. Each item is

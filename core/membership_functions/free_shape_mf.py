@@ -19,10 +19,25 @@ class FreeShapeMF:
         self.__in_values = np.array(in_values)
         self.__mf_values = np.array(mf_values)
 
-    def fuzzify(self, in_value):
+    def fuzzify(self, in_value: float):
         # return the nearest mf value for a given in_value
         idx = (np.abs(self.__in_values - in_value)).argmin()
         return self.__mf_values[idx]
+
+    @property
+    def in_values(self):
+        return self.__in_values
+
+    @property
+    def mf_values(self):
+        return self.__mf_values
+
+    # def __repr__(self):
+    #     plt.scatter(self.in_values, self.mf_values)
+    #     plt.ylim([0, 1])
+    #     plt.show()
+    #     return ""
+    #     return "in: {}\nmf: {}".format(self.in_values, self.mf_values)
 
 
 if __name__ == '__main__':

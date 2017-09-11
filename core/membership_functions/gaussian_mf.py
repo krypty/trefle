@@ -11,7 +11,9 @@ class GaussianMF(FreeShapeMF):
 
     If a membership can be expressed as a (simple) function, then overriding
     self.fuzzify() can be more efficient than computing a bunch of points a
-    priori
+    priori.
+    /!\ Be careful to not use this kind of trick if you want to use it as a
+    consequent
     """
 
     def __init__(self, mu, sigma):
@@ -21,7 +23,7 @@ class GaussianMF(FreeShapeMF):
         self.__v = sigma ** 2
         super().__init__(in_values, mf_values)
 
-    def fuzzify(self, in_value):
+    def fuzzify(self, in_value: float):
         # gaussian equation,
         # source: https://en.wikipedia.org/wiki/Normal_distribution
         return (1.0 / (np.sqrt(2.0 * np.pi * self.__v))) * np.exp(

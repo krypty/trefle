@@ -7,12 +7,12 @@ class TriangularMF(LinPWMF):
     - mf values are bound to [0, 1]
     """
 
-    def __init__(self, p_min, p_mid, p_max, n_points=10):
+    def __init__(self, p_min, p_mid, p_max, n_points=30):
         super().__init__([p_min, 0], [p_mid, 1], [p_max, 0], n_points=n_points)
 
 
 if __name__ == '__main__':
-    mf = TriangularMF(p_min=2, p_mid=15, p_max=16, n_points=100)
+    mf = TriangularMF(p_min=2, p_mid=15, p_max=16, n_points=30)
     print(mf.fuzzify(2.5))
     assert mf.fuzzify(-2) == 0
 
