@@ -18,7 +18,6 @@ class MembershipFunctionViewer(Viewer):
         self._ax.plot([in_value, in_value], [0, fuzzified], 'r')
 
     def get_plot(self, ax):
-        print("yolo")
         ax.scatter(self.__mf.in_values, self.__mf.mf_values, label=self.__label)
         ax.plot(self.__mf.in_values, self.__mf.mf_values)
         # ax.set_ylim([-0.1, 1.1])

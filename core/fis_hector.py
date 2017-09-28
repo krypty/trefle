@@ -54,8 +54,7 @@ class FIS:
         self.defuzzifier = defuzzifier
 
         self.input_values = dict()
-        self.fuzzified_output = np.zeros(
-            len(self.output_variable.input_values))
+        self.fuzzified_output = np.zeros(len(self.output_variable.input_values))
         self.defuzzified_output = 0.0
 
     def __str__(self):
@@ -88,9 +87,9 @@ class FIS:
         """
         This function performs the aggregation of the rules outputs
         """
-        self.fuzzified_output = np.zeros(
-            len(self.output_variable.input_values))
+        self.fuzzified_output = np.zeros(len(self.output_variable.input_values))
         for r in self.rules:
+            # GARY perform aggregation two by two
             self.fuzzified_output = self.aggregator(
                 self.fuzzified_output, r.consequent_activation)
 
@@ -104,36 +103,94 @@ class FIS:
 
 
 def main():
-    temperature = lv.LinguisticVariable('temperature', 0, 35, [17, 20, 26, 29],
-                                        [
-                                            'cold', 'warm', 'hot'], res=1.0)
-    sunshine = lv.LinguisticVariable('sunshine', 0, 100, [30, 50, 50, 100], [
-        'cloudy', 'partsunny', 'sunny'], res=1.0)
-    tourists = lv.LinguisticVariable('tourists', 0, 100, [0, 50, 50, 100], [
-        'low', 'medium', 'high'], res=1.0)
+    temperature = lv.LinguisticVariable('temperature', 0, 35,
+                                        [17, 20, 26, 29],
+                                        ['cold', 'warm', 'hot'], res=1.0)
 
-    rule_1 = fr.FuzzyRule(
-        'OR_max', [(temperature, 'hot'), (sunshine, 'sunny')],
-        (tourists, 'high'), 'MIN')
-    rule_2 = fr.FuzzyRule('AND_min', [
-        (temperature, 'warm'), (sunshine, 'partsunny')], (tourists, 'medium'),
+    sunshine = lv.LinguisticVariable('sunshine', 0, 100, [30, 50, 50, 100],
+                                     ['cloudy', 'partsunny', 'sunny'],
+                                     res=1.0)
+
+    tourists = lv.LinguisticVariable('tourists', 0, 100, [0, 50, 50, 100],
+                                     ['low', 'medium', 'high'], res=1.0)
+
+    rule_1 = fr.FuzzyRule('OR_max',
+                          [(temperature, 'hot'), (sunshine, 'sunny')],
+                          (tourists, 'high'), 'MIN')
+
+    rule_2 = fr.FuzzyRule('AND_min',
+                          [(temperature, 'warm'), (sunshine, 'partsunny')],
+                          (tourists, 'medium'),
                           'MIN')
-    rule_3 = fr.FuzzyRule(
-        'OR_max', [(temperature, 'cold'), (sunshine, 'cloudy')],
-        (tourists, 'low'), 'MIN')
 
-    print(rule_1)
-    print(rule_2)
-    print(rule_3)
+    rule_3 = fr.FuzzyRule('OR_max',
+                          [(temperature, 'cold'), (sunshine, 'cloudy')],
+                          (tourists, 'low'), 'MIN')
+
+    # print(rule_1)
+    # print(rule_2)
+    # print(rule_3)
 
     tourist_prediction_example = FIS([rule_1, rule_2, rule_3])
 
-    print(tourist_prediction_example)
+    # print(tourist_prediction_example)
 
     input_values = {'temperature': 19, 'sunshine': 60}
     tourist_prediction_example.compute_antecedent_activations(input_values)
-    print(tourist_prediction_example)
+    # print(tourist_prediction_example)
+
+    # print("comp cons act")
+    tourist_prediction_example.compute_consequent_activations()
+
+    # print("aggr")
+    tourist_prediction_example.aggregate()
+
+    print("defuz", tourist_prediction_example.defuzzify())
+
+
+def tip_problem_hector():
+    quality = lv.LinguisticVariable('quality', 0, 10,
+                                    [0, 5],
+                                    ['poor', 'average', 'good'], res=1.0)
+
+    service = lv.LinguisticVariable('service', 0, 10,
+                                    [0, 5],
+                                    ['poor', 'average', 'good'], res=1.0)
+
+    tip = lv.LinguisticVariable('tip', 0, 25,
+                                [0, 13, 15],
+                                ['low', 'medium', 'high'], res=1.0)
+
+    rule_1 = fr.FuzzyRule('OR_max', [(quality, 'poor'), (service, 'poor')],
+                          (tip, 'low'), 'MIN')
+
+    rule_2 = fr.FuzzyRule('AND_min', [(service, 'average')],
+                          (tip, 'medium'), 'MIN')
+
+    rule_3 = fr.FuzzyRule('OR_max', [(service, 'good'), (quality, 'good')],
+                          (tip, 'high'), 'MIN')
+
+    # print(rule_1)
+    # print(rule_2)
+    # print(rule_3)
+
+    tourist_prediction_example = FIS([rule_1, rule_2, rule_3])
+
+    # print(tourist_prediction_example)
+
+    input_values = {'quality': 6.5, 'service': 9.8}
+    tourist_prediction_example.compute_antecedent_activations(input_values)
+    # print(tourist_prediction_example)
+
+    # print("comp cons act")
+    tourist_prediction_example.compute_consequent_activations()
+
+    # print("aggr")
+    tourist_prediction_example.aggregate()
+
+    print("defuz", tourist_prediction_example.defuzzify())
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    tip_problem_hector()

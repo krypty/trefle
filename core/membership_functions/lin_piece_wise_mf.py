@@ -20,7 +20,7 @@ class LinPWMF(FreeShapeMF):
     Feel free to derive this class to create a TriangularMF, LinearMF,...
     """
 
-    def __init__(self, *p_args, n_points=30):
+    def __init__(self, *p_args, n_points=50):
         """
         Create a "linear piece-wise function"-like membership function
         :param p_args: this should at least contain 2 items. Each item is
@@ -40,7 +40,7 @@ class LinPWMF(FreeShapeMF):
 
         for i in range(1, len(p_args)):
             xs, ys = gen_line(p_args[i - 1], p_args[i], n_points=n_pts_part)
-            n_pts -= n_pts_part
+            # n_pts -= n_pts_part
 
             in_values.extend(xs)
             mf_values.extend(ys)
