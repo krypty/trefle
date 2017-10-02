@@ -7,7 +7,7 @@ from view.viewer import Viewer
 
 
 class LinguisticVariableViewer(Viewer):
-    def __init__(self, lv, ax):
+    def __init__(self, lv, ax=None):
         """
 
         :type lv: LinguisticVariable
@@ -15,7 +15,7 @@ class LinguisticVariableViewer(Viewer):
         super(LinguisticVariableViewer, self).__init__(ax)
         self.__lv = lv
 
-        self._viewers: List[MembershipFunctionViewer] = self.get_plot(ax)
+        self._viewers: List[MembershipFunctionViewer] = self.get_plot(self._ax)
 
     def fuzzify(self, in_value):
         [v.fuzzify(in_value) for v in self._viewers]
