@@ -1,5 +1,6 @@
 from collections import defaultdict
 from copy import deepcopy
+from typing import Dict, List
 
 from core.membership_functions.free_shape_mf import FreeShapeMF
 
@@ -19,7 +20,7 @@ class FuzzyRule:
     def consequents(self):
         return self.__cons
 
-    def fuzzify(self, crips_inputs):
+    def fuzzify(self, crips_inputs: Dict[str, float]) -> List[float]:
         """
 
         :rtype: FuzzyRule
@@ -91,6 +92,15 @@ class FuzzyRule:
                 self.consequents]
 
     def __repr__(self):
-        return "rule: " + ",".join(
+        text = "IF ({}) \n" \
+               "THEN ({})"
+
+        ants_text = ",".join(
             ["{} is {}".format(lv_name.name, lv_value) for lv_name, lv_value in
              self.antecedents])
+
+        cons_text = ",".join(
+            ["{} is {}".format(lv_name.name, lv_value) for lv_name, lv_value in
+             self.consequents])
+
+        return text.format(ants_text, cons_text)
