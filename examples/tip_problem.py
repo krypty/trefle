@@ -4,6 +4,7 @@ from core.fis.fis import FIS, OR_max, COA_func
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
+from view.fis_viewer import FISViewer
 
 
 def tip_problem():
@@ -32,7 +33,7 @@ def tip_problem():
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tip, "low")
+            (lv_tip, "low"),
         ],
         impl_func=np.min
     )
@@ -43,7 +44,7 @@ def tip_problem():
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tip, "medium")
+            (lv_tip, "medium"),
         ],
         impl_func=np.min
     )
@@ -55,7 +56,7 @@ def tip_problem():
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tip, "high")
+            (lv_tip, "high"),
         ],
         impl_func=np.min
     )
@@ -74,6 +75,8 @@ def tip_problem():
     print("expected  value: {}".format(expected_value))
     print("difference     : {}".format(expected_value - predicted_value))
 
+    fisv = FISViewer(fis)
+    fisv.show()
 
 if __name__ == '__main__':
     # import cProfile

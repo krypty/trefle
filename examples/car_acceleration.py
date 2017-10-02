@@ -1,13 +1,10 @@
 import numpy as np
 
-from core.fis.fis import FIS, COA_func
+from core.fis.fis import FIS, COA_func, AND_min, MIN
 from core.linguistic_variables.linguistic_variable import \
     LinguisticVariable as LVar
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
-
-AND_min = np.min
-MIN = np.min
 
 
 def car_accel_problem():
