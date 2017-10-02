@@ -24,7 +24,7 @@ def resort_problem():
     lv_tourists = LinguisticVariable(name="tourists", ling_values_dict={
         "low": LinPWMF([0, 1], [50, 0]),
         "medium": TriangularMF(p_min=0, p_mid=50, p_max=100),
-        "high": LinPWMF([0, 0], [50, 0], [100, 1])
+        "high": LinPWMF([50, 0], [100, 1])
     })
 
     r1 = FuzzyRule(
