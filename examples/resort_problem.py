@@ -1,6 +1,6 @@
 import numpy as np
 
-from core.fis.fis import FIS, AND_min, OR_max, COA_func
+from core.fis.fis import FIS, AND_min, OR_max, COA_func, MIN
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.membership_functions.triangular_mf import TriangularMF
@@ -36,7 +36,7 @@ def resort_problem():
         cons=[
             (lv_tourists, "high")
         ],
-        impl_func=np.min
+        impl_func=MIN
     )
 
     r2 = FuzzyRule(
@@ -48,7 +48,7 @@ def resort_problem():
         cons=[
             (lv_tourists, "medium")
         ],
-        impl_func=np.min
+        impl_func=MIN
     )
 
     r3 = FuzzyRule(
@@ -60,7 +60,7 @@ def resort_problem():
         cons=[
             (lv_tourists, "low"),
         ],
-        impl_func=np.min
+        impl_func=MIN
     )
 
     fis = FIS(
@@ -78,7 +78,14 @@ def resort_problem():
     print("difference     : {}".format(expected_value - predicted_value))
 
     fisv = FISViewer(fis)
+
+    describe_fis(fis)
+
     fisv.show()
+
+
+def describe_fis(fis):
+    [print(r) for r in fis.rules]
 
 
 if __name__ == '__main__':

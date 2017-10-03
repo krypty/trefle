@@ -29,6 +29,7 @@ class FISViewer:
                 a = axarr[row - 1, col]
                 b = axarr[row, col]
                 a.get_shared_x_axes().join(a, b)
+                a.get_shared_y_axes().join(a, b)
 
         # axarr[0, 2].text(0, 0, "jdslkajdska")
         # axarr[1, 2].text(0, 0, "yolo")
@@ -39,14 +40,11 @@ class FISViewer:
 
         for line, r in enumerate(self.__fis.rules):
             self._create_rule_plot(r, ax_line=axarr[line, :],
-                                   max_ants=max_ants, max_cons=max_cons)
+                                   max_ants=max_ants, max_cons=max_cons,
+                                   rule_index=line)
 
         # all columns of consequents share the same x axe per column
         ax_cons_cols = axarr[:, -max_cons:]
-
-        print("axarr", axarr.shape)
-
-        print(ax_cons_cols)
 
         # j = 0
         # for ax_col in ax_cons_cols:
@@ -57,32 +55,20 @@ class FISViewer:
 
         self._plot_rows_cols_labels(axarr, max_ants, max_cons)
 
-        self._plot_aggregation(axarr[-1, -1])
+        for cons_index, ax in enumerate(axarr[-1, max_ants:]):
+            self._plot_aggregation(cons_index, ax)
 
     def show(self):
         plt.tight_layout()
         plt.show()
 
-    def _create_rule_plot(self, r: FuzzyRule, ax_line, max_ants, max_cons):
+    def _create_rule_plot(self, r: FuzzyRule, ax_line, max_ants, max_cons,
+                          rule_index):
         n_rule_members = len(ax_line)
 
         self._plot_ants(ax_line[:max_ants], r.antecedents, n_rule_members)
         self._plot_cons(ax_line[-max_cons:], r.consequents,
-                        n_rule_members)
-
-        # # share the x axe for all members of this rule
-        # for i in range(1, len(ax_line)):
-        #     ax_line[i - 1].get_shared_x_axes().join(ax_line[i - 1], ax_line[i])
-
-
-        # for ant_or_cons, ax in zip_longest(ants_and_cons, ax_line,
-        #                                    fillvalue=None):
-        #     if ant_or_cons is None:
-        #         ax.axis("off")
-        #     else:
-        #         mf = ant_or_cons[0][ant_or_cons[1]]
-        #         label = "[{}] {}".format(ant_or_cons[0].name, ant_or_cons[1])
-        #         MembershipFunctionViewer(mf, ax=ax, label=label)
+                        n_rule_members, rule_index)
 
     def _plot_ants(self, axarr, antecedents, n_rule_members):
         for ant, ax, i in zip_longest(antecedents, axarr,
@@ -98,13 +84,22 @@ class FISViewer:
             label = "[{}] {}".format(ant[0].name, ant[1])
             MembershipFunctionViewer(mf, ax=ax, label=label)
 
-    def _plot_cons(self, axarr, consequents, n_rule_members):
+            # show last crisp inputs
+            crisp_values = self.__fis.last_crisp_values
+            in_value = crisp_values[ant[0].name]
+            fuzzified = mf.fuzzify(in_value)
+
+            ax.plot([in_value], [fuzzified], 'ro')
+            ax.plot([in_value, in_value], [0, fuzzified], 'r')
+
+    def _plot_cons(self, axarr, consequents, n_rule_members, rule_index):
         # assumption: each rule has the same number and names of consequents
         sorted_consequents = sorted(consequents, key=lambda c: c[0].name)
 
         for cons, ax, i in zip_longest(sorted_consequents, axarr,
                                        range(n_rule_members),
                                        fillvalue=None):
+            # print(cons, ax, i)
             if cons is None:
                 continue
 
@@ -113,6 +108,13 @@ class FISViewer:
             mf = cons[0][cons[1]]
             label = "[{}] {}".format(cons[0].name, cons[1])
             MembershipFunctionViewer(mf, ax=ax, label=label)
+
+            # print(self.__fis.last_implicated_consequents)
+            mf_implicated = \
+                self.__fis.last_implicated_consequents[cons[0].name][rule_index]
+            MembershipFunctionViewer(mf_implicated, ax=ax,
+                                     label=label + " implicated",
+                                     color="orange")
 
     def _plot_rows_cols_labels(self, axarr, max_ants, max_cons):
         col_ants = ['Antecedent {}'.format(col + 1) for col in range(max_ants)]
@@ -129,6 +131,29 @@ class FISViewer:
             ax.set_ylabel(row, rotation=90, size='large')
             # ax.yaxis.set_label_coords(-0.15, 0.5)
 
-    def _plot_aggregation(self, ax):
+    def _plot_aggregation(self, cons_index, ax):
+        aggr_cons = self.__fis.last_aggregated_consequents
+
+        cons_labels = list(aggr_cons.keys())
+        mf = list(aggr_cons.values())[cons_index]
+        print(mf)
+        MembershipFunctionViewer(mf, ax=ax,
+                                 label="[{}]".format(
+                                     cons_labels[cons_index]) + " aggregated",
+                                 color="orange")
+
+        # show last crisp inputs
+        crisp_values = self.__fis.last_crisp_values
+        print(crisp_values)
+        # in_value = crisp_values[ant[0].name]
+        # fuzzified = mf.fuzzify(in_value)
+        #
+        # ax.plot([in_value], [fuzzified], 'ro')
+        # ax.plot([in_value, in_value], [0, fuzzified], 'r')
+
+        defuzz = list(self.__fis.last_defuzzified_outputs.values())[cons_index]
+        ax.plot([defuzz, defuzz], [0, 1],
+                label="output = {:.3f}".format(defuzz))
+        ax.legend()
+
         ax.axis("on")
-        ax.text(0, 0.5, "aggregation will take place here")

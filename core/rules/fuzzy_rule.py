@@ -54,7 +54,7 @@ class FuzzyRule:
 
         # apply the rule antecedent function using a sliding window of size 2
         for i in range(1, len(fuzzified_inputs)):
-            ant_val = self.__ant_act_func([ant_val, fuzzified_inputs[i]])
+            ant_val = self.__ant_act_func[0]([ant_val, fuzzified_inputs[i]])
 
         return ant_val
 
@@ -79,7 +79,7 @@ class FuzzyRule:
         for conseq, conseq_label in self.__cons:
             ling_value = conseq[conseq_label]
             in_values = deepcopy(ling_value.in_values)  # deepcopy needed ?
-            mf_values = [self.__impl_func([val, antecedents_activation]) for val
+            mf_values = [self.__impl_func[0]([val, antecedents_activation]) for val
                          in ling_value.mf_values]
 
             implicated_consequents[conseq.name].append(
@@ -95,11 +95,11 @@ class FuzzyRule:
         text = "IF ({}) \n" \
                "THEN ({})"
 
-        ants_text = ",".join(
+        ants_text = " {} ".format(self.__ant_act_func[1]).join(
             ["{} is {}".format(lv_name.name, lv_value) for lv_name, lv_value in
              self.antecedents])
 
-        cons_text = ",".join(
+        cons_text = " {} ".format(self.__impl_func[1]).join(
             ["{} is {}".format(lv_name.name, lv_value) for lv_name, lv_value in
              self.consequents])
 

@@ -1,17 +1,22 @@
 from abc import ABCMeta
 from collections import defaultdict
+from typing import List
 
 import numpy as np
 
 from core.membership_functions.free_shape_mf import FreeShapeMF
+from core.rules.fuzzy_rule import FuzzyRule
 
-COA_func = lambda v, m: np.sum(np.multiply(v, m)) / np.sum(m)
-OR_max = np.max
-AND_min = np.min
+COA_func = (lambda v, m: np.sum(np.multiply(v, m)) / np.sum(m), "COA_func")
+OR_max = (np.max, "OR_max")
+AND_min = (np.min, "AND_min")
+MIN = (np.min, "MIN")
+
+ERR_MSG_MUST_PREDICT = "you must use predict() at least once"
 
 
 class FIS(metaclass=ABCMeta):
-    def __init__(self, aggr_func, defuzz_func, rules):
+    def __init__(self, aggr_func, defuzz_func, rules: List[FuzzyRule]):
         self.__aggr_func = aggr_func
         self.__defuzz_func = defuzz_func
         self.__rules = rules
@@ -20,7 +25,28 @@ class FIS(metaclass=ABCMeta):
     def rules(self):
         return self.__rules
 
+    @property
+    def last_crisp_values(self):
+        assert self._last_crisp_values is not None, ERR_MSG_MUST_PREDICT
+        return self._last_crisp_values
+
+    @property
+    def last_implicated_consequents(self):
+        assert self._implicated_consequents is not None, ERR_MSG_MUST_PREDICT
+        return self._implicated_consequents
+
+    @property
+    def last_aggregated_consequents(self):
+        assert self._aggregated_consequents is not None, ERR_MSG_MUST_PREDICT
+        return self._aggregated_consequents
+
+    @property
+    def last_defuzzified_outputs(self):
+        assert self._defuzzified_outputs is not None, ERR_MSG_MUST_PREDICT
+        return self._defuzzified_outputs
+
     def predict(self, crisp_values):
+        self._last_crisp_values = crisp_values
         # TODO: make FIS multiple output variable compatible
 
         """
@@ -45,17 +71,21 @@ class FIS(metaclass=ABCMeta):
                 # rules_implicated_cons.append(implicated_consequents)
 
                 # grouped by rules
+        self._implicated_consequents = rules_implicated_cons
 
         # AGGREGATE CONSEQUENTS
         aggregated_consequents = {}
         for out_v_name, out_v_mf in rules_implicated_cons.items():
             aggregated_consequents[out_v_name] = self.__aggregate(*out_v_mf)
 
+        self._aggregated_consequents = aggregated_consequents
+
         # DEFUZZIFY
         defuzzified_outputs = {}
         for out_v_name, out_v_mf in aggregated_consequents.items():
             defuzzified_outputs[out_v_name] = self.__defuzzify(out_v_mf)
 
+        self._defuzzified_outputs = defuzzified_outputs
         return defuzzified_outputs
 
     def __aggregate(self, *out_var_mf):
@@ -74,4 +104,5 @@ class FIS(metaclass=ABCMeta):
                            mf_values=aggregated_mf_values)
 
     def __defuzzify(self, aggr_mf):
-        return self.__defuzz_func(aggr_mf.in_values, aggr_mf.mf_values)
+        # print("in v", aggr_mf.in_values, "mf v", aggr_mf.mf_values)
+        return self.__defuzz_func[0](aggr_mf.in_values, aggr_mf.mf_values)

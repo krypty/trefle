@@ -4,10 +4,11 @@ from view.viewer import Viewer
 
 
 class MembershipFunctionViewer(Viewer):
-    def __init__(self, mf: FreeShapeMF, label="", ax=None):
+    def __init__(self, mf: FreeShapeMF, label="", ax=None, color=None):
         super(MembershipFunctionViewer, self).__init__(ax)
         self.__mf = mf
         self.__label = label
+        self.__color = color
 
         self.get_plot(self._ax)
 
@@ -19,9 +20,8 @@ class MembershipFunctionViewer(Viewer):
 
     def get_plot(self, ax):
         ax.scatter(self.__mf.in_values, self.__mf.mf_values,
-                   s=10, label=self.__label, c="green")
-        ax.plot(self.__mf.in_values, self.__mf.mf_values,
-                c="green")
+                   s=10, label=self.__label, c=self.__color)
+        ax.plot(self.__mf.in_values, self.__mf.mf_values, c=self.__color)
         # ax.set_ylim([-0.1, 1.1])
         ax.legend()
         return ax
