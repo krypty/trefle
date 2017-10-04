@@ -80,6 +80,10 @@ class FISViewer:
 
             ax.axis("on")
             ax.set_facecolor(ANTECEDENTS_BACKGROUND_COLOR)
+
+            for mf in ant[0].ling_values.values():
+                MembershipFunctionViewer(mf, ax=ax, color="gray", alpha=0.1)
+
             mf = ant[0][ant[1]]
             label = "[{}] {}".format(ant[0].name, ant[1])
             MembershipFunctionViewer(mf, ax=ax, label=label)

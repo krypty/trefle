@@ -29,6 +29,10 @@ class LinguisticVariable(metaclass=ABCMeta):
         return self.__name
 
     @property
+    def ling_values(self):
+        return self.__ling_values_dict
+
+    @property
     def labels_name(self):
         return self.__ling_values_dict.keys()
 
