@@ -21,10 +21,13 @@ class FISViewer:
 
         max_sum_ants_cons = max_ants + max_cons
         ncols = max_sum_ants_cons
-        nrows = n_rules + 1
+        nrows = n_rules + 1  # +1 row for aggregation
         fig, axarr = plt.subplots(ncols=ncols,
                                   nrows=nrows,
                                   figsize=(7 * ncols, 4 * nrows))
+
+        plt.suptitle(self._describe_fis())
+        # text(0.5, 0.95, 'test', transform=fig.transFigure, horizontalalignment='center')
 
         # -1 because last line is for aggregation
         for row in range(axarr.shape[0] - 1):
@@ -63,10 +66,14 @@ class FISViewer:
 
     def show(self):
         plt.tight_layout()
+        plt.subplots_adjust(top=0.88)
         plt.show()
 
     def save(self, filename):
         savefig(filename, bbox_inches='tight')
+
+    def set_title(self, title):
+        plt.suptitle(title)
 
     def _create_rule_plot(self, r: FuzzyRule, ax_line, max_ants, max_cons,
                           rule_index):
@@ -175,3 +182,7 @@ class FISViewer:
         ax.legend()
 
         ax.axis("on")
+
+    def _describe_fis(self):
+        return "crisp values: {}".format(self.__fis._last_crisp_values)
+        # return "\n".join(r.__repr__() for r in self.__fis.rules)

@@ -113,8 +113,7 @@ class FuzzyRule:
         return [con.lv_value.name for con in self.consequents]
 
     def __repr__(self):
-        text = "IF ({}) \n" \
-               "THEN ({})"
+        text = "IF ({}), THEN ({})"
 
         ants_text = " {} ".format(self._ant_act_func[1]).join(
             ["{} is {}".format(a.lv_name.name, a.lv_value) for a in
