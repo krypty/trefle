@@ -1,9 +1,10 @@
 import numpy as np
 
-from core.fis.fis import FIS, OR_max, COA_func
+from core.fis.fis import FIS, OR_max, COA_func, MIN
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
+from core.rules.fuzzy_rule_element import Antecedent, Consequent
 from view.fis_viewer import FISViewer
 
 
@@ -28,37 +29,37 @@ def tip_problem():
 
     r1 = FuzzyRule(
         ants=[
-            (lv_quality, "poor"),
-            (lv_service, "poor")
+            Antecedent(lv_quality, "poor"),
+            Antecedent(lv_service, "poor")
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tip, "low"),
+            Consequent(lv_tip, "low"),
         ],
-        impl_func=np.min
+        impl_func=MIN
     )
 
     r2 = FuzzyRule(
         ants=[
-            (lv_service, "average"),
+            Antecedent(lv_service, "average"),
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tip, "medium"),
+            Consequent(lv_tip, "medium"),
         ],
-        impl_func=np.min
+        impl_func=MIN
     )
 
     r3 = FuzzyRule(
         ants=[
-            (lv_service, "good"),
-            (lv_quality, "good")
+            Antecedent(lv_service, "good"),
+            Antecedent(lv_quality, "good")
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tip, "high"),
+            Consequent(lv_tip, "high"),
         ],
-        impl_func=np.min
+        impl_func=MIN
     )
 
     fis = FIS(
@@ -77,6 +78,7 @@ def tip_problem():
 
     fisv = FISViewer(fis)
     fisv.show()
+
 
 if __name__ == '__main__':
     # import cProfile
