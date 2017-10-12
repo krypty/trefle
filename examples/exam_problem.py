@@ -1,6 +1,6 @@
 import numpy as np
 
-from core.fis.fis import FIS
+from core.fis.fis import FIS, OR_max, AND_min, COA_func, MIN
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
@@ -76,107 +76,107 @@ def main():
                            ants=[(time_to_exam, 'very close'),
                                  (time_to_exam, 'close'), (importance, 'high')],
                            cons=[(priority, 'high')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'lot'),
                                  (difficulty, 'very hard')],
                            cons=[(priority, 'high')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'lot'), (difficulty, 'hard')],
                            cons=[(priority, 'high')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'medium'),
                                  (difficulty, 'very hard')],
                            cons=[(priority, 'high')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     # Medium priority rules
     rules.append(FuzzyRule(ant_act_func=OR_max,
                            ants=[(time_to_exam, 'medium'),
                                  (importance, 'medium')],
                            cons=[(priority, 'medium')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'few'),
                                  (difficulty, 'very hard')],
                            cons=[(priority, 'medium')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'medium'),
                                  (difficulty, 'hard')],
                            cons=[(priority, 'medium')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'lot'),
                                  (difficulty, 'medium')],
                            cons=[(priority, 'medium')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'lot'), (difficulty, 'easy')],
                            cons=[(priority, 'medium')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     # Low priority rules
     rules.append(FuzzyRule(ant_act_func=OR_max,
                            ants=[(time_to_exam, 'very far'),
                                  (time_to_exam, 'far'), (importance, 'low')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'lot'),
                                  (difficulty, 'very easy')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'medium'),
                                  (difficulty, 'medium')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'medium'),
                                  (difficulty, 'easy')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'medium'),
                                  (difficulty, 'very easy')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'few'), (difficulty, 'hard')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'few'),
                                  (difficulty, 'medium')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'few'), (difficulty, 'easy')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     rules.append(FuzzyRule(ant_act_func=AND_min,
                            ants=[(remaining_work, 'few'),
                                  (difficulty, 'very easy')],
                            cons=[(priority, 'low')],
-                           impl_func=np.min))
+                           impl_func=MIN))
 
     fis = FIS(aggr_func=np.max, defuzz_func=COA_func, rules=rules)
 
