@@ -1,6 +1,7 @@
 from itertools import zip_longest
 
 from matplotlib import pyplot as plt
+from matplotlib.pyplot import savefig
 
 from core.fis.fis import FIS
 from core.rules.fuzzy_rule import FuzzyRule
@@ -19,9 +20,11 @@ class FISViewer:
         max_cons = max([len(r.consequents) for r in self.__fis.rules])
 
         max_sum_ants_cons = max_ants + max_cons
-        fig, axarr = plt.subplots(ncols=max_sum_ants_cons,
-                                  nrows=n_rules + 1,
-                                  figsize=(16, 9))
+        ncols = max_sum_ants_cons
+        nrows = n_rules + 1
+        fig, axarr = plt.subplots(ncols=ncols,
+                                  nrows=nrows,
+                                  figsize=(7 * ncols, 4 * nrows))
 
         # -1 because last line is for aggregation
         for row in range(axarr.shape[0] - 1):
@@ -62,6 +65,9 @@ class FISViewer:
         plt.tight_layout()
         plt.show()
 
+    def save(self, filename):
+        savefig(filename, bbox_inches='tight')
+
     def _create_rule_plot(self, r: FuzzyRule, ax_line, max_ants, max_cons,
                           rule_index):
         n_rule_members = len(ax_line)
@@ -71,10 +77,8 @@ class FISViewer:
                         n_rule_members, rule_index)
 
     def _plot_ants(self, axarr, antecedents, n_rule_members):
-        for ant, ax, i in zip_longest(antecedents, axarr,
-                                      range(n_rule_members),
+        for ant, ax, i in zip_longest(antecedents, axarr, range(n_rule_members),
                                       fillvalue=None):
-
             if ant is None:
                 continue
 
