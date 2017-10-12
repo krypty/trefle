@@ -81,24 +81,31 @@ class FISViewer:
             ax.axis("on")
             ax.set_facecolor(ANTECEDENTS_BACKGROUND_COLOR)
 
-            for mf in ant[0].ling_values.values():
+            for mf in ant.lv_name.ling_values.values():
                 MembershipFunctionViewer(mf, ax=ax, color="gray", alpha=0.1)
 
-            mf = ant[0][ant[1]]
-            label = "[{}] {}".format(ant[0].name, ant[1])
-            MembershipFunctionViewer(mf, ax=ax, label=label)
+            mf = ant.lv_name[ant.lv_value]
+
+            not_str = "NOT " if ant.is_not else ""
+            label = "[{}] {}{}".format(ant.lv_name.name, not_str, ant.lv_value)
+
+            MembershipFunctionViewer(mf, ax=ax, label=label,
+                                     draw_not=ant.is_not)
 
             # show last crisp inputs
             crisp_values = self.__fis.last_crisp_values
-            in_value = crisp_values[ant[0].name]
+            in_value = crisp_values[ant.lv_name.name]
             fuzzified = mf.fuzzify(in_value)
+
+            if ant.is_not:
+                fuzzified = 1.0 - fuzzified
 
             ax.plot([in_value], [fuzzified], 'ro')
             ax.plot([in_value, in_value], [0, fuzzified], 'r')
 
     def _plot_cons(self, axarr, consequents, n_rule_members, rule_index):
         # assumption: each rule has the same number and names of consequents
-        sorted_consequents = sorted(consequents, key=lambda c: c[0].name)
+        sorted_consequents = sorted(consequents, key=lambda c: c.lv_name.name)
 
         for cons, ax, i in zip_longest(sorted_consequents, axarr,
                                        range(n_rule_members),
@@ -109,13 +116,14 @@ class FISViewer:
 
             ax.axis("on")
             ax.set_facecolor(CONSEQUENTS_BACKGROUND_COLOR)
-            mf = cons[0][cons[1]]
-            label = "[{}] {}".format(cons[0].name, cons[1])
+            mf = cons.lv_name[cons.lv_value]
+            label = "[{}] {}".format(cons.lv_name.name, cons.lv_value)
             MembershipFunctionViewer(mf, ax=ax, label=label)
 
             # print(self.__fis.last_implicated_consequents)
             mf_implicated = \
-                self.__fis.last_implicated_consequents[cons[0].name][rule_index]
+                self.__fis.last_implicated_consequents[cons.lv_name.name][
+                    rule_index]
             MembershipFunctionViewer(mf_implicated, ax=ax,
                                      label=label + " implicated",
                                      color="orange")

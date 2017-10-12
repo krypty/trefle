@@ -4,12 +4,14 @@ from view.viewer import Viewer
 
 
 class MembershipFunctionViewer(Viewer):
-    def __init__(self, mf: FreeShapeMF, label="", ax=None, color=None, alpha=None):
+    def __init__(self, mf: FreeShapeMF, label="", ax=None, color=None,
+                 alpha=None, draw_not=False):
         super(MembershipFunctionViewer, self).__init__(ax)
         self._mf = mf
         self._label = label
         self._color = color
         self._alpha = alpha
+        self._draw_not = draw_not
 
         self.get_plot(self._ax)
 
@@ -20,9 +22,14 @@ class MembershipFunctionViewer(Viewer):
         self._ax.plot([in_value, in_value], [0, fuzzified], 'r')
 
     def get_plot(self, ax):
-        ax.scatter(self._mf.in_values, self._mf.mf_values,
-                   s=10, label=self._label, c=self._color, alpha=self._alpha)
-        ax.plot(self._mf.in_values, self._mf.mf_values, c=self._color, alpha=self._alpha)
+        xs, ys = self._mf.in_values, self._mf.mf_values
+
+        if self._draw_not:
+            ys = 1.0 - ys
+
+        ax.scatter(xs, ys, s=10, label=self._label, c=self._color,
+                   alpha=self._alpha)
+        ax.plot(xs, ys, c=self._color, alpha=self._alpha)
         # ax.set_ylim([-0.1, 1.1])
         ax.legend()
         return ax

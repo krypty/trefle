@@ -5,6 +5,7 @@ from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.membership_functions.triangular_mf import TriangularMF
 from core.rules.fuzzy_rule import FuzzyRule
+from core.rules.fuzzy_rule_element import Antecedent, Consequent
 from view.fis_viewer import FISViewer
 
 
@@ -29,36 +30,36 @@ def resort_problem():
 
     r1 = FuzzyRule(
         ants=[
-            (lv_temperature, "hot"),
-            (lv_sunshine, "sunny")
+            Antecedent(lv_temperature, "hot"),
+            Antecedent(lv_sunshine, "sunny")
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tourists, "high")
+            Consequent(lv_tourists, "high")
         ],
         impl_func=MIN
     )
 
     r2 = FuzzyRule(
         ants=[
-            (lv_temperature, "warm"),
-            (lv_sunshine, "part_sunny")
+            Antecedent(lv_temperature, "warm"),
+            Antecedent(lv_sunshine, "part_sunny")
         ],
         ant_act_func=AND_min,
         cons=[
-            (lv_tourists, "medium")
+            Consequent(lv_tourists, "medium")
         ],
         impl_func=MIN
     )
 
     r3 = FuzzyRule(
         ants=[
-            (lv_temperature, "cold"),
-            (lv_sunshine, "cloudy")
+            Antecedent(lv_temperature, "cold", is_not=True),
+            Antecedent(lv_sunshine, "cloudy")
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_tourists, "low"),
+            Consequent(lv_tourists, "low"),
         ],
         impl_func=MIN
     )

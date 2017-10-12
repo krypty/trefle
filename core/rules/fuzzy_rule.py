@@ -1,12 +1,29 @@
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Callable, Tuple
 
 from core.membership_functions.free_shape_mf import FreeShapeMF
+from core.rules.fuzzy_rule_element import Antecedent, Consequent
 
 
 class FuzzyRule:
-    def __init__(self, ants, ant_act_func, cons, impl_func):
+    def __init__(self,
+                 ants: List[Antecedent],
+                 ant_act_func: Tuple[Callable, str],
+                 cons: List[Consequent],
+                 impl_func: Tuple[Callable, str]):
+        """
+        Define a fuzzy rule
+
+        Assumptions:
+        * the antecedent's activation function is the same for all consequents
+        * multiple antecedents and consequents can be used for a single rule
+
+        :param ants: a list of Antecedent
+        :param ant_act_func:
+        :param cons:
+        :param impl_func:
+        """
         self._ants = ants
         self._ant_act_func = ant_act_func
         self._cons = cons
@@ -30,11 +47,14 @@ class FuzzyRule:
         """
 
         fuzzified_inputs_for_rule = []
-        for lv_name, lv_value in self.antecedents:
-            # lv_name="temperature", lv_value="cold"
+        for a in self.antecedents:
+            in_val = crips_inputs[a.lv_name.name]
 
-            in_val = crips_inputs[lv_name.name]
-            fuzzified_input = lv_name[lv_value].fuzzify(in_val)
+            if a.is_not:
+                fuzzified_input = 1.0 - a.lv_name[a.lv_value].fuzzify(in_val)
+            else:
+                fuzzified_input = a.lv_name[a.lv_value].fuzzify(in_val)
+
             fuzzified_inputs_for_rule.append(fuzzified_input)
 
         return fuzzified_inputs_for_rule
@@ -75,8 +95,10 @@ class FuzzyRule:
 
         implicated_consequents = defaultdict(list)
 
+        # TODO: improve the comment below
         # (conseq, conseq_label) is (linguistic variable, linguistic value used in this conseq)
-        for conseq, conseq_label in self._cons:
+        for con in self._cons:
+            conseq, conseq_label = con.lv_name, con.lv_value
             ling_value = conseq[conseq_label]
             in_values = deepcopy(ling_value.in_values)  # deepcopy needed ?
             mf_values = [self._impl_func[0]([val, antecedents_activation]) for
@@ -88,19 +110,18 @@ class FuzzyRule:
         return implicated_consequents
 
     def get_output_variable_names(self):
-        return [conseq.name for conseq, conseq_label in
-                self.consequents]
+        return [con.lv_value.name for con in self.consequents]
 
     def __repr__(self):
         text = "IF ({}) \n" \
                "THEN ({})"
 
         ants_text = " {} ".format(self._ant_act_func[1]).join(
-            ["{} is {}".format(lv_name.name, lv_value) for lv_name, lv_value in
+            ["{} is {}".format(a.lv_name.name, a.lv_value) for a in
              self.antecedents])
 
         cons_text = " {} ".format(self._impl_func[1]).join(
-            ["{} is {}".format(lv_name.name, lv_value) for lv_name, lv_value in
+            ["{} is {}".format(c.lv_name.name, c.lv_value) for c in
              self.consequents])
 
         return text.format(ants_text, cons_text)
