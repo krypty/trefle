@@ -54,7 +54,7 @@ def resort_problem():
 
     r3 = FuzzyRule(
         ants=[
-            Antecedent(lv_temperature, "cold", is_not=True),
+            Antecedent(lv_temperature, "cold"),
             Antecedent(lv_sunshine, "cloudy")
         ],
         ant_act_func=OR_max,
@@ -81,7 +81,7 @@ def resort_problem():
     fisv = FISViewer(fis)
 
     describe_fis(fis)
-
+    fisv.save("/tmp/out.png")
     fisv.show()
 
 
