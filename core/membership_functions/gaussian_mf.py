@@ -19,15 +19,15 @@ class GaussianMF(FreeShapeMF):
     def __init__(self, mu, sigma):
         in_values = []
         mf_values = []
-        self.__mu = mu
-        self.__v = sigma ** 2
+        self._mu = mu
+        self._v = sigma ** 2
         super().__init__(in_values, mf_values)
 
     def fuzzify(self, in_value: float):
         # gaussian equation,
         # source: https://en.wikipedia.org/wiki/Normal_distribution
-        return (1.0 / (np.sqrt(2.0 * np.pi * self.__v))) * np.exp(
-            -((in_value - self.__mu) ** 2) / (2 * self.__v))
+        return (1.0 / (np.sqrt(2.0 * np.pi * self._v))) * np.exp(
+            -((in_value - self._mu) ** 2) / (2 * self._v))
 
 
 if __name__ == '__main__':

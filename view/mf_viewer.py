@@ -6,23 +6,23 @@ from view.viewer import Viewer
 class MembershipFunctionViewer(Viewer):
     def __init__(self, mf: FreeShapeMF, label="", ax=None, color=None, alpha=None):
         super(MembershipFunctionViewer, self).__init__(ax)
-        self.__mf = mf
-        self.__label = label
-        self.__color = color
-        self.__alpha = alpha
+        self._mf = mf
+        self._label = label
+        self._color = color
+        self._alpha = alpha
 
         self.get_plot(self._ax)
 
     def fuzzify(self, in_value):
-        fuzzified = self.__mf.fuzzify(in_value)
+        fuzzified = self._mf.fuzzify(in_value)
 
         self._ax.plot([in_value], [fuzzified], 'ro')
         self._ax.plot([in_value, in_value], [0, fuzzified], 'r')
 
     def get_plot(self, ax):
-        ax.scatter(self.__mf.in_values, self.__mf.mf_values,
-                   s=10, label=self.__label, c=self.__color, alpha=self.__alpha)
-        ax.plot(self.__mf.in_values, self.__mf.mf_values, c=self.__color, alpha=self.__alpha)
+        ax.scatter(self._mf.in_values, self._mf.mf_values,
+                   s=10, label=self._label, c=self._color, alpha=self._alpha)
+        ax.plot(self._mf.in_values, self._mf.mf_values, c=self._color, alpha=self._alpha)
         # ax.set_ylim([-0.1, 1.1])
         ax.legend()
         return ax

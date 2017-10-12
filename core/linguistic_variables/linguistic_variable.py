@@ -21,20 +21,20 @@ class LinguisticVariable(metaclass=ABCMeta):
         membership function that represents it (i.e. an instance of
         FreeShapeMF)
         """
-        self.__name = name
-        self.__ling_values_dict = ling_values_dict
+        self._name = name
+        self._ling_values_dict = ling_values_dict
 
     @property
     def name(self):
-        return self.__name
+        return self._name
 
     @property
     def ling_values(self):
-        return self.__ling_values_dict
+        return self._ling_values_dict
 
     @property
     def labels_name(self):
-        return self.__ling_values_dict.keys()
+        return self._ling_values_dict.keys()
 
     def __getitem__(self, ling_value: str):
         """
@@ -43,8 +43,8 @@ class LinguisticVariable(metaclass=ABCMeta):
         :param ling_value:
         :return: the linguistic value associated to the key ling_value
         """
-        return self.__ling_values_dict[ling_value]
+        return self._ling_values_dict[ling_value]
 
     def __str__(self):
         return "Name: {}, values: {}".format(self.name,
-                                             self.__ling_values_dict.keys())
+                                             self._ling_values_dict.keys())

@@ -16,22 +16,22 @@ class FreeShapeMF:
         #      np.arange(1, len(in_values))]
         # ), "Input values are not monotonic increasing"
 
-        self.__in_values = np.array(in_values)
-        self.__mf_values = np.array(mf_values)
+        self._in_values = np.array(in_values)
+        self._mf_values = np.array(mf_values)
 
     def fuzzify(self, in_value: float):
         # # return the nearest mf value for a given in_value
         # idx = (np.abs(self.__in_values - in_value)).argmin()
         # return self.__mf_values[idx]
-        return np.interp(in_value, self.__in_values, self.__mf_values)
+        return np.interp(in_value, self._in_values, self._mf_values)
 
     @property
     def in_values(self):
-        return self.__in_values
+        return self._in_values
 
     @property
     def mf_values(self):
-        return self.__mf_values
+        return self._mf_values
 
         # def __repr__(self):
         #     plt.scatter(self.in_values, self.mf_values)

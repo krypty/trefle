@@ -17,13 +17,13 @@ ERR_MSG_MUST_PREDICT = "you must use predict() at least once"
 
 class FIS(metaclass=ABCMeta):
     def __init__(self, aggr_func, defuzz_func, rules: List[FuzzyRule]):
-        self.__aggr_func = aggr_func
-        self.__defuzz_func = defuzz_func
-        self.__rules = rules
+        self._aggr_func = aggr_func
+        self._defuzz_func = defuzz_func
+        self._rules = rules
 
     @property
     def rules(self):
-        return self.__rules
+        return self._rules
 
     @property
     def last_crisp_values(self):
@@ -59,7 +59,7 @@ class FIS(metaclass=ABCMeta):
         rules_implicated_cons = defaultdict(list)
 
         # FUZZIFY AND ACTIVATE INPUTS THEN IMPLICATE CONSEQUENTS FOR EACH RULE
-        for r in self.__rules:
+        for r in self._rules:
             fuzzified_inputs = r.fuzzify(crisp_values)
             antecedents_activation = r.activate(fuzzified_inputs)
             implicated_consequents = r.implicate(antecedents_activation)
@@ -97,7 +97,7 @@ class FIS(metaclass=ABCMeta):
         aggregated_in_values = np.linspace(min_in, max_in, 50)
         for x in aggregated_in_values:
             fuzzified_x = [mf.fuzzify(x) for mf in out_var_mf]
-            mf = self.__aggr_func(fuzzified_x)
+            mf = self._aggr_func(fuzzified_x)
             aggregated_mf_values.append(mf)
 
         return FreeShapeMF(in_values=aggregated_in_values,
@@ -105,4 +105,4 @@ class FIS(metaclass=ABCMeta):
 
     def __defuzzify(self, aggr_mf):
         # print("in v", aggr_mf.in_values, "mf v", aggr_mf.mf_values)
-        return self.__defuzz_func[0](aggr_mf.in_values, aggr_mf.mf_values)
+        return self._defuzz_func[0](aggr_mf.in_values, aggr_mf.mf_values)

@@ -80,8 +80,7 @@ class FuzzyRule:
             ling_value = conseq[conseq_label]
             in_values = deepcopy(ling_value.in_values)  # deepcopy needed ?
             mf_values = [self._impl_func[0]([val, antecedents_activation]) for
-                         val
-                         in ling_value.mf_values]
+                         val in ling_value.mf_values]
 
             implicated_consequents[conseq.name].append(
                 FreeShapeMF(in_values, mf_values))
