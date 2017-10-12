@@ -5,6 +5,8 @@ from core.linguistic_variables.linguistic_variable import \
     LinguisticVariable as LVar
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
+from core.rules.fuzzy_rule_element import Antecedent, Consequent
+from view.fis_viewer import FISViewer
 
 
 def car_accel_problem():
@@ -28,40 +30,49 @@ def car_accel_problem():
 
     car_rules = [
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'fast'), (car_acc, 'constant')],
-                  cons=[(car_pedal, 'release')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'fast'),
+                        Antecedent(car_acc, 'constant')],
+                  cons=[Consequent(car_pedal, 'release')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'fast'), (car_acc, 'rising')],
-                  cons=[(car_pedal, 'release')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'fast'),
+                        Antecedent(car_acc, 'rising')],
+                  cons=[Consequent(car_pedal, 'release')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'slow'), (car_acc, 'constant')],
-                  cons=[(car_pedal, 'push')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'slow'),
+                        Antecedent(car_acc, 'constant')],
+                  cons=[Consequent(car_pedal, 'push')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'slow'), (car_acc, 'slowing')],
-                  cons=[(car_pedal, 'push')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'slow'),
+                        Antecedent(car_acc, 'slowing')],
+                  cons=[Consequent(car_pedal, 'push')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'fast'), (car_acc, 'slowing')],
-                  cons=[(car_pedal, 'nothing')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'fast'),
+                        Antecedent(car_acc, 'slowing')],
+                  cons=[Consequent(car_pedal, 'nothing')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'ok'), (car_acc, 'slowing')],
-                  cons=[(car_pedal, 'nothing')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'ok'),
+                        Antecedent(car_acc, 'slowing')],
+                  cons=[Consequent(car_pedal, 'nothing')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'ok'), (car_acc, 'constant')],
-                  cons=[(car_pedal, 'nothing')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'ok'),
+                        Antecedent(car_acc, 'constant')],
+                  cons=[Consequent(car_pedal, 'nothing')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'ok'), (car_acc, 'rising')],
-                  cons=[(car_pedal, 'nothing')], impl_func=MIN),
+                  ants=[Antecedent(car_speed, 'ok'),
+                        Antecedent(car_acc, 'rising')],
+                  cons=[Consequent(car_pedal, 'nothing')], impl_func=MIN),
 
         FuzzyRule(ant_act_func=AND_min,
-                  ants=[(car_speed, 'slow'), (car_acc, 'rising')],
-                  cons=[(car_pedal, 'nothing')], impl_func=MIN)
+                  ants=[Antecedent(car_speed, 'slow'),
+                        Antecedent(car_acc, 'rising')],
+                  cons=[Consequent(car_pedal, 'nothing')], impl_func=MIN)
     ]
 
     fis = FIS(rules=car_rules, aggr_func=np.max,
@@ -74,6 +85,11 @@ def car_accel_problem():
     print("predicted value: {}".format(predicted_value))
     print("expected  value: {}".format(expected_value))
     print("difference     : {}".format(expected_value - predicted_value))
+
+    fisv = FISViewer(fis)
+    fisv.save("/tmp/out.png")
+    fisv.show()
+
 
 
 if __name__ == '__main__':
