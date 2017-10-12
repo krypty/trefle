@@ -37,18 +37,18 @@ class FuzzyRule:
     def consequents(self):
         return self._cons
 
-    def fuzzify(self, crips_inputs: Dict[str, float]) -> List[float]:
+    def fuzzify(self, crisp_inputs: Dict[str, float]) -> List[float]:
         """
 
         :rtype: FuzzyRule
-        :param crips_inputs: the rule's antecedents crisps inputs values i.e. a
+        :param crisp_inputs: the rule's antecedents crisps inputs values i.e. a
         user's/dataset sample input.
         :return: fuzzified inputs for this particular rule
         """
 
         fuzzified_inputs_for_rule = []
         for a in self.antecedents:
-            in_val = crips_inputs[a.lv_name.name]
+            in_val = crisp_inputs[a.lv_name.name]
 
             if a.is_not:
                 fuzzified_input = 1.0 - a.lv_name[a.lv_value].fuzzify(in_val)
