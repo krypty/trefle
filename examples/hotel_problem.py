@@ -1,9 +1,10 @@
 import numpy as np
 
-from core.fis.fis import FIS, OR_max, COA_func
+from core.fis.fis import FIS, OR_max, COA_func, MIN
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
+from core.rules.fuzzy_rule_element import Consequent, Antecedent
 from view.lv_viewer import LinguisticVariableViewer
 from view.mf_viewer import MembershipFunctionViewer
 
@@ -27,14 +28,14 @@ def hotel_problem():
 
     r1 = FuzzyRule(
         ants=[
-            (lv_service, "good"),
-            (lv_service, "very good")
+            Antecedent(lv_service, "good"),
+            Antecedent(lv_service, "very good")
         ],
         ant_act_func=OR_max,
         cons=[
-            (lv_recommendation, "high")
+            Consequent(lv_recommendation, "high")
         ],
-        impl_func=np.min
+        impl_func=MIN
     )
 
     print(r1)
