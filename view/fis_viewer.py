@@ -123,7 +123,9 @@ class FISViewer:
     def _plot_rows_cols_labels(self, axarr, max_ants, max_cons):
         col_ants = ['Antecedent {}'.format(col + 1) for col in range(max_ants)]
         col_cons = ['Consequent {}'.format(col + 1) for col in range(max_cons)]
-        rows = ['Rule {}'.format(row + 1) for row in range(axarr.shape[1] - 1)]
+
+        rows = ['Rule {} [{}]'.format(row + 1, rule._ant_act_func[1])
+                for rule, row in zip(self.__fis.rules, range(axarr.shape[1]))]
 
         for ax, col in zip(axarr[0], col_ants):
             ax.set_title(col)
