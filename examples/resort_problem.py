@@ -4,6 +4,7 @@ from core.fis.fis import FIS, AND_min, OR_max, COA_func, MIN
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.membership_functions.triangular_mf import TriangularMF
+from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Antecedent, Consequent
 from view.fis_viewer import FISViewer
@@ -64,10 +65,18 @@ def resort_problem():
         impl_func=MIN
     )
 
+    rdefault = DefaultFuzzyRule(
+        cons=[
+            Consequent(lv_tourists, "medium"),
+        ],
+        impl_func=MIN
+    )
+
     fis = FIS(
         aggr_func=np.max,
         defuzz_func=COA_func,
-        rules=[r1, r2, r3]
+        rules=[r1, r2, r3],
+        default_rule=rdefault
     )
 
     input_values = {'temperature': 19, 'sunshine': 60}
@@ -87,6 +96,8 @@ def resort_problem():
 
 def describe_fis(fis):
     [print(r) for r in fis.rules]
+    if fis.default_rule is not None:
+        print(fis.default_rule)
 
 
 if __name__ == '__main__':

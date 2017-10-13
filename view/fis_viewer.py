@@ -1,4 +1,4 @@
-from itertools import zip_longest
+from itertools import zip_longest, chain
 
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import savefig
@@ -15,7 +15,8 @@ class FISViewer:
     def __init__(self, fis: FIS):
         self.__fis = fis
 
-        n_rules = len(self.__fis.rules)
+        n_default_rule = 1 if self.__fis.default_rule is not None else 0
+        n_rules = len(self.__fis.rules) + n_default_rule
         max_ants = max([len(r.antecedents) for r in self.__fis.rules])
         max_cons = max([len(r.consequents) for r in self.__fis.rules])
 
@@ -44,10 +45,11 @@ class FISViewer:
 
         [ax.axis("off") for ax in axarr.flat]
 
-        for line, r in enumerate(self.__fis.rules):
-            self._create_rule_plot(r, ax_line=axarr[line, :],
-                                   max_ants=max_ants, max_cons=max_cons,
-                                   rule_index=line)
+        for line, r in enumerate(chain(fis.rules, [fis.default_rule])):
+            if r is not None:
+                self._create_rule_plot(r, ax_line=axarr[line, :],
+                                       max_ants=max_ants, max_cons=max_cons,
+                                       rule_index=line)
 
         # all columns of consequents share the same x axe per column
         ax_cons_cols = axarr[:, -max_cons:]

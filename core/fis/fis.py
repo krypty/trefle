@@ -5,6 +5,7 @@ from typing import List
 import numpy as np
 
 from core.membership_functions.free_shape_mf import FreeShapeMF
+from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
 from core.rules.fuzzy_rule import FuzzyRule
 
 COA_func = (lambda v, m: np.sum(np.multiply(v, m)) / np.sum(m), "COA_func")
@@ -16,14 +17,25 @@ ERR_MSG_MUST_PREDICT = "you must use predict() at least once"
 
 
 class FIS(metaclass=ABCMeta):
-    def __init__(self, aggr_func, defuzz_func, rules: List[FuzzyRule]):
+    def __init__(self, aggr_func, defuzz_func, rules: List[FuzzyRule],
+                 default_rule: DefaultFuzzyRule = None):
         self._aggr_func = aggr_func
         self._defuzz_func = defuzz_func
         self._rules = rules
+        self._default_rule = default_rule
+
+        self._last_crisp_values = None
+        self._implicated_consequents = None
+        self._aggregated_consequents = None
+        self._defuzzified_outputs = None
 
     @property
     def rules(self):
         return self._rules
+
+    @property
+    def default_rule(self):
+        return self._default_rule
 
     @property
     def last_crisp_values(self):
@@ -58,20 +70,32 @@ class FIS(metaclass=ABCMeta):
 
         rules_implicated_cons = defaultdict(list)
 
+        # can be set to 0 because activation values are in [0, 1]
+        max_ant_act = 0
+
         # FUZZIFY AND ACTIVATE INPUTS THEN IMPLICATE CONSEQUENTS FOR EACH RULE
         for r in self._rules:
             fuzzified_inputs = r.fuzzify(crisp_values)
             antecedents_activation = r.activate(fuzzified_inputs)
+            max_ant_act = max(max_ant_act, antecedents_activation)
             implicated_consequents = r.implicate(antecedents_activation)
             # print(r)
             # print("impl cons", implicated_consequents)
 
-            for k, v in implicated_consequents.items():
-                rules_implicated_cons[k].extend(v)
+            for lv_name, lv_impl_mf in implicated_consequents.items():
+                rules_implicated_cons[lv_name].extend(lv_impl_mf)
                 # rules_implicated_cons.append(implicated_consequents)
 
                 # grouped by rules
         self._implicated_consequents = rules_implicated_cons
+
+        # HANDLE DEFAULT RULE
+        if self._default_rule is not None:
+            act_value = 1.0 - max_ant_act
+            print("default rule activation", act_value)
+            implicated_consequents = self._default_rule.implicate(act_value)
+            for lv_name, lv_impl_mf in implicated_consequents.items():
+                self._implicated_consequents[lv_name].extend(lv_impl_mf)
 
         # AGGREGATE CONSEQUENTS
         aggregated_consequents = {}
