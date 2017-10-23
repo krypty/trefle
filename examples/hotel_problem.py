@@ -5,6 +5,7 @@ from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Consequent, Antecedent
+from view.fis_viewer import FISViewer
 from view.lv_viewer import LinguisticVariableViewer
 from view.mf_viewer import MembershipFunctionViewer
 
@@ -49,8 +50,10 @@ def hotel_problem():
     input_values = {'service': 7.5}
     predicted_value = fis.predict(input_values)["recommendation"]
 
-    cons = fis.last_implicated_consequents
-    MembershipFunctionViewer(cons["recommendation"][0]).show()
+    FISViewer(fis).show()
+
+    # cons = fis.last_implicated_consequents
+    # MembershipFunctionViewer(cons["recommendation"][0]).show()
 
     expected_value = 0
     print("predicted value: {}".format(predicted_value))

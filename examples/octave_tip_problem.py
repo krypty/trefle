@@ -34,13 +34,6 @@ def tip_problem():
             "plus_twenty": GaussianMF(1.20, 0.02)
         })
 
-    """
-1.  (Food-Quality == Bad) && (Service == Bad) => (Tip == About-Ten-Percent) && (Check-Plus-Tip == Plus-About-Ten-Percent) (1)
-2.  (Food-Quality == Bad) && (Service == Good) => (Tip == About-Fifteen-Percent) && (Check-Plus-Tip == Plus-About-Fifteen-Percent) (1)
-3.  (Food-Quality == Good) && (Service == Bad) => (Tip == About-Fifteen-Percent) && (Check-Plus-Tip == Plus-About-Fifteen-Percent) (1)
-4.  (Food-Quality == Good) && (Service == Good) => (Tip == About-Twenty-Percent) && (Check-Plus-Tip == Plus-About-Twenty-Percent) (1)
-"""
-
     r1 = FuzzyRule(
         ants=[
             Antecedent(lv_quality, "bad"),

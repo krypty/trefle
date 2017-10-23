@@ -12,7 +12,7 @@ class LinguisticVariable(metaclass=ABCMeta):
     that represent it).
     """
 
-    def __init__(self, name, ling_values_dict: Dict[str, FreeShapeMF]):
+    def __init__(self, name: str, ling_values_dict: Dict[str, FreeShapeMF]):
         """
         :param name: name of the linguistic variable (e.g. "Temperature")
         :param ling_values_dict: dict that contains the associated linguistic

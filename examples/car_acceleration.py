@@ -2,7 +2,7 @@ import numpy as np
 
 from core.fis.fis import FIS, COA_func, AND_min, MIN
 from core.linguistic_variables.linguistic_variable import \
-    LinguisticVariable as LVar
+    LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Antecedent, Consequent
@@ -10,19 +10,19 @@ from view.fis_viewer import FISViewer
 
 
 def car_accel_problem():
-    car_speed = LVar(name='speed', ling_values_dict={
+    car_speed = LinguisticVariable(name='speed', ling_values_dict={
         'slow': LinPWMF([-20, 1], [0, 0]),
         'ok': LinPWMF([-20, 0], [0, 1], [15, 0]),
         'fast': LinPWMF([0, 0], [15, 1])
     })
 
-    car_acc = LVar(name='acceleration', ling_values_dict={
+    car_acc = LinguisticVariable(name='acceleration', ling_values_dict={
         'slowing': LinPWMF([-20, 1], [0, 0]),
         'constant': LinPWMF([-20, 0], [0, 1], [20, 0]),
         'rising': LinPWMF([0, 0], [20, 1])
     })
 
-    car_pedal = LVar(name='pedal', ling_values_dict={
+    car_pedal = LinguisticVariable(name='pedal', ling_values_dict={
         'release': LinPWMF([0, 1], [50, 0]),
         'nothing': LinPWMF([0, 0], [50, 1], [100, 0]),
         'push': LinPWMF([50, 0], [100, 1])
@@ -89,7 +89,6 @@ def car_accel_problem():
     fisv = FISViewer(fis)
     fisv.save("/tmp/out.png")
     fisv.show()
-
 
 
 if __name__ == '__main__':
