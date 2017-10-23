@@ -98,21 +98,20 @@ class FIS(metaclass=ABCMeta):
                 self._implicated_consequents[lv_name].extend(lv_impl_mf)
 
         # AGGREGATE CONSEQUENTS
-        aggregated_consequents = {}
-        for out_v_name, out_v_mf in rules_implicated_cons.items():
-            aggregated_consequents[out_v_name] = self.__aggregate(*out_v_mf)
-
-        self._aggregated_consequents = aggregated_consequents
+        self._aggregated_consequents = self._aggregate(rules_implicated_cons)
 
         # DEFUZZIFY
-        defuzzified_outputs = {}
-        for out_v_name, out_v_mf in aggregated_consequents.items():
-            defuzzified_outputs[out_v_name] = self.__defuzzify(out_v_mf)
+        return self._defuzzify()
 
-        self._defuzzified_outputs = defuzzified_outputs
-        return defuzzified_outputs
+    def _aggregate(self, rules_implicated_cons):
+        aggregated_consequents = {}
+        for out_v_name, out_v_mf in rules_implicated_cons.items():
+            aggregated_consequents[out_v_name] = self._aggregate_cons(
+                *out_v_mf)
+        return aggregated_consequents
 
-    def __aggregate(self, *out_var_mf):
+    def _aggregate_cons(self, *out_var_mf):
+        print(out_var_mf)
         all_in_values = np.concatenate([mf.in_values for mf in out_var_mf])
         min_in, max_in = np.min(all_in_values), np.max(all_in_values)
 
@@ -127,6 +126,13 @@ class FIS(metaclass=ABCMeta):
         return FreeShapeMF(in_values=aggregated_in_values,
                            mf_values=aggregated_mf_values)
 
-    def __defuzzify(self, aggr_mf):
+    def _defuzzify(self):
+        defuzzified_outputs = {}
+        for out_v_name, out_v_mf in self._aggregated_consequents.items():
+            defuzzified_outputs[out_v_name] = self._defuzzify_cons(out_v_mf)
+        self._defuzzified_outputs = defuzzified_outputs
+        return defuzzified_outputs
+
+    def _defuzzify_cons(self, aggr_mf):
         # print("in v", aggr_mf.in_values, "mf v", aggr_mf.mf_values)
         return self._defuzz_func[0](aggr_mf.in_values, aggr_mf.mf_values)
