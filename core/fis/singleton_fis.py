@@ -12,7 +12,7 @@ class SingletonFIS(FIS):
 
             numerator = 0
             denominator = 0
-            for i, rule in enumerate(self._rules):
+            for i, rule in enumerate(chain(self._rules, [self._default_rule])):
                 cons_implicated_value = out_v_mf[i].mf_values[0]
                 label = rule.consequents[index].lv_value
                 print(label)
