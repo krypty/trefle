@@ -19,6 +19,7 @@ class LinguisticVariableViewer(Viewer):
 
     def fuzzify(self, in_value):
         [v.fuzzify(in_value) for v in self._viewers]
+        return self
 
     def get_plot(self, ax):
         ax.set_title("MF: {}".format(self.__lv.name))

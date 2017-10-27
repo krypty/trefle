@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.pyplot import savefig
 
 from core.fis.fis import FIS
+from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
 from core.rules.fuzzy_rule import FuzzyRule
 from view.mf_viewer import MembershipFunctionViewer
 
@@ -25,7 +26,7 @@ class FISViewer:
         nrows = n_rules + 1  # +1 row for aggregation
         fig, axarr = plt.subplots(ncols=ncols,
                                   nrows=nrows,
-                                  figsize=(7 * ncols, 4 * nrows))
+                                  figsize=(3 * ncols, 2 * nrows))
 
         plt.suptitle(self._describe_fis())
         # text(0.5, 0.95, 'test', transform=fig.transFigure, horizontalalignment='center')
@@ -65,6 +66,17 @@ class FISViewer:
 
         for cons_index, ax in enumerate(axarr[-1, max_ants:]):
             self._plot_aggregation(cons_index, ax)
+
+        # show only the vertical label
+        if self.__fis.default_rule is not None:
+            ax_default_rule = axarr[-2, 0]
+            ax_default_rule.axis("on")
+            ax_default_rule.set_xticks([])
+            ax_default_rule.set_yticks([])
+            ax_default_rule.spines['top'].set_visible(False)
+            ax_default_rule.spines['right'].set_visible(False)
+            ax_default_rule.spines['bottom'].set_visible(False)
+            ax_default_rule.spines['left'].set_visible(False)
 
     def show(self):
         plt.tight_layout()
@@ -145,8 +157,15 @@ class FISViewer:
         col_ants = ['Antecedent {}'.format(col + 1) for col in range(max_ants)]
         col_cons = ['Consequent {}'.format(col + 1) for col in range(max_cons)]
 
-        rows = ['Rule {} [{}]'.format(row + 1, rule._ant_act_func[1])
-                for rule, row in zip(self.__fis.rules, range(axarr.shape[0]))]
+        rows = []
+        for rule, row in zip(chain(self.__fis.rules, [self.__fis.default_rule]), range(axarr.shape[0])):
+            if isinstance(rule, DefaultFuzzyRule):
+                rows.append("Default rule")
+            else:
+                rows.append("Rule {} {}".format(row+1, rule._ant_act_func[1]))
+        #
+        # rows = ['Rule {} [{}]'.format(row + 1, rule._ant_act_func[1] if not isinstance(rule, DefaultFuzzyRule) else "")
+        #         for rule, row in zip(chain(self.__fis.rules, [self.__fis.default_rule]), range(axarr.shape[0]))]
 
         for ax, col in zip(axarr[0], col_ants):
             ax.set_title(col)
@@ -156,14 +175,13 @@ class FISViewer:
 
         for ax, row in zip(axarr[:, 0], rows):
             ax.set_ylabel(row, rotation=90, size='large')
-            # ax.yaxis.set_label_coords(-0.15, 0.5)
+            ax.yaxis.set_label_coords(-0.15, 0.5)
 
     def _plot_aggregation(self, cons_index, ax):
         aggr_cons = self.__fis.last_aggregated_consequents
 
         cons_labels = list(aggr_cons.keys())
         mf = list(aggr_cons.values())[cons_index]
-        print(mf)
         MembershipFunctionViewer(mf, ax=ax,
                                  label="[{}]".format(
                                      cons_labels[cons_index]) + " aggregated",
@@ -171,7 +189,6 @@ class FISViewer:
 
         # show last crisp inputs
         crisp_values = self.__fis.last_crisp_values
-        print(crisp_values)
         # in_value = crisp_values[ant[0].name]
         # fuzzified = mf.fuzzify(in_value)
         #
@@ -186,5 +203,7 @@ class FISViewer:
         ax.axis("on")
 
     def _describe_fis(self):
-        return "crisp values: {}".format(self.__fis._last_crisp_values)
+        line1 = "crisp values: {}".format(self.__fis._last_crisp_values)
+        line2 = "output values: {}".format(self.__fis.last_defuzzified_outputs)
+        return "\n".join([line1, line2])
         # return "\n".join(r.__repr__() for r in self.__fis.rules)

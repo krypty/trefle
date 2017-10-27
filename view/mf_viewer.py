@@ -21,6 +21,10 @@ class MembershipFunctionViewer(Viewer):
         self._ax.plot([in_value], [fuzzified], 'ro')
         self._ax.plot([in_value, in_value], [0, fuzzified], 'r')
 
+        print("[{}] value {} has been fuzzified to {}".format(
+            self._label, in_value, fuzzified
+        ))
+
     def get_plot(self, ax):
         xs, ys = self._mf.in_values, self._mf.mf_values
 
