@@ -4,6 +4,14 @@ from core.membership_functions.free_shape_mf import FreeShapeMF
 
 
 def gen_line(p0, p1, n_points):
+    points_same_x = abs(p1[0] - p0[0]) < 1e-6
+    points_same_y = abs(p1[1] - p0[1]) < 1e-6
+    if points_same_y and points_same_x:
+        return [p0[0]], [p0[1]]
+
+    if points_same_x:
+        return [p0[0], p1[0]], [p0[1], p1[1]]
+
     xs = np.linspace(p0[0], p1[0], n_points)
     slope = (p1[1] - p0[1]) / (p1[0] - p0[0])
     ys = [slope * (x - p0[0]) + p0[1] for x in xs]
@@ -49,10 +57,24 @@ class LinPWMF(FreeShapeMF):
 
 
 if __name__ == '__main__':
-    lin1 = LinPWMF([0, 0], [2, 1], [5, 1], [6, 0.5], [10, 0], n_points=200)
-    assert abs(lin1.fuzzify(-133) - 0) < 1e-2
-    assert abs(lin1.fuzzify(1) - 0.51) < 1e-2
-    assert abs(lin1.fuzzify(3) - 1.0) < 1e-2
-    assert abs(lin1.fuzzify(6) - 0.5) < 1e-2
-    assert abs(lin1.fuzzify(8) - 0.25) < 1e-2
-    assert abs(lin1.fuzzify(120) - 0) < 1e-2
+    from view.mf_viewer import MembershipFunctionViewer
+
+    lin1 = LinPWMF([0, 0], [2, 1], [5, 1], [6, 0.5], [10, 0])
+    MembershipFunctionViewer(lin1).show()
+    x = abs(lin1.fuzzify(-133) - 0)
+    assert x < 1e-2, x
+
+    x = abs(lin1.fuzzify(1) - 0.50)
+    assert x < 1e-2, x
+
+    x = abs(lin1.fuzzify(3) - 1.0)
+    assert x < 1e-2, x
+
+    x = abs(lin1.fuzzify(6) - 0.5)
+    assert x < 1e-2, x
+
+    x = abs(lin1.fuzzify(8) - 0.25)
+    assert x < 1e-2, x
+
+    x = abs(lin1.fuzzify(120) - 0)
+    assert x < 1e-2, x
