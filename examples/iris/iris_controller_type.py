@@ -8,7 +8,11 @@ from core.membership_functions.singleton_mf import SingletonMF
 from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Antecedent, Consequent
-from view.fis_viewer import FISViewer
+
+"""
+IRIS DATASET SOURCE: 
+https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
+"""
 
 
 def main():
@@ -90,7 +94,6 @@ def main():
             "PL": sample[2],
             "PW": sample[3]
         })
-
 
         expected_out_str = sample[4][5:]
 

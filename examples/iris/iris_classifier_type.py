@@ -9,6 +9,11 @@ from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Antecedent, Consequent
 
+"""
+IRIS DATASET SOURCE: 
+https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
+"""
+
 
 def main():
     # Build FIS from Fig 3.9 of Carlos Peña's book
