@@ -3,43 +3,11 @@ import numpy as np
 from core.fis.fis import MIN, AND_min, COA_func
 from core.fis.singleton_fis import SingletonFIS
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
-from core.membership_functions.lin_piece_wise_mf import LinPWMF
+from core.linguistic_variables.three_points_lv import ThreePointsLV
 from core.membership_functions.singleton_mf import SingletonMF
 from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Antecedent, Consequent
-from view.fis_viewer import FISViewer
-
-
-class ThreePointsLV(LinguisticVariable):
-    """
-    Syntactic sugar for simplified linguistic variable with only 3 points (p1,
-    p2 and p3) and fixed labels ("low", "medium" and "high").
-
-
-      ^
-      | low      medium           high
-    1 |XXXXX       X          XXXXXXXXXXXX
-      |     X     X  X       XX
-      |      X   X    X    XX
-      |       X X      XX X
-      |       XX        XXX
-      |      X  X     XX   XX
-      |     X    X XX       XX
-      |    X       X          XX
-    0 +-------------------------------------->
-           p1     p2          p3
-
-
-    """
-
-    def __init__(self, name, p1, p2, p3):
-        assert p1 <= p2 <= p3, "points must be increasing values"
-        super(ThreePointsLV, self).__init__(name, ling_values_dict={
-            "low": LinPWMF([p1, 1], [p2, 0]),
-            "medium": LinPWMF([p1, 0], [p2, 1], [p3, 0]),
-            "high": LinPWMF([p2, 0], [p3, 1])
-        })
 
 
 def main():
@@ -61,14 +29,6 @@ def main():
         "no": SingletonMF(0),
         "yes": SingletonMF(1)
     })
-
-    # LinguisticVariableViewer(lv_sw)\
-    #     .fuzzify(1)\
-    #     .fuzzify(2)\
-    #     .fuzzify(3.16)\
-    #     .fuzzify(3.22)\
-    #     .fuzzify(4.2)\
-    #     .show()
 
     r1 = FuzzyRule(
         ants=[Antecedent(lv_pw, "low")],
@@ -162,8 +122,8 @@ def main():
         n_correct_pred = check_prediction(predicted_out_str, expected_out_str,
                                           n_correct_pred)
 
-        print("[{}] expected {}, predicted {}".format(idx,expected_out_str,
-                                                 predicted_out_str))
+        print("[{}] expected {}, predicted {}".format(idx, expected_out_str,
+                                                      predicted_out_str))
 
     print("pred OK: {}, total pred: {}".format(n_correct_pred, len(iris_data)))
     assert n_correct_pred == 149, "The book says this FIS must predict " \
