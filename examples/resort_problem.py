@@ -1,11 +1,9 @@
 import numpy as np
 
-from core.fis.fis import FIS, AND_min, OR_max, COA_func, MIN, SingletonFIS
+from core.fis.fis import FIS, AND_min, OR_max, COA_func, MIN
 from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
-from core.membership_functions.singleton_mf import SingletonMF
 from core.membership_functions.triangular_mf import TriangularMF
-from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Antecedent, Consequent
 from view.fis_viewer import FISViewer
@@ -24,17 +22,17 @@ def resort_problem():
         "sunny": LinPWMF([50, 0], [100, 1])
     })
 
-    # lv_tourists = LinguisticVariable(name="tourists", ling_values_dict={
-    #     "low": LinPWMF([0, 1], [50, 0]),
-    #     "medium": TriangularMF(p_min=0, p_mid=50, p_max=100),
-    #     "high": LinPWMF([50, 0], [100, 1])
-    # })
-
     lv_tourists = LinguisticVariable(name="tourists", ling_values_dict={
-        "low": SingletonMF(0),
-        "medium": SingletonMF(50),
-        "high": SingletonMF(100)
+        "low": LinPWMF([0, 1], [50, 0]),
+        "medium": TriangularMF(p_min=0, p_mid=50, p_max=100),
+        "high": LinPWMF([50, 0], [100, 1])
     })
+
+    # lv_tourists = LinguisticVariable(name="tourists", ling_values_dict={
+    #     "low": SingletonMF(0),
+    #     "medium": SingletonMF(50),
+    #     "high": SingletonMF(100)
+    # })
 
     r1 = FuzzyRule(
         ants=[
@@ -72,18 +70,11 @@ def resort_problem():
         impl_func=MIN
     )
 
-    # rdefault = DefaultFuzzyRule(
-    #     cons=[
-    #         Consequent(lv_tourists, "medium"),
-    #     ],
-    #     impl_func=MIN
-    # )
-
-    fis = SingletonFIS(
+    # fis = SingletonFIS(
+    fis = FIS(
         aggr_func=np.max,
         defuzz_func=COA_func,
-        rules=[r1, r2, r3],
-        # default_rule=rdefault
+        rules=[r1, r2, r3]
     )
 
     input_values = {'temperature': 19, 'sunshine': 60}
