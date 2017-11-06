@@ -13,12 +13,14 @@ class SingletonFIS(FIS):
         aggregated_consequents = {}
         for index, (out_v_name, out_v_mf) in enumerate(
                 rules_implicated_cons.items()):
-            # print("yolo", out_v_name, out_v_mf)
-            # print(out_v_mf[0].mf_values[0])
 
             numerator = 0
             denominator = 0
             for i, rule in enumerate(chain(self._rules, [self._default_rule])):
+                # TODO: refactor this to better handle default rule
+                if rule is None:
+                    continue
+
                 cons_implicated_value = out_v_mf[i].mf_values[0]
                 label = rule.consequents[index].lv_value
                 # print(label)
@@ -31,6 +33,7 @@ class SingletonFIS(FIS):
                 numerator += cons_implicated_value * rule_act_value
                 denominator += cons_implicated_value
 
+            # TODO: replace FreeShapeMF by lighter data structure for singl. fis
             aggregated_consequents[out_v_name] = FreeShapeMF(
                 in_values=[numerator / float(denominator)], mf_values=[1])
 
