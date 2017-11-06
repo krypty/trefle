@@ -5,6 +5,17 @@ from core.linguistic_variables.linguistic_variable import LinguisticVariable
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from core.rules.fuzzy_rule import FuzzyRule
 from core.rules.fuzzy_rule_element import Antecedent, Consequent
+from view.fis_viewer import FISViewer
+
+"""
+The outputs come from external_references/SANTAMARIA_LFA_LABO4-5/Labo-5.
+They are not guaranteed to be 100% accurate but they give a good start.
+
+Therefore, the reference presents a bug that gives small errors on implication
+because the way it was implemented (use of res=XXX i.e. create points at 
+regular interval (range(a,b,step)) instead of np.linspace(a, b, n_pts)). This
+causes some "breaks/cuts" in slopes of fuzzy sets. 
+"""
 
 i = 0
 
@@ -50,27 +61,7 @@ def main():
         "high": LinPWMF([0.5, 0], [1, 1]),
     })
 
-    # lvs = [difficulty, importance, remaining_work, time_to_exam, priority]
-    #
-    # fig, axs = plt.subplots(len(lvs), figsize=(12, 8))
-    #
-    # for lv, ax in zip(lvs, axs):
-    #     LinguisticVariableViewer(lv, ax)
-    #
-    # plt.show()
-    #
-    #
-    # assert False
-
     rules = []
-
-    # rules.append(FuzzyRule(
-    #     ants=[(time_to_exam, 'very close'), (time_to_exam, 'close'),
-    #           (importance, 'high')],
-    #     ant_act_func=OR_max,
-    #     cons=[(priority, 'high')],
-    #     impl_func=np.min
-    # ))
 
     # High priority rules
     rules.append(FuzzyRule(ant_act_func=OR_max,
@@ -187,68 +178,75 @@ def main():
 
     fis = FIS(aggr_func=np.max, defuzz_func=COA_func, rules=rules)
 
-    r = []
+    results = []
     # class 1
-    r.append(fis.predict(crisp_values={'difficulty': 8, 'importance': 4,
-                                       'remaining_work': 30,
-                                       'time_to_exam': 4}))
+    fis_predict(results, fis, crisp_values={'difficulty': 8, 'importance': 4,
+                                            'remaining_work': 30,
+                                            'time_to_exam': 4})
 
     # class 2
-    r.append(fis.predict(crisp_values={'difficulty': 4, 'importance': 6,
-                                       'remaining_work': 50,
-                                       'time_to_exam': 6}))
+    fis_predict(results, fis, crisp_values={'difficulty': 4, 'importance': 6,
+                                            'remaining_work': 50,
+                                            'time_to_exam': 6})
 
     # class 3
-    r.append(fis.predict(crisp_values={'difficulty': 10, 'importance': 7,
-                                       'remaining_work': 10,
-                                       'time_to_exam': 10}))
+    fis_predict(results, fis, crisp_values={'difficulty': 10, 'importance': 7,
+                                            'remaining_work': 10,
+                                            'time_to_exam': 10})
 
     # class 3
-    r.append(fis.predict(crisp_values={'difficulty': 2, 'importance': 3,
-                                       'remaining_work': 80,
-                                       'time_to_exam': 3}))
+    fis_predict(results, fis, crisp_values={'difficulty': 2, 'importance': 3,
+                                            'remaining_work': 80,
+                                            'time_to_exam': 3})
 
     # class 4
-    r.append(fis.predict(crisp_values={'difficulty': 6, 'importance': 9,
-                                       'remaining_work': 40,
-                                       'time_to_exam': 13}))
+    fis_predict(results, fis, crisp_values={'difficulty': 6, 'importance': 9,
+                                            'remaining_work': 40,
+                                            'time_to_exam': 13})
 
     # class 5
-    r.append(fis.predict(crisp_values={'difficulty': 4, 'importance': 7,
-                                       'remaining_work': 10,
-                                       'time_to_exam': 10}))
+    fis_predict(results, fis, crisp_values={'difficulty': 4, 'importance': 7,
+                                            'remaining_work': 10,
+                                            'time_to_exam': 10})
 
     # class 6
-    r.append(fis.predict(crisp_values={'difficulty': 1, 'importance': 7,
-                                       'remaining_work': 10,
-                                       'time_to_exam': 10}))
+    fis_predict(results, fis, crisp_values={'difficulty': 1, 'importance': 7,
+                                            'remaining_work': 10,
+                                            'time_to_exam': 10})
 
     # class 7
-    r.append(fis.predict(crisp_values={'difficulty': 10, 'importance': 10,
-                                       'remaining_work': 10,
-                                       'time_to_exam': 10}))
+    fis_predict(results, fis, crisp_values={'difficulty': 10, 'importance': 10,
+                                            'remaining_work': 10,
+                                            'time_to_exam': 10})
 
-    r.append(fis.predict(
-        crisp_values={'difficulty': 10, 'importance': 1, 'remaining_work': 10,
-                      'time_to_exam': 10}))
-    r.append(fis.predict(
-        crisp_values={'difficulty': 10, 'importance': 7, 'remaining_work': 1,
-                      'time_to_exam': 10}))
-    r.append(fis.predict(
-        crisp_values={'difficulty': 5, 'importance': 7, 'remaining_work': 1,
-                      'time_to_exam': 10}))
-    r.append(fis.predict(
-        crisp_values={'difficulty': 10, 'importance': 7, 'remaining_work': 10,
-                      'time_to_exam': 1}))
-    r.append(fis.predict(
-        crisp_values={'difficulty': 10, 'importance': 7, 'remaining_work': 10,
-                      'time_to_exam': 30}))
-    r.append(fis.predict(
-        crisp_values={'difficulty': 10, 'importance': 10, 'remaining_work': 100,
-                      'time_to_exam': 1}))
-    r.append(fis.predict(
-        crisp_values={'difficulty': 1, 'importance': 1, 'remaining_work': 0,
-                      'time_to_exam': 30}))
+    fis_predict(results, fis,
+                crisp_values={'difficulty': 10, 'importance': 1,
+                              'remaining_work': 10,
+                              'time_to_exam': 10})
+    fis_predict(results, fis,
+                crisp_values={'difficulty': 10, 'importance': 7,
+                              'remaining_work': 1,
+                              'time_to_exam': 10})
+    fis_predict(results, fis,
+                crisp_values={'difficulty': 5, 'importance': 7,
+                              'remaining_work': 1,
+                              'time_to_exam': 10})
+    fis_predict(results, fis,
+                crisp_values={'difficulty': 10, 'importance': 7,
+                              'remaining_work': 10,
+                              'time_to_exam': 1})
+    fis_predict(results, fis,
+                crisp_values={'difficulty': 10, 'importance': 7,
+                              'remaining_work': 10,
+                              'time_to_exam': 30})
+    fis_predict(results, fis,
+                crisp_values={'difficulty': 10, 'importance': 10,
+                              'remaining_work': 100,
+                              'time_to_exam': 1})
+    fis_predict(results, fis,
+                crisp_values={'difficulty': 1, 'importance': 1,
+                              'remaining_work': 0,
+                              'time_to_exam': 30})
 
     a = [
         (1, 0.530666027791088),
@@ -268,12 +266,20 @@ def main():
         (15, 0.133333333333333)
     ]
 
-    for res, exp_res in zip(r, a):
+    for res, exp_res in zip(results, a):
         res_val = res["priority"]
         exp_res_val = exp_res[1]
         diff = abs(res_val - exp_res_val)
         print("computed {:.3f} vs {:.3f} = {:.3f}".format(res_val, exp_res_val,
                                                           diff))
+
+
+def fis_predict(results, fis, crisp_values):
+    res = fis.predict(crisp_values)
+    # fisv = FISViewer(fis)
+    # fisv.save("/tmp/out.png")
+    # input("Press enter...")
+    results.append(res)
 
 
 def predict(i, fis, input_values):

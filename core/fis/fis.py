@@ -92,7 +92,6 @@ class FIS(metaclass=ABCMeta):
         # HANDLE DEFAULT RULE
         if self._default_rule is not None:
             act_value = 1.0 - max_ant_act
-            print("default rule activation", act_value)
             implicated_consequents = self._default_rule.implicate(act_value)
             for lv_name, lv_impl_mf in implicated_consequents.items():
                 self._implicated_consequents[lv_name].extend(lv_impl_mf)
@@ -111,7 +110,6 @@ class FIS(metaclass=ABCMeta):
         return aggregated_consequents
 
     def _aggregate_cons(self, *out_var_mf):
-        print(out_var_mf)
         all_in_values = np.concatenate([mf.in_values for mf in out_var_mf])
         min_in, max_in = np.min(all_in_values), np.max(all_in_values)
 
