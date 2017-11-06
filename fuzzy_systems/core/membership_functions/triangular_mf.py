@@ -1,4 +1,4 @@
-from core.membership_functions.lin_piece_wise_mf import LinPWMF
+from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
 
 
 class TriangularMF(LinPWMF):

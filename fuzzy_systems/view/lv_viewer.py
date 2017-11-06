@@ -1,9 +1,10 @@
 from typing import List
 
-from core.linguistic_variables.linguistic_variable import LinguisticVariable
-from core.membership_functions.lin_piece_wise_mf import LinPWMF
-from view.mf_viewer import MembershipFunctionViewer
-from view.viewer import Viewer
+from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+    LinguisticVariable
+from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
+from fuzzy_systems.view.mf_viewer import MembershipFunctionViewer
+from fuzzy_systems.view.viewer import Viewer
 
 
 class LinguisticVariableViewer(Viewer):

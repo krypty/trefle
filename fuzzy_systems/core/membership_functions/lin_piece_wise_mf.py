@@ -1,6 +1,6 @@
 import numpy as np
 
-from core.membership_functions.free_shape_mf import FreeShapeMF
+from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
 
 
 def gen_line(p0, p1, n_points):

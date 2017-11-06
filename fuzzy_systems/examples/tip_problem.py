@@ -1,13 +1,14 @@
 import numpy as np
 
-from core.fis.fis import OR_max, COA_func, MIN
-from core.fis.singleton_fis import SingletonFIS
-from core.linguistic_variables.linguistic_variable import LinguisticVariable
-from core.membership_functions.lin_piece_wise_mf import LinPWMF
-from core.membership_functions.singleton_mf import SingletonMF
-from core.rules.fuzzy_rule import FuzzyRule
-from core.rules.fuzzy_rule_element import Antecedent, Consequent
-from view.fis_viewer import FISViewer
+from fuzzy_systems.core.fis.fis import OR_max, COA_func, MIN
+from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
+from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+    LinguisticVariable
+from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
+from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
+from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
+from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def tip_problem():
@@ -25,7 +26,7 @@ def tip_problem():
 
     lv_tip = LinguisticVariable(name="tip", ling_values_dict={
         "low": SingletonMF(0),  # LinPWMF([0, 1], [13, 0]),
-        "medium": SingletonMF(25//2),  # LinPWMF([0, 0], [13, 1], [25, 0]),
+        "medium": SingletonMF(25 // 2),  # LinPWMF([0, 0], [13, 1], [25, 0]),
         "high": SingletonMF(25)  # LinPWMF([13, 0], [25, 1])
 
         # "low": LinPWMF([0, 1], [13, 0]),

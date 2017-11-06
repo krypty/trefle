@@ -1,5 +1,6 @@
-from matplotlib import pyplot as plt
 from abc import ABCMeta, abstractmethod
+
+from matplotlib import pyplot as plt
 
 
 class Viewer(metaclass=ABCMeta):
@@ -11,7 +12,6 @@ class Viewer(metaclass=ABCMeta):
     @abstractmethod
     def get_plot(self, ax):
         raise NotImplementedError()
-
 
     def show(self):
         plt.show()

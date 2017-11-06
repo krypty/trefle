@@ -1,4 +1,4 @@
-from core.rules.fuzzy_rule import FuzzyRule
+from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 
 
 class DefaultFuzzyRule(FuzzyRule):

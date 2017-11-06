@@ -1,11 +1,11 @@
 import numpy as np
 
-from core.fis.fis import FIS, OR_max, AND_min, COA_func, MIN
-from core.linguistic_variables.linguistic_variable import LinguisticVariable
-from core.membership_functions.lin_piece_wise_mf import LinPWMF
-from core.rules.fuzzy_rule import FuzzyRule
-from core.rules.fuzzy_rule_element import Antecedent, Consequent
-from view.fis_viewer import FISViewer
+from fuzzy_systems.core.fis.fis import FIS, OR_max, AND_min, COA_func, MIN
+from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+    LinguisticVariable
+from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
+from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
 
 """
 The outputs come from external_references/SANTAMARIA_LFA_LABO4-5/Labo-5.

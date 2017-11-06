@@ -1,7 +1,7 @@
 import numpy as np
 
-from core.membership_functions.free_shape_mf import FreeShapeMF
-from view.mf_viewer import MembershipFunctionViewer
+from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
+from fuzzy_systems.view.mf_viewer import MembershipFunctionViewer
 
 
 class GaussianMF(FreeShapeMF):

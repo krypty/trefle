@@ -1,13 +1,12 @@
 import numpy as np
 
-from core.fis.fis import FIS, OR_max, COA_func, MIN
-from core.linguistic_variables.linguistic_variable import LinguisticVariable
-from core.membership_functions.lin_piece_wise_mf import LinPWMF
-from core.rules.fuzzy_rule import FuzzyRule
-from core.rules.fuzzy_rule_element import Consequent, Antecedent
-from view.fis_viewer import FISViewer
-from view.lv_viewer import LinguisticVariableViewer
-from view.mf_viewer import MembershipFunctionViewer
+from fuzzy_systems.core.fis.fis import FIS, OR_max, COA_func, MIN
+from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+    LinguisticVariable
+from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
+from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from fuzzy_systems.core.rules.fuzzy_rule_element import Consequent, Antecedent
+from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def hotel_problem():

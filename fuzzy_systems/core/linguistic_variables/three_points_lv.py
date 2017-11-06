@@ -1,5 +1,5 @@
-from core.linguistic_variables.linguistic_variable import LinguisticVariable
-from core.membership_functions.lin_piece_wise_mf import LinPWMF
+from fuzzy_systems.core.linguistic_variables.linguistic_variable import LinguisticVariable
+from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
 
 
 class ThreePointsLV(LinguisticVariable):

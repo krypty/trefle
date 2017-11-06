@@ -3,10 +3,10 @@ from itertools import zip_longest, chain
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import savefig
 
-from core.fis.fis import FIS
-from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
-from core.rules.fuzzy_rule import FuzzyRule
-from view.mf_viewer import MembershipFunctionViewer
+from fuzzy_systems.core.fis.fis import FIS
+from fuzzy_systems.core.rules.DefaultFuzzyRule import DefaultFuzzyRule
+from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from fuzzy_systems.view.mf_viewer import MembershipFunctionViewer
 
 ANTECEDENTS_BACKGROUND_COLOR = (0.95, 0.95, 0.95)
 CONSEQUENTS_BACKGROUND_COLOR = "white"

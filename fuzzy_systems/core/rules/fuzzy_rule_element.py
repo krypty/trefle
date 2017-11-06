@@ -1,4 +1,5 @@
-from core.linguistic_variables.linguistic_variable import LinguisticVariable
+from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+    LinguisticVariable
 
 
 class FuzzyRuleElement:

@@ -4,9 +4,9 @@ from typing import List
 
 import numpy as np
 
-from core.membership_functions.free_shape_mf import FreeShapeMF
-from core.rules.DefaultFuzzyRule import DefaultFuzzyRule
-from core.rules.fuzzy_rule import FuzzyRule
+from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
+from fuzzy_systems.core.rules.DefaultFuzzyRule import DefaultFuzzyRule
+from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 
 COA_func = (lambda v, m: np.sum(np.multiply(v, m)) / np.sum(m), "COA_func")
 OR_max = (np.max, "OR_max")

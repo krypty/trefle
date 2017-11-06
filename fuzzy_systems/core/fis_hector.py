@@ -1,6 +1,7 @@
-import fuzzy_rule as fr
-import linguistic_variable as lv
 import numpy as np
+
+from fuzzy_systems.core.fuzzy_rule import FuzzyRule
+from fuzzy_systems.core.linguistic_variable import LinguisticVariable
 
 
 class FIS:
@@ -103,27 +104,27 @@ class FIS:
 
 
 def main():
-    temperature = lv.LinguisticVariable('temperature', 0, 35,
+    temperature = LinguisticVariable('temperature', 0, 35,
                                         [17, 20, 26, 29],
                                         ['cold', 'warm', 'hot'], res=1.0)
 
-    sunshine = lv.LinguisticVariable('sunshine', 0, 100, [30, 50, 50, 100],
+    sunshine = LinguisticVariable('sunshine', 0, 100, [30, 50, 50, 100],
                                      ['cloudy', 'partsunny', 'sunny'],
                                      res=1.0)
 
-    tourists = lv.LinguisticVariable('tourists', 0, 100, [0, 50, 50, 100],
+    tourists = LinguisticVariable('tourists', 0, 100, [0, 50, 50, 100],
                                      ['low', 'medium', 'high'], res=1.0)
 
-    rule_1 = fr.FuzzyRule('OR_max',
+    rule_1 = FuzzyRule('OR_max',
                           [(temperature, 'hot'), (sunshine, 'sunny')],
                           (tourists, 'high'), 'MIN')
 
-    rule_2 = fr.FuzzyRule('AND_min',
+    rule_2 = FuzzyRule('AND_min',
                           [(temperature, 'warm'), (sunshine, 'partsunny')],
                           (tourists, 'medium'),
                           'MIN')
 
-    rule_3 = fr.FuzzyRule('OR_max',
+    rule_3 = FuzzyRule('OR_max',
                           [(temperature, 'cold'), (sunshine, 'cloudy')],
                           (tourists, 'low'), 'MIN')
 
@@ -149,25 +150,25 @@ def main():
 
 
 def tip_problem_hector():
-    quality = lv.LinguisticVariable('quality', 0, 10,
+    quality = LinguisticVariable('quality', 0, 10,
                                     [0, 5],
                                     ['poor', 'average', 'good'], res=1.0)
 
-    service = lv.LinguisticVariable('service', 0, 10,
+    service = LinguisticVariable('service', 0, 10,
                                     [0, 5],
                                     ['poor', 'average', 'good'], res=1.0)
 
-    tip = lv.LinguisticVariable('tip', 0, 25,
+    tip = LinguisticVariable('tip', 0, 25,
                                 [0, 13, 15],
                                 ['low', 'medium', 'high'], res=1.0)
 
-    rule_1 = fr.FuzzyRule('OR_max', [(quality, 'poor'), (service, 'poor')],
+    rule_1 = FuzzyRule('OR_max', [(quality, 'poor'), (service, 'poor')],
                           (tip, 'low'), 'MIN')
 
-    rule_2 = fr.FuzzyRule('AND_min', [(service, 'average')],
+    rule_2 = FuzzyRule('AND_min', [(service, 'average')],
                           (tip, 'medium'), 'MIN')
 
-    rule_3 = fr.FuzzyRule('OR_max', [(service, 'good'), (quality, 'good')],
+    rule_3 = FuzzyRule('OR_max', [(service, 'good'), (quality, 'good')],
                           (tip, 'high'), 'MIN')
 
     # print(rule_1)
