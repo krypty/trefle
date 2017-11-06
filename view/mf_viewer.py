@@ -1,3 +1,5 @@
+from matplotlib.ticker import MaxNLocator
+
 from core.membership_functions.free_shape_mf import FreeShapeMF
 from core.membership_functions.lin_piece_wise_mf import LinPWMF
 from view.viewer import Viewer
@@ -31,11 +33,14 @@ class MembershipFunctionViewer(Viewer):
         if self._draw_not:
             ys = 1.0 - ys
 
-        ax.scatter(xs, ys, s=10, label=self._label, c=self._color,
+        ax.scatter(xs, ys, s=5, label=self._label, c=self._color,
                    alpha=self._alpha)
         ax.plot(xs, ys, c=self._color, alpha=self._alpha)
         # ax.set_ylim([-0.1, 1.1])
         ax.legend()
+
+        ax.xaxis.set_major_locator(MaxNLocator(5))
+        ax.yaxis.set_major_locator(MaxNLocator(5))
         return ax
 
 

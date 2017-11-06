@@ -158,11 +158,14 @@ class FISViewer:
         col_cons = ['Consequent {}'.format(col + 1) for col in range(max_cons)]
 
         rows = []
-        for rule, row in zip(chain(self.__fis.rules, [self.__fis.default_rule]), range(axarr.shape[0])):
+        for rule, row in zip(chain(self.__fis.rules, [self.__fis.default_rule]),
+                             range(axarr.shape[0])):
             if isinstance(rule, DefaultFuzzyRule):
                 rows.append("Default rule")
+            elif rule is None:
+                continue
             else:
-                rows.append("Rule {} {}".format(row+1, rule._ant_act_func[1]))
+                rows.append("Rule {} {}".format(row + 1, rule._ant_act_func[1]))
         #
         # rows = ['Rule {} [{}]'.format(row + 1, rule._ant_act_func[1] if not isinstance(rule, DefaultFuzzyRule) else "")
         #         for rule, row in zip(chain(self.__fis.rules, [self.__fis.default_rule]), range(axarr.shape[0]))]
