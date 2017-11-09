@@ -20,9 +20,18 @@ class FuzzyRule:
         * multiple antecedents and consequents can be used for a single rule
 
         :param ants: a list of Antecedent
-        :param ant_act_func:
-        :param cons:
-        :param impl_func:
+
+        :param ant_act_func: A Tuple[Callable, str] where the callable is
+        either a t-norm or a t-conorm operator and where the string is used
+        for visualization purposes. Generally, FIS.AND_min or FIS.OR_max is used
+
+        :param cons:a list of Consequent
+
+        :param impl_func: Implication function i.e. the function f(a,b) where
+        a is a scalar, the result value of the antecedents activation of this
+        rule, and where b represents the membership function(s) of the
+        consequent(s) used in the rule. This function will return an implicated
+        membership function
         """
         self._ants = ants
         self._ant_act_func = ant_act_func
@@ -39,11 +48,14 @@ class FuzzyRule:
 
     def fuzzify(self, crisp_inputs: Dict[str, float]) -> List[float]:
         """
+        This function will fuzzify crisp input values on each rule's antecedents
 
-        :rtype: FuzzyRule
         :param crisp_inputs: the rule's antecedents crisps inputs values i.e. a
-        user's/dataset sample input.
-        :return: fuzzified inputs for this particular rule
+        user's/dataset sample input. Example crisp_inputs = {"temperature": 18,
+        "sunshine": 55}
+
+        :return: a list of fuzzified inputs (same size as the number of
+        antecedents) for this particular rule
         """
 
         fuzzified_inputs_for_rule = []
@@ -65,11 +77,6 @@ class FuzzyRule:
         :param fuzzified_inputs:
         :return: a scalar that represents the antecedents activation
         """
-        # cannot set this value arbitrarily because it can lead to wrong results
-        # example: if rule_ant_val is set to 0 and AND operator is used, the
-        # result will always be 0
-        # ????  known drawback: when i = 0 it's like we do: ant_act_func(ant0, ant0)
-        # ????  FIXME: this will not work with probor function -> now should work if we start at range(1, ..)
         ant_val = fuzzified_inputs[0]
 
         # apply the rule antecedent function using a sliding window of size 2
@@ -93,18 +100,22 @@ class FuzzyRule:
         operation
         """
 
+        impl_func = self._impl_func[0]
         implicated_consequents = defaultdict(list)
 
-        # TODO: improve the comment below
-        # (conseq, conseq_label) is (linguistic variable, linguistic value used in this conseq)
         for con in self._cons:
-            conseq, conseq_label = con.lv_name, con.lv_value
-            ling_value = conseq[conseq_label]
-            in_values = deepcopy(ling_value.in_values)  # deepcopy needed ?
-            mf_values = [self._impl_func[0]([val, antecedents_activation]) for
+            # get the output variable's MF used by this specific consequent
+            # in this rule. For example the MF of "warm" in the case of
+            # the linguistic variable "temperature".
+            ling_value = con.lv_name[con.lv_value]
+
+            in_values = deepcopy(ling_value.in_values)  # FIXME deepcopy needed?
+            mf_values = [impl_func([val, antecedents_activation]) for
                          val in ling_value.mf_values]
 
-            implicated_consequents[conseq.name].append(
+            # lv_name.name is the name of the linguistic variable, e.g.
+            # "temperature"
+            implicated_consequents[con.lv_name.name].append(
                 FreeShapeMF(in_values, mf_values))
 
         return implicated_consequents
