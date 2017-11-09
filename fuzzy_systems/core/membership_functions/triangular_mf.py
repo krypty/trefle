@@ -5,6 +5,8 @@ class TriangularMF(LinPWMF):
     """
     Assumptions:
     - mf values are bound to [0, 1]
+
+    This class is more an example of how you can derive LinPWMF
     """
 
     def __init__(self, p_min, p_mid, p_max, n_points=50):

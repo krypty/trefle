@@ -1,11 +1,22 @@
+from typing import List, Callable, Tuple
+
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from fuzzy_systems.core.rules.fuzzy_rule_element import Consequent
 
 
 class DefaultFuzzyRule(FuzzyRule):
-    def __init__(self, cons, impl_func):
+    def __init__(self, cons: List[Consequent], impl_func: Tuple[Callable, str]):
+        """
+        Define a default rule for a fuzzy system. It behaves the same as
+        FuzzyRule but it does not require to define antecedents
+        neither an activation function
+
+        :param cons: see FuzzyRule's docstring
+        :param impl_func: see FuzzyRule's docstring
+        """
         super(DefaultFuzzyRule, self).__init__(
             ants=[],
-            ant_act_func=None,  # can set any other act func, it is not use
+            ant_act_func=None,  # can set any other act func, it is not used
             cons=cons,
             impl_func=impl_func
         )

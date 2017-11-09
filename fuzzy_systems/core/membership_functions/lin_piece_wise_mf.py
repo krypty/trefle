@@ -4,6 +4,14 @@ from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
 
 
 def gen_line(p0, p1, n_points):
+    """
+    Generate a line (list of xs and ys) given two points p0 and p1.
+    This function handles vertical and horizontal lines
+    :param p0: a point as x0 and y0
+    :param p1: a point as x1 and y1
+    :param n_points: number of points to generate
+    :return: xs, ys as list of x and list of y of the generated line
+    """
     points_same_x = abs(p1[0] - p0[0]) < 1e-6
     points_same_y = abs(p1[1] - p0[1]) < 1e-6
     if points_same_y and points_same_x:
@@ -48,8 +56,6 @@ class LinPWMF(FreeShapeMF):
 
         for i in range(1, len(p_args)):
             xs, ys = gen_line(p_args[i - 1], p_args[i], n_points=n_pts_part)
-            # n_pts -= n_pts_part
-
             in_values.extend(xs)
             mf_values.extend(ys)
 
@@ -57,7 +63,7 @@ class LinPWMF(FreeShapeMF):
 
 
 if __name__ == '__main__':
-    from view.mf_viewer import MembershipFunctionViewer
+    from fuzzy_systems.view.mf_viewer import MembershipFunctionViewer
 
     lin1 = LinPWMF([0, 0], [2, 1], [5, 1], [6, 0.5], [10, 0])
     MembershipFunctionViewer(lin1).show()

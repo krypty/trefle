@@ -22,6 +22,8 @@ class GaussianMF(FreeShapeMF):
 
         # in order to get 99% of the input space,
         # see https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule
+        # Therefore, always use odd number for np.linspace to have the same
+        # number of points on both sides of the gaussian
         in_values = np.linspace(mu - 3 * sigma, mu + 3 * sigma, 25)
         mf_values = [self.gaussian(i, mu, v) for i in in_values]
 
@@ -49,6 +51,6 @@ if __name__ == '__main__':
     mf = GaussianMF(mu=30, sigma=4)
     MembershipFunctionViewer(mf).show()
     print(mf.fuzzify(0))
-    print(mf.fuzzify(3))
-    print(mf.fuzzify(10))
+    print(mf.fuzzify(30))
+    print(mf.fuzzify(40))
     print(mf.fuzzify(1000))
