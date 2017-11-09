@@ -1,6 +1,6 @@
 from abc import ABCMeta
 from collections import defaultdict
-from typing import List
+from typing import List, Callable, Tuple
 
 import numpy as np
 
@@ -17,13 +17,37 @@ ERR_MSG_MUST_PREDICT = "you must use predict() at least once"
 
 
 class FIS(metaclass=ABCMeta):
-    def __init__(self, aggr_func, defuzz_func, rules: List[FuzzyRule],
+    def __init__(self, aggr_func, defuzz_func: Tuple[Callable, str],
+                 rules: List[FuzzyRule],
                  default_rule: DefaultFuzzyRule = None):
+        """
+        Create a Mamdani Fuzzy Inference System where aggregation function,
+        defuzzification function, rules and default rule are defined by the
+        caller (you).
+        :param aggr_func: aggregation function. Can be any function that takes
+        lists of floats and returns a list of float. Most of the time, numpy.max
+        is the function you want to use.
+
+        :param defuzz_func: defuzzification function. Can be any
+        Tuple[Callable, str] object. Callable is the defuzzification function
+        and str is a user-defined label. The signature of the defuzzification
+        function must be like f(v, m) where v is XXX and m is XXX                    <-- FIXME
+        Pre-defined defuzzification functions are already implemented in
+        this class such as COA_func.
+
+        :param rules: List of FuzzyRule. It supports rules with multiples
+        consequents as long as all rules use each defined consequent. For
+        example it is invalid to have the first rule with 1 consequent and the
+        other with 2. The caller (you) must take care of this himself.
+
+        :param default_rule: if desired, a default rule can be set
+        """
         self._aggr_func = aggr_func
         self._defuzz_func = defuzz_func
         self._rules = rules
         self._default_rule = default_rule
 
+        # used by FISViewer, useless for the computation itself
         self._last_crisp_values = None
         self._implicated_consequents = None
         self._aggregated_consequents = None
@@ -59,8 +83,6 @@ class FIS(metaclass=ABCMeta):
 
     def predict(self, crisp_values):
         self._last_crisp_values = crisp_values
-        # TODO: make FIS multiple output variable compatible
-
         """
 
         :param crisp_values: a dict where keys are variables name and values are
@@ -70,10 +92,10 @@ class FIS(metaclass=ABCMeta):
 
         rules_implicated_cons = defaultdict(list)
 
-        # can be set to 0 because activation values are in [0, 1]
+        # initial value can be set to 0 because activation values are in [0, 1]
         max_ant_act = 0
 
-        # FUZZIFY AND ACTIVATE INPUTS THEN IMPLICATE CONSEQUENTS FOR EACH RULE
+        # Fuzzify and activate inputs then implicate consequents for each rule
         for r in self._rules:
             fuzzified_inputs = r.fuzzify(crisp_values)
             antecedents_activation = r.activate(fuzzified_inputs)
@@ -89,20 +111,28 @@ class FIS(metaclass=ABCMeta):
                 # grouped by rules
         self._implicated_consequents = rules_implicated_cons
 
-        # HANDLE DEFAULT RULE
+        # Handle default rule
         if self._default_rule is not None:
             act_value = 1.0 - max_ant_act
             implicated_consequents = self._default_rule.implicate(act_value)
             for lv_name, lv_impl_mf in implicated_consequents.items():
                 self._implicated_consequents[lv_name].extend(lv_impl_mf)
 
-        # AGGREGATE CONSEQUENTS
+        # Aggregate consequents
         self._aggregated_consequents = self._aggregate(rules_implicated_cons)
 
-        # DEFUZZIFY
+        # Defuzzify
         return self._defuzzify()
 
     def _aggregate(self, rules_implicated_cons):
+        """
+        Aggregate each consequent (grouped by output variables)
+        :param rules_implicated_cons: implicated (i.e. after rule activation)
+        consequents of this system's rules.
+
+        :return: a dict where keys are output variables name and where values
+        are aggregated fuzzy sets.
+        """
         aggregated_consequents = {}
         for out_v_name, out_v_mf in rules_implicated_cons.items():
             aggregated_consequents[out_v_name] = self._aggregate_cons(
@@ -110,6 +140,16 @@ class FIS(metaclass=ABCMeta):
         return aggregated_consequents
 
     def _aggregate_cons(self, *out_var_mf):
+        """
+        Aggregate a given consequent (represented by one or more membership
+        function) together.
+
+        :param out_var_mf: a list of membership functions for a given output
+        variable.
+
+        :return: the aggregated fuzzy set, represented by a FreeShapeMF since
+        the result can be a MF of any shape.
+        """
         all_in_values = np.concatenate([mf.in_values for mf in out_var_mf])
         min_in, max_in = np.min(all_in_values), np.max(all_in_values)
 
@@ -125,6 +165,13 @@ class FIS(metaclass=ABCMeta):
                            mf_values=aggregated_mf_values)
 
     def _defuzzify(self):
+        """
+        Defuzzify the output variable(s) into crisp values. Must be run after
+        aggregation.
+
+        :return: a dict of crisp values where keys are variables names and
+        values are discrete/crisp output values
+        """
         defuzzified_outputs = {}
         for out_v_name, out_v_mf in self._aggregated_consequents.items():
             defuzzified_outputs[out_v_name] = self._defuzzify_cons(out_v_mf)
@@ -132,5 +179,11 @@ class FIS(metaclass=ABCMeta):
         return defuzzified_outputs
 
     def _defuzzify_cons(self, aggr_mf):
-        # print("in v", aggr_mf.in_values, "mf v", aggr_mf.mf_values)
+        """
+        Defuzzify an aggregated membership function using the user-defined
+        aggregation function.
+
+        :param aggr_mf: aggregated membership function to defuzzify
+        :return: crisp value for this MF
+        """
         return self._defuzz_func[0](aggr_mf.in_values, aggr_mf.mf_values)
