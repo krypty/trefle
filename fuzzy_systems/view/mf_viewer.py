@@ -33,11 +33,11 @@ class MembershipFunctionViewer(Viewer):
         if self._draw_not:
             ys = 1.0 - ys
 
-        ax.scatter(xs, ys, s=5, label=self._label, c=self._color,
-                   alpha=self._alpha)
+        sc = ax.scatter(xs, ys, s=5, label=self._label, c=self._color,
+                        alpha=self._alpha)
         ax.plot(xs, ys, c=self._color, alpha=self._alpha)
         # ax.set_ylim([-0.1, 1.1])
-        ax.legend()
+        ax.legend([sc], [self._label])
 
         ax.xaxis.set_major_locator(MaxNLocator(5))
         ax.yaxis.set_major_locator(MaxNLocator(5))
