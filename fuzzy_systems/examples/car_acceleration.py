@@ -87,7 +87,7 @@ def car_accel_problem():
     print("difference     : {}".format(expected_value - predicted_value))
 
     fisv = FISViewer(fis)
-    fisv.save("/tmp/out.png")
+    # fisv.save("/tmp/out.png")
     fisv.show()
 
 

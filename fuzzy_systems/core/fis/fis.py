@@ -5,7 +5,7 @@ from typing import List, Callable, Tuple
 import numpy as np
 
 from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
-from fuzzy_systems.core.rules.DefaultFuzzyRule import DefaultFuzzyRule
+from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 
 COA_func = (lambda v, m: np.sum(np.multiply(v, m)) / np.sum(m), "COA_func")
@@ -17,13 +17,14 @@ ERR_MSG_MUST_PREDICT = "you must use predict() at least once"
 
 
 class FIS(metaclass=ABCMeta):
-    def __init__(self, aggr_func, defuzz_func: Tuple[Callable, str],
+    def __init__(self, aggr_func: Callable, defuzz_func: Tuple[Callable, str],
                  rules: List[FuzzyRule],
                  default_rule: DefaultFuzzyRule = None):
         """
         Create a Mamdani Fuzzy Inference System where aggregation function,
         defuzzification function, rules and default rule are defined by the
-        caller (you).
+        caller (you). All rules have the same weight.
+
         :param aggr_func: aggregation function. Can be any function that takes
         lists of floats and returns a list of float. Most of the time, numpy.max
         is the function you want to use.

@@ -5,7 +5,7 @@ from typing import Callable, Tuple, List
 from fuzzy_systems.core.fis.fis import FIS
 from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
 from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.DefaultFuzzyRule import DefaultFuzzyRule
+from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 
 
@@ -23,7 +23,7 @@ def are_all_consequents_singleton(rules: List[FuzzyRule]):
 
 
 class SingletonFIS(FIS):
-    def __init__(self, aggr_func, defuzz_func: Tuple[Callable, str],
+    def __init__(self, aggr_func: Callable, defuzz_func: Tuple[Callable, str],
                  rules: List[FuzzyRule], default_rule: DefaultFuzzyRule = None):
         """
         Create a singleton fuzzy inference system. This class is not optimized

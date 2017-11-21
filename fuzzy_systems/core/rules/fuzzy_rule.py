@@ -31,7 +31,7 @@ class FuzzyRule:
         a is a scalar, the result value of the antecedents activation of this
         rule, and where b represents the membership function(s) of the
         consequent(s) used in the rule. This function will return an implicated
-        membership function
+        membership function. Generally, min or product are used.
         """
         self._ants = ants
         self._ant_act_func = ant_act_func

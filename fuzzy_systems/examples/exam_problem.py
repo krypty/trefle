@@ -6,6 +6,7 @@ from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
 from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
+from fuzzy_systems.view.fis_viewer import FISViewer
 
 """
 The outputs come from external_references/SANTAMARIA_LFA_LABO4-5/Labo-5.
@@ -276,9 +277,9 @@ def main():
 
 def fis_predict(results, fis, crisp_values):
     res = fis.predict(crisp_values)
-    # fisv = FISViewer(fis)
-    # fisv.save("/tmp/out.png")
-    # input("Press enter...")
+    fisv = FISViewer(fis)
+    fisv.save("/tmp/out.png")
+    input("Press enter...")
     results.append(res)
 
 

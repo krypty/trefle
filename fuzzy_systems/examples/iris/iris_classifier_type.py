@@ -7,7 +7,7 @@ from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
 from fuzzy_systems.core.linguistic_variables.three_points_lv import \
     ThreePointsLV
 from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.DefaultFuzzyRule import DefaultFuzzyRule
+from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
 
@@ -24,18 +24,14 @@ def main():
     lv_pl = ThreePointsLV(name="PL", p1=4.68, p2=5.26, p3=6.03)
     lv_pw = ThreePointsLV(name="PW", p1=0.39, p2=1.16, p3=2.03)
 
-    lv_setosa = LinguisticVariable(name="setosa", ling_values_dict={
+    yes_no = {
         "no": SingletonMF(0),
         "yes": SingletonMF(1)
-    })
-    lv_virginica = LinguisticVariable(name="virginica", ling_values_dict={
-        "no": SingletonMF(0),
-        "yes": SingletonMF(1)
-    })
-    lv_versicolor = LinguisticVariable(name="versicolor", ling_values_dict={
-        "no": SingletonMF(0),
-        "yes": SingletonMF(1)
-    })
+    }
+    lv_setosa = LinguisticVariable(name="setosa", ling_values_dict=yes_no)
+    lv_virginica = LinguisticVariable(name="virginica", ling_values_dict=yes_no)
+    lv_versicolor = LinguisticVariable(name="versicolor",
+                                       ling_values_dict=yes_no)
 
     r1 = FuzzyRule(
         ants=[Antecedent(lv_pw, "low")],

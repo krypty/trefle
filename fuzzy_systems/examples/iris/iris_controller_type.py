@@ -7,7 +7,7 @@ from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
 from fuzzy_systems.core.linguistic_variables.three_points_lv import \
     ThreePointsLV
 from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.DefaultFuzzyRule import DefaultFuzzyRule
+from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
 
