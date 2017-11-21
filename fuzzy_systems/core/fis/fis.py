@@ -82,6 +82,11 @@ class FIS(metaclass=ABCMeta):
         assert self._defuzzified_outputs is not None, ERR_MSG_MUST_PREDICT
         return self._defuzzified_outputs
 
+    def describe(self):
+        [print(r) for r in self.rules]
+        if self.default_rule is not None:
+            print(self.default_rule)
+
     def predict(self, crisp_values):
         self._last_crisp_values = crisp_values
         """
