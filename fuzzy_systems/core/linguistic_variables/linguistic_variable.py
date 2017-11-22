@@ -23,6 +23,7 @@ class LinguisticVariable(metaclass=ABCMeta):
         """
         self._name = name
         self._ling_values_dict = ling_values_dict
+        self._in_range = self._compute_in_range()
 
     @property
     def name(self):
@@ -36,6 +37,10 @@ class LinguisticVariable(metaclass=ABCMeta):
     def labels_name(self):
         return self._ling_values_dict.keys()
 
+    @property
+    def in_range(self):
+        return self._in_range
+
     def __getitem__(self, ling_value: str):
         """
         Syntactic sugar to directly access to linguistic values given its name.
@@ -48,3 +53,10 @@ class LinguisticVariable(metaclass=ABCMeta):
     def __str__(self):
         return "Name: {}, values: {}".format(self.name,
                                              self._ling_values_dict.keys())
+
+    def _compute_in_range(self):
+        a = [[min(mf.in_values), max(mf.in_values)] for mf in
+             self._ling_values_dict.values()]
+
+        in_min, in_max = zip(*a)
+        return min(in_min), max(in_max)
