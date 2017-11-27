@@ -13,7 +13,7 @@ CONSEQUENTS_BACKGROUND_COLOR = "white"
 
 
 class FISViewer:
-    def __init__(self, fis: FIS):
+    def __init__(self, fis: FIS, figsize=None):
         self.__fis = fis
 
         n_default_rule = 1 if self.__fis.default_rule is not None else 0
@@ -24,12 +24,15 @@ class FISViewer:
         max_sum_ants_cons = max_ants + max_cons
         ncols = max_sum_ants_cons
         nrows = n_rules + 1  # +1 row for aggregation
+
+        if figsize is None:
+            figsize = (3 * ncols, 2 * nrows)
+
         fig, axarr = plt.subplots(ncols=ncols,
                                   nrows=nrows,
-                                  figsize=(3 * ncols, 2 * nrows))
+                                  figsize=figsize)
 
         plt.suptitle(self._describe_fis())
-        # text(0.5, 0.95, 'test', transform=fig.transFigure, horizontalalignment='center')
 
         # -1 because last line is for aggregation
         for row in range(axarr.shape[0] - 1):
@@ -38,11 +41,6 @@ class FISViewer:
                 b = axarr[row, col]
                 a.get_shared_x_axes().join(a, b)
                 a.get_shared_y_axes().join(a, b)
-
-        # axarr[0, 2].text(0, 0, "jdslkajdska")
-        # axarr[1, 2].text(0, 0, "yolo")
-        # axarr[0, 2].get_shared_x_axes().join(axarr[0, 2], axarr[1, 2])
-        # axarr[1, 2].get_shared_x_axes().join(axarr[1, 2], axarr[2, 2])
 
         [ax.axis("off") for ax in axarr.flat]
 
@@ -53,15 +51,6 @@ class FISViewer:
                                        rule_index=line)
 
         # all columns of consequents share the same x axe per column
-        ax_cons_cols = axarr[:, -max_cons:]
-
-        # j = 0
-        # for ax_col in ax_cons_cols:
-        #     j += 1
-        #     for i in range(1, len(ax_col)):
-        #         ax_col[i].text(4, 0, str(i) + ", " + str(j))
-        #         ax_col[i - 1].get_shared_x_axes().join(ax_col[i - 1], ax_col[i])
-
         self._plot_rows_cols_labels(axarr, max_ants, max_cons)
 
         for cons_index, ax in enumerate(axarr[-1, max_ants:]):
@@ -78,15 +67,18 @@ class FISViewer:
             ax_default_rule.spines['bottom'].set_visible(False)
             ax_default_rule.spines['left'].set_visible(False)
 
-    def show(self):
+    @staticmethod
+    def show():
         plt.tight_layout()
         plt.subplots_adjust(top=0.88)
         plt.show()
 
-    def save(self, filename):
+    @staticmethod
+    def save(filename):
         savefig(filename, bbox_inches='tight')
 
-    def set_title(self, title):
+    @staticmethod
+    def set_title(title):
         plt.suptitle(title)
 
     def _create_rule_plot(self, r: FuzzyRule, ax_line, max_ants, max_cons,
@@ -166,9 +158,6 @@ class FISViewer:
                 continue
             else:
                 rows.append("Rule {} {}".format(row + 1, rule._ant_act_func[1]))
-        #
-        # rows = ['Rule {} [{}]'.format(row + 1, rule._ant_act_func[1] if not isinstance(rule, DefaultFuzzyRule) else "")
-        #         for rule, row in zip(chain(self.__fis.rules, [self.__fis.default_rule]), range(axarr.shape[0]))]
 
         for ax, col in zip(axarr[0], col_ants):
             ax.set_title(col)
