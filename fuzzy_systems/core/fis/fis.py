@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from typing import List, Callable, Tuple
 
 import numpy as np
@@ -14,6 +14,17 @@ AND_min = (np.min, "AND_min")
 MIN = (np.min, "MIN")
 
 ERR_MSG_MUST_PREDICT = "you must use predict() at least once"
+
+
+def must_use_predict_before(func):
+    def wrapper(*args):
+        that = args[0]
+        if that._last_crisp_values is None:
+            raise ValueError(ERR_MSG_MUST_PREDICT)
+        to_return = func(that)
+        return to_return
+
+    return wrapper
 
 
 class FIS(metaclass=ABCMeta):
@@ -63,23 +74,23 @@ class FIS(metaclass=ABCMeta):
         return self._default_rule
 
     @property
+    @must_use_predict_before
     def last_crisp_values(self):
-        assert self._last_crisp_values is not None, ERR_MSG_MUST_PREDICT
         return self._last_crisp_values
 
     @property
+    @must_use_predict_before
     def last_implicated_consequents(self):
-        assert self._implicated_consequents is not None, ERR_MSG_MUST_PREDICT
         return self._implicated_consequents
 
     @property
+    @must_use_predict_before
     def last_aggregated_consequents(self):
-        assert self._aggregated_consequents is not None, ERR_MSG_MUST_PREDICT
         return self._aggregated_consequents
 
     @property
+    @must_use_predict_before
     def last_defuzzified_outputs(self):
-        assert self._defuzzified_outputs is not None, ERR_MSG_MUST_PREDICT
         return self._defuzzified_outputs
 
     def describe(self):

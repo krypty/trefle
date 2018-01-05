@@ -130,7 +130,7 @@ class FuzzyRule:
             ["{} is {}".format(a.lv_name.name, a.lv_value) for a in
              self.antecedents])
 
-        cons_text = " {} ".format(self._impl_func[1]).join(
+        cons_text = " {} ".format(",").join(
             ["{} is {}".format(c.lv_name.name, c.lv_value) for c in
              self.consequents])
 

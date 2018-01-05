@@ -23,23 +23,26 @@ def main():
     ax3 = fig.add_subplot(223, projection='3d')
     ax4 = fig.add_subplot(224, projection='3d')
 
-    show_surface(fis_mamdani, title="Mamdani", x_label="speed", y_label="speed_change",
+    show_surface(fis_mamdani, title="Mamdani",
+                 x_label="speed", y_label="speed_change",
                  z_label="action",
                  n_pts=15, x_range=(-1, 1), y_range=(-1, 1), z_range=(-1, 1),
                  ax=ax)
 
-    show_surface(fis_singleton,title="Singleton",  x_label="speed", y_label="speed_change",
+    show_surface(fis_singleton, title="Singleton",
+                 x_label="speed", y_label="speed_change",
                  z_label="action",
                  n_pts=15, x_range=(-1, 1), y_range=(-1, 1), z_range=(-1, 1),
                  ax=ax2)
 
-    show_surface(fis_default_rule, title="Singleton + DR", x_label="speed", y_label="speed_change",
+    show_surface(fis_default_rule, title="Singleton + DR",
+                 x_label="speed", y_label="speed_change",
                  z_label="action",
                  n_pts=15, x_range=(-1, 1), y_range=(-1, 1), z_range=(-1, 1),
                  ax=ax3)
 
-    show_surface(fis_default_rule_and_not, title="Singleton + DR + not", x_label="speed",
-                 y_label="speed_change",
+    show_surface(fis_default_rule_and_not, title="Singleton + DR + not",
+                 x_label="speed", y_label="speed_change",
                  z_label="action",
                  n_pts=15, x_range=(-1, 1), y_range=(-1, 1), z_range=(-1, 1),
                  ax=ax4)

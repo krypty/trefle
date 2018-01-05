@@ -86,10 +86,10 @@ def resort_problem():
     print("expected  value: {}".format(expected_value))
     print("difference     : {}".format(expected_value - predicted_value))
 
+    # View the FIS
     fisv = FISViewer(fis)
-
     describe_fis(fis)
-    fisv.save("/tmp/out.png")
+    # fisv.save("/tmp/out.png")
     fisv.show()
 
 

@@ -1,5 +1,5 @@
 def main():
-    pass
+    print("Please see examples before starting in the examples folder")
 
 
 if __name__ == '__main__':
