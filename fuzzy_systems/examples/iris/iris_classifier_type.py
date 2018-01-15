@@ -18,6 +18,10 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
 
 
 def main():
+    from time import time
+
+    t0 = time()
+
     # Build FIS from Fig 3.9 of Carlos Peña's book
     lv_sl = ThreePointsLV(name="SL", p1=4.65, p2=4.65, p3=5.81)
     lv_sw = ThreePointsLV(name="SW", p1=2.68, p2=3.74, p3=4.61)
@@ -100,6 +104,8 @@ def main():
             counter += 1
         return counter
 
+    yolo_preds = []
+
     n_correct_pred = 0
     for idx, sample in enumerate(iris_data):
         predicted_out = fis.predict({
@@ -111,6 +117,15 @@ def main():
         # print("pred out", predicted_out)
 
         preds = sorted(predicted_out.items(), key=lambda p: p[1], reverse=True)
+        print(preds)
+
+        # setosa, versi, virgi
+        yoloyolo = sorted(predicted_out.items(), key=lambda p: p[0], reverse=False)
+
+        a =[yoloyolo[0][1], yoloyolo[1][1], yoloyolo[2][1]]
+        print(a)
+        print("-"*10)
+        yolo_preds.append(a)
 
         # the max pred must reach at least 0.5 to be considered as a the true
         #  predicted output
@@ -125,12 +140,16 @@ def main():
         n_correct_pred = check_prediction(predicted_out_str, expected_out_str,
                                           n_correct_pred)
 
-        print("[{}] expected {}, predicted {}".format(idx, expected_out_str,
-                                                      predicted_out_str))
+        # print("[{}] expected {}, predicted {}".format(idx, expected_out_str,
+        #                                               predicted_out_str))
+
+    print((time() - t0) * 1000, "ms")
 
     print("pred OK: {}, total pred: {}".format(n_correct_pred, len(iris_data)))
     assert n_correct_pred == 149, "The book says this FIS must predict " \
                                   "correctly 149 cases "
+
+    np.savetxt("/tmp/pyfuge_original.csv", np.array(yolo_preds), delimiter=";")
 
 
 if __name__ == '__main__':
