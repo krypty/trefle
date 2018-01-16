@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     t0 = time()
     predict(ind=individual,
-            dataset=observations,
+            observations=observations,
             n_rules=N_RULES,
             max_vars_per_rule=MAX_VARS_PER_RULE,
             n_labels=N_LABELS,

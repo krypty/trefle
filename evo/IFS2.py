@@ -64,7 +64,8 @@ class IFSUtils:
         return np.where(evo_cons >= 0.5, 1, 0)
 
 
-def predict(ind, dataset, n_rules, max_vars_per_rule, n_labels, n_consequents,
+def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
+            n_consequents,
             default_rule_cons, vars_range_getter, labels_weights=None,
             dc_idx=-1):
     """
@@ -82,7 +83,7 @@ def predict(ind, dataset, n_rules, max_vars_per_rule, n_labels, n_consequents,
     len(ind) = ((n_labels-1) * max_vars_per_rule) * n_rules
     + max_vars_per_rule * n_rules + n_consequents * n_rules
 
-    :param dataset: a NxM np.array N=n_observations, M=n_vars
+    :param observations: a NxM np.array N=n_observations, M=n_vars
     :param n_rules:
     :param max_vars_per_rule: maximum of variables per rule. Must be <= n_vars
     :param n_labels: number of linguistic labels (e.g. LOW, MEDIUM, HIGH,
@@ -106,6 +107,7 @@ def predict(ind, dataset, n_rules, max_vars_per_rule, n_labels, n_consequents,
     """
     n_obs, n_vars = observations.shape
 
+    # TODO: extract it to caller
     if labels_weights is None:
         labels_weights = np.ones(n_labels)
 
@@ -153,7 +155,7 @@ def predict(ind, dataset, n_rules, max_vars_per_rule, n_labels, n_consequents,
 
     # PREDICT FOR EACH OBSERVATION IN DATASET
     defuzzified_outputs = np.full((n_obs, n_consequents), np.nan)
-    for obs_i, obs in enumerate(dataset):
+    for obs_i, obs in enumerate(observations):
         # FUZZIFY INPUTS
         mf_values_eye = np.eye(n_labels)
 
@@ -192,6 +194,7 @@ def predict(ind, dataset, n_rules, max_vars_per_rule, n_labels, n_consequents,
         # print("lala")
         # print(ifs_cons.shape)
         # print("def")
+        # reshape because np.append expects same shape
         default_rule_cons = default_rule_cons.reshape(1, -1)
         # print(default_rule_cons.shape)
         ifs_cons = np.append(ifs_cons, default_rule_cons, axis=0)
@@ -267,11 +270,12 @@ if __name__ == '__main__':
 
     from time import time
 
+    print("len ind", len(ind))
     t0 = time()
 
     predicted_outputs = predict(
         ind=ind,
-        dataset=observations,
+        observations=observations,
         n_rules=3,
         max_vars_per_rule=4,
         n_labels=len(labels),

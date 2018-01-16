@@ -1,6 +1,7 @@
 from abc import ABCMeta
 
 import numpy as np
+from profilehooks import profile
 
 
 def XXXDataset2PFDataset(orig_dataset):
@@ -63,6 +64,9 @@ class FitnessEvaluator(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    def eval_fitness(self, y_pred, dataset: PFDataset):
+        raise NotImplementedError()
+
 
 class Ind2IFS(metaclass=ABCMeta):
     def __init__(self):
@@ -77,6 +81,9 @@ class Ind2IFS(metaclass=ABCMeta):
         :param ind: an individual
         :return: a IFS
         """
+        raise NotImplementedError()
+
+    def predict(self, ind):
         raise NotImplementedError()
 
 
@@ -114,6 +121,7 @@ class SimpleEAExperiment(Experiment):
     algorithm) with DEAP library.
     """
 
+    @profile(sort="tottime", filename="/tmp/yolo.profile")
     def __init__(self, dataset: PFDataset, ind2ifs: Ind2IFS,
                  fitevaluator: FitnessEvaluator, **kwargs):
         super(SimpleEAExperiment, self).__init__(dataset, ind2ifs, fitevaluator,
@@ -153,8 +161,11 @@ class SimpleEAExperiment(Experiment):
                          toolbox.individual)
 
         def eval_ind(ind):
-            ifs = self._ind2ifs.convert(ind)
-            fitness = self._fiteval.eval(ifs, self._dataset)
+            # ifs = self._ind2ifs.convert(ind)
+            # fitness = self._fiteval.eval(ifs, self._dataset)
+
+            y_preds = self._ind2ifs.predict(ind)
+            fitness = self._fiteval.eval_fitness(y_preds, self._dataset)
             return [fitness]
 
         toolbox.register("evaluate", eval_ind)
@@ -172,14 +183,18 @@ class SimpleEAExperiment(Experiment):
         N_POP = self._kwargs.get("N_POP") or 100
         population = toolbox.population(n=N_POP)
 
-        NGEN = self._kwargs.get("GEN") or 10
+        NGEN = self._kwargs.get("N_GEN") or 10
 
         hof = tools.HallOfFame(self._kwargs.get("HOF") or 2)
 
         algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.1, ngen=NGEN,
                             halloffame=hof,
                             stats=stats)
-        topN = tools.selBest(population, k=3)
+        top_n = tools.selBest(population, k=3)
+
+        print("top_n")
+        for tn in top_n:
+            print(tn)
 
 
 class CoCoExperiment(Experiment):
