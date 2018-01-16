@@ -1,5 +1,4 @@
 from functools import lru_cache
-from functools import lru_cache
 from typing import List
 
 import numpy as np
@@ -206,7 +205,7 @@ def main():
 
         return error + (-0.001 * vars_per_rule)
 
-    @profile(sort="tottime")
+    # @profile(sort="tottime")
     def evaluate_ind(ind):
         fis = _create_fis(ind)
         vars_per_rule = sum([len(r.antecedents) for r in fis.rules])
@@ -311,30 +310,30 @@ def main():
             print("---------")
             print("---------")
 
-    view_top_n_fis(iris_dataset, topN)
-
-    # Test best FIS
-    for idx, ind in enumerate(topN):
-        fis = _create_fis(ind)
-
-        pred_test = predict(fis, X, y)
-
-        n_good_preds = len([p for p in pred_test if p >= 0.5])
-
-        print("[{}] good preds {}/{} ({:.3f})".format(
-            idx, n_good_preds, len(y), n_good_preds / float(len(y))))
+    # view_top_n_fis(iris_dataset, topN)
+    #
+    # # Test best FIS
+    # for idx, ind in enumerate(topN):
+    #     fis = _create_fis(ind)
+    #
+    #     pred_test = predict(fis, X, y)
+    #
+    #     n_good_preds = len([p for p in pred_test if p >= 0.5])
+    #
+    #     print("[{}] good preds {}/{} ({:.3f})".format(
+    #         idx, n_good_preds, len(y), n_good_preds / float(len(y))))
 
 
 if __name__ == '__main__':
-    # from time import time
+    from time import time
     # from datetime import datetime
     #
     # print(str(datetime.now()))
-    # t0 = time()
-    # tick = lambda: print((time() - t0) * 1000)
+    t0 = time()
+    tick = lambda: print((time() - t0) * 1000)
     #
-    # main()
-    # tick()
+    main()
+    tick()
     # print(str(datetime.now()))
 
-    main()
+    # main()

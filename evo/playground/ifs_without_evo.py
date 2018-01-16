@@ -66,7 +66,7 @@ class IFSUtils:
 
 def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
             n_consequents,
-            default_rule_cons, vars_range_getter, labels_weights=None,
+            default_rule_cons, vars_range_getter, labels_weights,
             dc_idx=-1):
     """
     Assumptions:
@@ -106,10 +106,6 @@ def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
     :return: an array of defuzzified outputs (i.e. non-thresholded outputs)
     """
     n_obs, n_vars = observations.shape
-
-    # TODO: extract it to caller
-    if labels_weights is None:
-        labels_weights = np.ones(n_labels)
 
     # n_labels-1 because we don't generate a MF for DC label
     mfs_idx_len = (n_labels - 1) * max_vars_per_rule
@@ -273,16 +269,18 @@ if __name__ == '__main__':
     print("len ind", len(ind))
     t0 = time()
 
+    n_labels = len(labels)
+
     predicted_outputs = predict(
         ind=ind,
         observations=observations,
         n_rules=3,
         max_vars_per_rule=4,
-        n_labels=len(labels),
+        n_labels=n_labels,
         n_consequents=3,
         default_rule_cons=default_rule_cons,
         vars_range_getter=vars_range_getter,
-        labels_weights=None,
+        labels_weights=np.ones(n_labels),
         dc_idx=-1
     )
 

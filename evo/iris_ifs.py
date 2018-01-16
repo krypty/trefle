@@ -1,6 +1,6 @@
 import numpy as np
 
-from evo import IFS2, IFS
+from evo import IFS2
 from evo.IFS2 import IFSUtils
 from evo.dataset.pf_dataset import PFDataset
 from evo.experiment.simple_experiment import SimpleEAExperiment
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         def _compute_metric(y_pred, y_true):
             return -((y_pred - y_true) ** 2).mean(axis=None)
 
-        def eval(self, ifs: IFS, dataset: PFDataset):
+        def eval(self, ifs, dataset: PFDataset):
             pass
 
         def eval_fitness(self, y_preds, dataset: PFDataset):
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                 n_consequents=self.n_consequents,
                 default_rule_cons=self.default_rule,
                 vars_range_getter=self._vars_range_getter,
-                labels_weights=None,
+                labels_weights=np.ones(self.n_labels),
                 dc_idx=-1
             )
 
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         n_rules=3,
         n_max_var_per_rule=4,
         mf_label_names=["LOW", "MEDIUM", "HIGH", "DC"],
-        default_rule_output=[0, 0, 1],  # setosa, versicolor, virginica
+        default_rule_output=[0, 0, 1],  # [setosa, versicolor, virginica]
         dataset=ds_train,
     )
 
@@ -118,8 +118,8 @@ if __name__ == '__main__':
         dataset=ds_train,
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
-        N_POP=100,
-        N_GEN=10
+        N_POP=300,
+        N_GEN=5
     )
 
     ##
