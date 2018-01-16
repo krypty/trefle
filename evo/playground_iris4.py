@@ -1,9 +1,11 @@
 import numpy as np
 
-from evo import IFS2
-from evo.Evo import SimpleEAExperiment, PFDataset, FitnessEvaluator, IFS, \
-    Ind2IFS
+from evo import IFS2, IFS
 from evo.IFS2 import IFSUtils
+from evo.dataset.pf_dataset import PFDataset
+from evo.experiment.simple_experiment import SimpleEAExperiment
+from evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
+from evo.helpers.ind_2_ifs import Ind2IFS
 
 
 def Iris2PFDataset():

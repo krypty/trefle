@@ -36,10 +36,10 @@ class IFSUtils:
         return ifs_ants.astype(np.int)
 
     @staticmethod
-    def create_vars_range_getter(dataset):
+    def create_vars_range_getter(observations):
         @lru_cache(maxsize=None)
         def _vars_getter(vi):
-            x = dataset[:, vi]
+            x = observations[:, vi]
             return x.ptp(), x.min()
 
         return _vars_getter

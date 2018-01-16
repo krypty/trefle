@@ -1,6 +1,5 @@
 from evo.IFS2 import predict, IFSUtils
 
-
 # class IFS:
 #     def __init__(self):
 #         self._rules = []
@@ -87,7 +86,7 @@ if __name__ == '__main__':
     # DC, but we should let the user decide. later...
     # print("DC_IDX", DC_IDX)
 
-    vars_range_func = IFSUtils.create_vars_range_getter(dataset=observations)
+    vars_range_func = IFSUtils.create_vars_range_getter(observations)
 
     from time import sleep, time
 
@@ -136,7 +135,8 @@ if __name__ == '__main__':
     #  evo_mfs2ifs_mfs(evo_mfs, vars_range_getter)
 
     # vars_range_func should be declared outside the evolution process
-    vars_range_func = IFSUtils.create_vars_range_getter(dataset=observations)
+    vars_range_func = IFSUtils.create_vars_range_getter(
+        observations=observations)
     in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, vars_range_func)
 
     print("in_values")
