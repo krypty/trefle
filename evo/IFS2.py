@@ -7,15 +7,25 @@ class IFSUtils:
     @staticmethod
     def unitfloat2idx(flt, weights):
         """
+        Returns a weighted index between 0 and len(weights)-1. For example,
+        flt=0.5 and weights=[1,1,1,1,1] will create a array A=[0 1 2 3 4] and
+        will returns 2 because the index at 0.5*len(A) is 2.
+        This function also works with unequals weights such as [1,1,1,4].
+        The latter will privilege the last index by 4 times.
+        Indeed weights will become [0 1 2 3 3 3 3]. This will be particularly
+        useful to give DC label a higher probability to be chosen.
 
         :param flt: a float number in [0, 1]
         :param weights: an array of weights e.g. [1 1 0.5] or [2 1 1 4]
-        :return:
+        :return: the weighted index
         """
         len_weight = len(weights)
         weights_norm = (weights / weights.min()).astype(np.int)
         indices = np.repeat(np.arange(len_weight), weights_norm)
-        return indices[int(round(flt * (len_weight - 1)))]
+
+        idx = flt * len(indices)
+        safe_idx = max(0, min(len(indices) - 1, idx))
+        return indices[int(safe_idx)]
 
     @staticmethod
     def evo_ants2ifs_ants(evo_ants, weights):
@@ -127,13 +137,13 @@ def predict(ind, dataset, n_rules, max_vars_per_rule, n_labels, n_consequents,
 
     # CONVERT EVOLUTION MFS TO IFS MFS
     in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, vars_range_getter)
-    # TODO remove me
-    in_values = np.array([
-        [4.65, 4.65, 5.81],  # SL
-        [2.68, 3.74, 4.61],  # SW
-        [4.68, 5.26, 6.03],  # PL
-        [0.39, 1.16, 2.03]  # PW
-    ])
+    # # TODO remove me
+    # in_values = np.array([
+    #     [4.65, 4.65, 5.81],  # SL
+    #     [2.68, 3.74, 4.61],  # SW
+    #     [4.68, 5.26, 6.03],  # PL
+    #     [0.39, 1.16, 2.03]  # PW
+    # ])
 
     # CONVERT EVOLUTION ANTS TO IFS ANTS
     ifs_ants_idx = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
@@ -225,8 +235,8 @@ if __name__ == '__main__':
     # print("obs", observations)
 
     vars_range_getter = IFSUtils.create_vars_range_getter(observations)
-    for i in range(observations.shape[1]):
-        print(vars_range_getter(i))
+    # for i in range(observations.shape[1]):
+    #     print(vars_range_getter(i))
 
     ind = []
 
@@ -237,7 +247,7 @@ if __name__ == '__main__':
     ind.extend([0, 0, 0])  # v3 PW
 
     a = np.array(ind)
-    print(a.reshape(4, -1))
+    # print(a.reshape(4, -1))
 
     # ants
     dc_value = 1.0
@@ -274,6 +284,6 @@ if __name__ == '__main__':
 
     print((time() - t0) * 1000, "ms")
 
-    print(predicted_outputs[0])
+    # print(predicted_outputs[0])
 
     np.savetxt("/tmp/pyfuge.csv", predicted_outputs, delimiter=",")

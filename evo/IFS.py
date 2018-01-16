@@ -58,58 +58,6 @@ from evo.IFS2 import predict, IFSUtils
 #         return np.eye(size)
 
 
-def test_evo_ants2ifs_ants():
-    evo_ants = np.array([
-        [0.0, 1.0],  # r0
-        [0.5, 0.5],  # r1
-        [0.25, 0.75],  # r2
-    ])
-
-    exp_arr = np.array([
-        [0, 2],
-        [2, 2],
-        [1, 2],
-    ])
-
-    labels_names = ["L", "H", "DC"]
-    labels_weights = np.ones(len(labels_names))
-
-    ifs_ants = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
-
-    try:
-        assert np.allclose(exp_arr, ifs_ants)
-    except AssertionError:
-        print("ERROR !")
-        print(exp_arr)
-        print("^exp---out--v")
-        print(ifs_ants)
-
-
-def test_evo_ants2ifs_ants_2():
-    evo_ants = np.array([
-        [0.0, 1.0],  # r0
-        [0.5, 0.5],  # r1
-        [0.25, 0.75],  # r2
-    ])
-
-    exp_arr = np.array([
-        [0, 3],
-        [2, 2],
-        [1, 2],
-    ])
-
-    labels_weights = np.array([0.5, 0.5, 0.5, 2])
-    ifs_ants = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
-
-    try:
-        assert np.allclose(exp_arr, ifs_ants)
-    except AssertionError:
-        print("ERROR !")
-        print(exp_arr)
-        print("^exp---out--v")
-        print(ifs_ants)
-
-
 if __name__ == '__main__':
     import numpy as np
 
