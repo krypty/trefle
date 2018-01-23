@@ -1,4 +1,6 @@
+attrs==17.4.0
 bleach==2.1.2
+click==6.7
 cycler==0.10.0
 Cython==0.27.3
 deap==1.2.2
@@ -27,13 +29,19 @@ notebook==5.2.2
 numpy==1.13.3
 pandas==0.22.0
 pandocfilters==1.4.2
+parso==0.1.1
 pexpect==4.3.1
 pickleshare==0.7.4
 pipdeptree==0.10.1
+pluggy==0.6.0
+profilehooks==1.10.0
 prompt-toolkit==1.0.15
 ptyprocess==0.5.2
+pur==4.0.3
+py==1.5.2
 Pygments==2.2.0
 pyparsing==2.2.0
+pytest==3.3.2
 python-dateutil==2.6.1
 pytz==2017.3
 pyzmq==16.0.3
