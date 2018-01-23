@@ -39,7 +39,7 @@ def main():
         # return n_true,
 
     def yolo(individual, indpb):
-        return (individual, )
+        return (individual,)
 
         # FIXME: wrong doctring
         """Flip the value of the attributes of the input individual and return the
@@ -92,7 +92,7 @@ def main():
     algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.1, ngen=NGEN,
                         halloffame=hof,
                         )
-                        #stats=stats)
+    # stats=stats)
 
     # for gen in range(NGEN):
     #     offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)

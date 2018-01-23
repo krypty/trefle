@@ -269,7 +269,7 @@ def main():
     """
 
     algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.1, ngen=NGEN,
-                        halloffame=hof,
+                        # halloffame=hof,
                         stats=stats)
     topN = tools.selBest(population, k=3)
 

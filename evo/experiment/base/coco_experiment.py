@@ -1,4 +1,4 @@
-from evo.experiment.experiment import Experiment
+from evo.experiment.base.experiment import Experiment
 
 
 class CoCoExperiment(Experiment):

@@ -1,8 +1,7 @@
 import numpy as np
-from profilehooks import profile
 
 from evo.dataset.pf_dataset import PFDataset
-from evo.experiment.experiment import Experiment
+from evo.experiment.base.experiment import Experiment
 from evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
 from evo.helpers.ind_2_ifs import Ind2IFS
 
@@ -13,7 +12,7 @@ class SimpleEAExperiment(Experiment):
     algorithm) with DEAP library.
     """
 
-    @profile(sort="tottime", filename="/tmp/yolo.profile")
+    # @profile(sort="tottime", filename="/tmp/yolo.profile")
     def __init__(self, dataset: PFDataset, ind2ifs: Ind2IFS,
                  fitevaluator: FitnessEvaluator, **kwargs):
         super(SimpleEAExperiment, self).__init__(dataset, ind2ifs, fitevaluator,
@@ -73,6 +72,6 @@ class SimpleEAExperiment(Experiment):
                             stats=stats)
         top_n = tools.selBest(population, k=3)
 
-        print("top_n")
-        for tn in top_n:
-            print(tn)
+        # print("top_n")
+        # for tn in top_n:
+        #     print(tn)
