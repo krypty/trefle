@@ -77,10 +77,55 @@ def run_without_evo():
 
     print((time() - t0) * 1000, "ms")
 
-    # print(predicted_outputs[0])
+    print(predicted_outputs[0])
 
     # np.savetxt("/tmp/pyfuge.csv", predicted_outputs, delimiter=",")
 
 
+def run_with_simple_evo():
+    from time import time
+    from evo.playground.iris_ifs import Iris2PFDataset
+    from evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
+    from evo.experiment.base.simple_experiment import SimpleEAExperiment
+    from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
+        PyFUGEFitnessEvaluator
+
+    # from datetime import datetime
+    #
+    # print(str(datetime.now()))
+    t0 = time()
+    tick = lambda: print((time() - t0) * 1000)
+
+    ##
+    ## TRAINING PHASE
+    ##
+    ds_train, ds_test = Iris2PFDataset(
+        fname=r"../../fuzzy_systems/examples/iris/iris.data")
+
+    pyfuge_ind_2_ifs = PyFUGESimpleEAInd2IFS(
+        n_vars=ds_train.N_VARS,
+        n_rules=3,
+        n_max_var_per_rule=4,
+        mf_label_names=["LOW", "MEDIUM", "HIGH", "DC"],
+        default_rule_output=[0, 0, 1],  # [setosa, versicolor, virginica]
+        dataset=ds_train,
+    )
+
+    SimpleEAExperiment(
+        dataset=ds_train,
+        ind2ifs=pyfuge_ind_2_ifs,
+        fitevaluator=PyFUGEFitnessEvaluator(),
+        N_POP=300,
+        N_GEN=5
+    )
+
+    ##
+    ## VALIDATION PHASE
+    ##
+
+    tick()
+
+
 if __name__ == '__main__':
-    run_without_evo()
+    # run_without_evo()
+    run_with_simple_evo()
