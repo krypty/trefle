@@ -5,12 +5,11 @@ from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
     PyFUGEFitnessEvaluator
 
 
-def Iris2PFDataset():
+def Iris2PFDataset(fname):
     import pandas as pd
     from sklearn.preprocessing import LabelEncoder
     from sklearn.model_selection import train_test_split
 
-    fname = r"../fuzzy_systems/examples/iris/iris.data"
     iris_dataset = pd.read_csv(fname, sep=",",
                                names=["SL", "SW", "PL", "PW", "OUT"])
 
@@ -47,7 +46,8 @@ if __name__ == '__main__':
     ##
     ## TRAINING PHASE
     ##
-    ds_train, ds_test = Iris2PFDataset()
+    ds_train, ds_test = Iris2PFDataset(
+        fname=r"../fuzzy_systems/examples/iris/iris.data")
 
     pyfuge_ind_2_ifs = PyFUGESimpleEAInd2IFS(
         n_vars=ds_train.N_VARS,
