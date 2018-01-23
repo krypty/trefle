@@ -1,6 +1,6 @@
 import sys
 from itertools import chain
-from typing import Callable, Tuple, List
+from typing import List
 
 from fuzzy_systems.core.fis.fis import FIS
 from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
@@ -23,7 +23,7 @@ def are_all_consequents_singleton(rules: List[FuzzyRule]):
 
 
 class SingletonFIS(FIS):
-    def __init__(self, aggr_func: Callable, defuzz_func: Tuple[Callable, str],
+    def __init__(self,
                  rules: List[FuzzyRule], default_rule: DefaultFuzzyRule = None):
         """
         Create a singleton fuzzy inference system. This class is not optimized
@@ -31,8 +31,6 @@ class SingletonFIS(FIS):
         class can be used however for learning purposes or to see the error
         compared to a Mamdani-like FIS.
 
-        :param aggr_func: see FIS docstring
-        :param defuzz_func: see FIS docstring
         :param rules: see FIS docstring
         :param default_rule: see FIS docstring
         """
@@ -40,8 +38,9 @@ class SingletonFIS(FIS):
         assert are_all_consequents_singleton(rules), \
             "All consequents must be singleton when using a SingletonFIS"
 
-        super(SingletonFIS, self).__init__(aggr_func, defuzz_func, rules,
-                                           default_rule)
+        super(SingletonFIS, self).__init__(aggr_func=None, defuzz_func=None,
+                                           rules=rules,
+                                           default_rule=default_rule)
 
     def _aggregate(self, rules_implicated_cons):
         aggregated_consequents = {}

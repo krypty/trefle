@@ -1,6 +1,4 @@
-import numpy as np
-
-from fuzzy_systems.core.fis.fis import OR_max, COA_func, MIN
+from fuzzy_systems.core.fis.fis import OR_max, MIN
 from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
 from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
@@ -69,11 +67,7 @@ def tip_problem():
         impl_func=MIN
     )
 
-    fis = SingletonFIS(
-        aggr_func=np.max,
-        defuzz_func=COA_func,
-        rules=[r1, r2, r3]
-    )
+    fis = SingletonFIS(rules=[r1, r2, r3])
 
     input_values = {'quality': 3, 'service': 3}
     predicted_value = fis.predict(input_values)["tip"]

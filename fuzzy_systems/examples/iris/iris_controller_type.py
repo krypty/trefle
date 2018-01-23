@@ -1,6 +1,6 @@
 import numpy as np
 
-from fuzzy_systems.core.fis.fis import MIN, AND_min, COA_func
+from fuzzy_systems.core.fis.fis import MIN, AND_min
 from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
 from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
@@ -71,12 +71,7 @@ def main():
         impl_func=MIN
     )
 
-    fis = SingletonFIS(
-        rules=rules,
-        default_rule=dr,
-        aggr_func=AND_min,
-        defuzz_func=COA_func,
-    )
+    fis = SingletonFIS(rules=rules, default_rule=dr)
 
     # Read Iris dataset
     iris_data = np.loadtxt('iris.data', delimiter=",",

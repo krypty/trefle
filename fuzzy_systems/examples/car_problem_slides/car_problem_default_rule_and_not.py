@@ -1,6 +1,4 @@
-import numpy as np
-
-from fuzzy_systems.core.fis.fis import COA_func, AND_min, MIN
+from fuzzy_systems.core.fis.fis import AND_min, MIN
 from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
 from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
@@ -46,11 +44,7 @@ def car_accel_problem():
     default_rule = DefaultFuzzyRule(cons=[Consequent(car_action, 'nothing')],
                                     impl_func=MIN)
 
-    fis = SingletonFIS(rules=car_rules,
-                       default_rule=default_rule,
-                       aggr_func=np.max,
-                       defuzz_func=COA_func)
-
+    fis = SingletonFIS(rules=car_rules, default_rule=default_rule)
     input_values = {'speed': 1, 'speed_change': 0.22}
     fis.predict(input_values)
 

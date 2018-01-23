@@ -182,8 +182,6 @@ def main():
         fis = SingletonFIS(
             rules=rules,
             default_rule=dr,
-            aggr_func=AND_min,
-            defuzz_func=COA_func,
         )
 
         return fis

@@ -57,9 +57,7 @@ def car_accel_problem():
                                     impl_func=MIN)
 
     fis = SingletonFIS(rules=car_rules,
-                       default_rule=default_rule,
-                       aggr_func=np.max,
-                       defuzz_func=COA_func)
+                       default_rule=default_rule)
 
     input_values = {'speed': 1, 'speed_change': 0.22}
     fis.predict(input_values)
