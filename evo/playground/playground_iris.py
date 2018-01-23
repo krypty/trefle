@@ -22,6 +22,7 @@ def main():
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     def eval_one_max(individual):
+        return 0,
         # print("".join(individual), target_solution)
         # a = [1.0 / (1.0 + abs(ord(t_c) - ord(c))) for c, t_c in
         #      zip("".join(individual), target_solution)]
@@ -38,6 +39,8 @@ def main():
         # return n_true,
 
     def yolo(individual, indpb):
+        return (individual, )
+
         # FIXME: wrong doctring
         """Flip the value of the attributes of the input individual and return the
         mutant. The *individual* is expected to be a :term:`sequence` and the values of the
@@ -63,11 +66,11 @@ def main():
     toolbox.register("mutate", yolo, indpb=0.10)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", np.mean)
-    stats.register("std", np.std)
-    stats.register("min", np.min)
-    stats.register("max", np.max)
+    # stats = tools.Statistics(lambda ind: ind.fitness.values)
+    # stats.register("avg", np.mean)
+    # stats.register("std", np.std)
+    # stats.register("min", np.min)
+    # stats.register("max", np.max)
 
     population = toolbox.population(n=300)
 
@@ -88,7 +91,8 @@ def main():
 
     algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.1, ngen=NGEN,
                         halloffame=hof,
-                        stats=stats)
+                        )
+                        #stats=stats)
 
     # for gen in range(NGEN):
     #     offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
@@ -98,8 +102,8 @@ def main():
     #     population = toolbox.select(offspring, k=len(population))
     top10 = tools.selBest(population, k=50)
 
-    for t in top10:
-        print("".join(t))
+    # for t in top10:
+    #     print("".join(t))
 
 
 if __name__ == '__main__':

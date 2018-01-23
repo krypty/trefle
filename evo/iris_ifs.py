@@ -1,11 +1,10 @@
 import numpy as np
 
-from evo import IFS2
-from evo.IFS2 import IFSUtils
 from evo.dataset.pf_dataset import PFDataset
 from evo.experiment.simple_experiment import SimpleEAExperiment
 from evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
 from evo.helpers.ind_2_ifs import Ind2IFS
+from evo.playground.ifs_without_evo import IFSUtils, predict
 
 
 def Iris2PFDataset():
@@ -64,8 +63,10 @@ if __name__ == '__main__':
             self.n_consequents = len(default_rule_output)
             self.default_rule = np.array(default_rule_output)
             self.dataset = dataset
-            self._vars_range_getter = IFSUtils.create_vars_range_getter(
-                dataset.X)
+
+            self.vars_range = np.empty((dataset.shape[1], 2))
+            self.vars_range[:, 0] = self.dataset.ptp(axis=0)
+            self.vars_range[:, 1] = self.dataset.min(axis=0)
 
             super(PyFUGESimpleEAInd2IFS, self).__init__()
 
@@ -84,7 +85,7 @@ if __name__ == '__main__':
             pass
 
         def predict(self, ind):
-            predicted_outputs = IFS2.predict(
+            predicted_outputs = predict(
                 ind=ind,
                 observations=self.dataset.X,
                 n_rules=self.n_rules,
@@ -92,7 +93,7 @@ if __name__ == '__main__':
                 n_labels=self.n_labels,
                 n_consequents=self.n_consequents,
                 default_rule_cons=self.default_rule,
-                vars_range_getter=self._vars_range_getter,
+                vars_ranges=self.vars_range,
                 labels_weights=np.ones(self.n_labels),
                 dc_idx=-1
             )

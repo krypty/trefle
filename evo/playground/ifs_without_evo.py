@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 import numpy as np
 
 
@@ -36,22 +34,12 @@ class IFSUtils:
         return ifs_ants.astype(np.int)
 
     @staticmethod
-    def create_vars_range_getter(observations):
-        @lru_cache(maxsize=None)
-        def _vars_getter(vi):
-            x = observations[:, vi]
-            return x.ptp(), x.min()
+    def evo_mfs2ifs_mfs(evo_mfs, vars_range):
+        for i in range(evo_mfs.shape[0] - 1):
+            evo_mfs[:, i] *= vars_range[:, 0]
+            evo_mfs[:, i] += vars_range[:, 1]
 
-        return _vars_getter
-
-    @staticmethod
-    def evo_mfs2ifs_mfs(evo_mfs, vars_range_getter):
-        ifs_mfs = np.empty_like(evo_mfs)
-        for i in range(ifs_mfs.shape[0]):
-            vptp, vmin = vars_range_getter(i)
-            ifs_mfs[i] = evo_mfs[i] * vptp + vmin
-
-        return ifs_mfs
+        return evo_mfs
 
     @staticmethod
     def evo_cons2ifs_cons(evo_cons):
@@ -65,8 +53,8 @@ class IFSUtils:
 
 
 def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
-            n_consequents,
-            default_rule_cons, vars_range_getter, labels_weights,
+            n_consequents, default_rule_cons, vars_ranges,
+            labels_weights,
             dc_idx=-1):
     """
     Assumptions:
@@ -94,9 +82,9 @@ def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
     default rule. E.g. [0, 0, 1] if there is 3 consequents. Each consequent must
     be either 0 or 1 since IFS is a classifier type singleton
     fuzzy system
-    :param vars_range_getter: a function that, given a variable index, returns
-    the data range of the variable. You should use the helper function
-    IFSUtils.create_vars_range_getter(dataset) to get this done.
+    :param vars_ranges: a Nx2 np.array where each row contains the ith variable
+    ptp (range) and minimum. It will be used to scale a float in [0, 1].
+    Example, [[v0_ptp, v0_min], [v1_ptp, v1_min]].
     :param labels_weights: an array of length n_labels. Set the labels weights.
     For example, [1, 1, 4] will set the chance to set an antecedent to
     don't care (DC) label 4 times more often (on average) than the others
@@ -120,7 +108,8 @@ def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
     evo_cons = ind[ants_idx_end:]
 
     # print("mfs")
-    evo_mfs = np.array(evo_mfs).reshape(max_vars_per_rule, n_labels - 1)
+    evo_mfs = np.array(evo_mfs, dtype=np.float).reshape(max_vars_per_rule,
+                                                        n_labels - 1)
     # print(evo_mfs)
 
     # print("ants")
@@ -130,11 +119,13 @@ def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
     # print("cons")
     # print(n_rules, n_consequents)
     # print(evo_cons)
-    evo_cons = np.array(evo_cons).reshape(n_rules, n_consequents)
+    evo_cons = np.array(evo_cons, dtype=np.float).reshape(n_rules,
+                                                          n_consequents)
     # print(evo_cons)
 
     # CONVERT EVOLUTION MFS TO IFS MFS
-    in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, vars_range_getter)
+    # in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, vars_range_getter)
+    in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, vars_ranges)
     # # TODO remove me
     # in_values = np.array([
     #     [4.65, 4.65, 5.81],  # SL
@@ -150,26 +141,32 @@ def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
     assert in_values.shape[1] == n_labels - 1  # drop DC label
 
     # PREDICT FOR EACH OBSERVATION IN DATASET
+    mf_values_eye = np.eye(n_labels)
+
+    # set DC row to 1. This will neutralize the effect of AND_min
+    mf_values_eye[dc_idx] = 1
+
+    # TODO make sure -1 is correct index (dc_idx ?)
+    mf_values_eye = mf_values_eye[:, :-1]  # shape = (N_LABELS, N_LABELS-1)
+
     defuzzified_outputs = np.full((n_obs, n_consequents), np.nan)
     for obs_i, obs in enumerate(observations):
         # FUZZIFY INPUTS
-        mf_values_eye = np.eye(n_labels)
-
-        # set DC row to 1. This will neutralize the effect of AND_min
-        mf_values_eye[dc_idx] = 1
-        mf_values_eye = mf_values_eye[:, :-1]  # shape = (N_LABELS, N_LABELS-1)
-
-        fuz_ants = np.zeros_like(ifs_ants_idx).astype(np.float)
+        fuz_ants = np.empty_like(ifs_ants_idx, dtype=np.float)
         for ri in range(n_rules):
+            ants_ri = ifs_ants_idx[ri]
+
             # ignore rule with all antecedents set to DC
-            if np.all(ifs_ants_idx[ri] == dc_idx):
+            if np.all(ants_ri == dc_idx):
                 print("rule {} ignored".format(ri))
                 continue
 
+            # fuz_ants[ri] = multiInterp(obs, in_values, mf_values_eye[ants_ri])
             for vi in range(max_vars_per_rule):
-                _mf_values = mf_values_eye[ifs_ants_idx[ri][vi]]
-                fuz_ants[ri, vi] = np.interp(obs[vi], in_values[vi],
-                                             _mf_values)
+                _mf_values = mf_values_eye[ants_ri[vi]]
+                # fuz_ants[ri, vi] = np.interp(obs[vi], in_values[vi], _mf_values) #FIXME; np.interp(obs[vi] won't work if max_var_per_rule != n_rules
+                fuz_ants[ri, vi] = np.interp(obs[ants_ri[vi]], in_values[vi],
+                                             _mf_values)  # FIXME; np.interp(obs[vi] won't work if max_var_per_rule != n_rules
 
         # RULES ACTIVATION
         rules_act = np.min(fuz_ants, axis=1)
@@ -181,19 +178,14 @@ def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
         # IMPLICATION
         ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
 
-        # TODO: remove me
-        assert evo_cons.shape == ifs_cons.shape
-        assert evo_cons.shape[0] == ifs_ants_idx.shape[0], \
-            "#rules != #consequents"
-
         # add default rule consequent to consequents
         # print("lala")
         # print(ifs_cons.shape)
         # print("def")
         # reshape because np.append expects same shape
-        default_rule_cons = default_rule_cons.reshape(1, -1)
+        # default_rule_cons = default_rule_cons.reshape(1, -1)
         # print(default_rule_cons.shape)
-        ifs_cons = np.append(ifs_cons, default_rule_cons, axis=0)
+        ifs_cons = np.append(ifs_cons, default_rule_cons[np.newaxis, :], axis=0)
 
         # AGGREGATION and DEFUZZIFICATION
         # print("lalala")
@@ -212,7 +204,7 @@ def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
     return defuzzified_outputs
 
 
-if __name__ == '__main__':
+def main():
     # inputs: "SL", "SW", "PL", "PW"
     # outputs: setosa, versicolor, virginica
 
@@ -233,9 +225,9 @@ if __name__ == '__main__':
     observations = X
     # print("obs", observations)
 
-    vars_range_getter = IFSUtils.create_vars_range_getter(observations)
-    # for i in range(observations.shape[1]):
-    #     print(vars_range_getter(i))
+    iris_vars_range = np.empty((observations.shape[1], 2))
+    iris_vars_range[:, 0] = observations.ptp(axis=0)
+    iris_vars_range[:, 1] = observations.min(axis=0)
 
     ind = []
 
@@ -266,7 +258,7 @@ if __name__ == '__main__':
 
     from time import time
 
-    print("len ind", len(ind))
+    # print("len ind", len(ind))
     t0 = time()
 
     n_labels = len(labels)
@@ -279,7 +271,7 @@ if __name__ == '__main__':
         n_labels=n_labels,
         n_consequents=3,
         default_rule_cons=default_rule_cons,
-        vars_range_getter=vars_range_getter,
+        vars_ranges=iris_vars_range,
         labels_weights=np.ones(n_labels),
         dc_idx=-1
     )
@@ -288,4 +280,8 @@ if __name__ == '__main__':
 
     # print(predicted_outputs[0])
 
-    np.savetxt("/tmp/pyfuge.csv", predicted_outputs, delimiter=",")
+    # np.savetxt("/tmp/pyfuge.csv", predicted_outputs, delimiter=",")
+
+
+if __name__ == '__main__':
+    main()
