@@ -28,7 +28,7 @@ def Iris2PFDataset(fname):
     # print(y[0])
     y_names = le.classes_
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
     return (PFDataset(X_train, y_train, X_names, y_names),
             PFDataset(X_test, y_test, X_names, y_names))

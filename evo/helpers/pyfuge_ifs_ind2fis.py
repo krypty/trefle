@@ -106,8 +106,6 @@ def _create_ling_var(var_name, in_values_vi):
 
 def _create_rule(ant_idx_ri, cons_idx_ri, labels, ling_vars, output_vars,
                  dc_index):
-    print("ling_vars", ling_vars)
-    print("labels", labels)
     ants = [Antecedent(ling_vars[i], labels[ant]) for i, ant in
             enumerate(ant_idx_ri) if ant != dc_index]
 

@@ -8,14 +8,14 @@ class PyFUGEFitnessEvaluator(FitnessEvaluator):
 
     @staticmethod
     def _compute_metric(y_pred, y_true):
-        # return -((y_pred - y_true) ** 2).mean(axis=None)
-        y_pred_bin = np.where(y_pred >= 0.5, 1, 0)
-
-        n_good = 0
-        for row in range(y_pred.shape[0]):
-            if np.all(np.equal(y_pred_bin[row], y_true[row])):
-                n_good += 1
-        return n_good / float(y_pred.shape[0])
+        return -((y_pred - y_true) ** 2).sum(axis=None)
+        # y_pred_bin = np.where(y_pred >= 0.5, 1, 0)
+        #
+        # n_good = 0
+        # for row in range(y_pred.shape[0]):
+        #     if np.all(np.equal(y_pred_bin[row], y_true[row])):
+        #         n_good += 1
+        # return n_good / float(y_pred.shape[0])
 
     def eval(self, ifs, dataset: PFDataset):
         pass

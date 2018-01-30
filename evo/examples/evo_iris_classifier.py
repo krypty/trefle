@@ -82,6 +82,16 @@ def run_without_evo():
     # np.savetxt("/tmp/pyfuge.csv", predicted_outputs, delimiter=",")
 
 
+def _compute_accuracy(y_true, y_pred):
+    y_pred_bin = np.where(y_pred >= 0.5, 1, 0)
+
+    n_good = 0
+    for row in range(y_pred.shape[0]):
+        if np.all(np.equal(y_pred_bin[row], y_true[row])):
+            n_good += 1
+    return n_good / float(y_pred.shape[0])
+
+
 def run_with_simple_evo():
     from time import time
     from evo.playground.iris_ifs import Iris2PFDataset
@@ -127,12 +137,13 @@ def run_with_simple_evo():
         dataset=ds_train,
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
-        N_POP=300,
-        N_GEN=100
+        N_POP=400,
+        N_GEN=50
     )
 
     top_n = exp.get_top_n()
 
+    fis_li = []
     for ind in top_n:
         print("ind ({}): {}".format(ind.fitness, ind))
         fis = pyfuge_ifs_ind2fis.convert(
@@ -148,10 +159,31 @@ def run_with_simple_evo():
         fis.describe()
         FISViewer(fis).show()
 
+        fis_li.append(fis)
+
     ##
     ## VALIDATION PHASE
     ##
-    
+
+    # make sure the var_range is still set to training set. If not, we cheat
+    var_range_train = IFSUtils.compute_vars_range(ds_train.X)
+
+    for ind in top_n:
+        y_pred_test = IFSUtils.predict(
+            ind,
+            observations=ds_test.X,
+            n_rules=n_rules,
+            max_vars_per_rule=n_max_vars_per_rule,
+            n_labels=len(mf_label_names),
+            n_consequents=len(default_rule_output),
+            default_rule_cons=np.array(default_rule_output),
+            vars_ranges=var_range_train,
+            labels_weights=labels_weights,
+            dc_idx=dc_index
+        )
+
+        acc = _compute_accuracy(ds_test.y, y_pred_test)
+        print("acc ", acc)
 
     tick()
 
