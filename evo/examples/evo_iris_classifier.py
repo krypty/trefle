@@ -1,6 +1,8 @@
 import numpy as np
 
+from evo.helpers import pyfuge_ifs_ind2fis
 from evo.helpers.ifs_utils import IFSUtils
+from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def run_without_evo():
@@ -24,9 +26,7 @@ def run_without_evo():
     observations = X
     # print("obs", observations)
 
-    iris_vars_range = np.empty((observations.shape[1], 2))
-    iris_vars_range[:, 0] = observations.ptp(axis=0)
-    iris_vars_range[:, 1] = observations.min(axis=0)
+    iris_vars_range = IFSUtils.compute_vars_range(observations)
 
     ind = []
 
@@ -72,7 +72,7 @@ def run_without_evo():
         default_rule_cons=default_rule_cons,
         vars_ranges=iris_vars_range,
         labels_weights=np.ones(n_labels),
-        dc_idx=-1
+        dc_idx=n_labels - 1
     )
 
     print((time() - t0) * 1000, "ms")
@@ -90,38 +90,68 @@ def run_with_simple_evo():
     from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
         PyFUGEFitnessEvaluator
 
-    # from datetime import datetime
-    #
-    # print(str(datetime.now()))
     t0 = time()
     tick = lambda: print((time() - t0) * 1000)
 
     ##
-    ## TRAINING PHASE
+    ## LOAD DATASET
     ##
     ds_train, ds_test = Iris2PFDataset(
         fname=r"../../fuzzy_systems/examples/iris/iris.data")
 
+    ##
+    ## EXPERIMENT PARAMETERS
+    ##
+    n_vars = ds_train.N_VARS
+    n_rules = 3
+    n_max_vars_per_rule = 2
+    mf_label_names = ["LOW", "HIGH", "DC"]
+    default_rule_output = [0, 1, 0]  # [setosa, versicolor, virginica]
+    labels_weights = np.ones(len(mf_label_names))
+    dc_index = len(mf_label_names) - 1
+
+    ##
+    ## TRAINING PHASE
+    ##
     pyfuge_ind_2_ifs = PyFUGESimpleEAInd2IFS(
-        n_vars=ds_train.N_VARS,
-        n_rules=3,
-        n_max_var_per_rule=4,
-        mf_label_names=["LOW", "MEDIUM", "HIGH", "DC"],
-        default_rule_output=[0, 0, 1],  # [setosa, versicolor, virginica]
+        n_vars=n_vars,
+        n_rules=n_rules,
+        n_max_var_per_rule=n_max_vars_per_rule,
+        mf_label_names=mf_label_names,
+        default_rule_output=default_rule_output,
         dataset=ds_train,
+        labels_weights=labels_weights
     )
 
-    SimpleEAExperiment(
+    exp = SimpleEAExperiment(
         dataset=ds_train,
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=300,
-        N_GEN=5
+        N_GEN=100
     )
+
+    top_n = exp.get_top_n()
+
+    for ind in top_n:
+        print("ind ({}): {}".format(ind.fitness, ind))
+        fis = pyfuge_ifs_ind2fis.convert(
+            n_vars=n_vars,
+            ind=ind, n_rules=n_rules, n_labels=len(mf_label_names),
+            n_max_vars_per_rule=n_max_vars_per_rule,
+            vars_ranges=IFSUtils.compute_vars_range(ds_train.X),
+            labels_weights=labels_weights,
+            dc_index=dc_index, default_rule_cons=default_rule_output,
+            pretty_vars_names=ds_train.X_names,
+            pretty_outputs_names=ds_train.y_names
+        )
+        fis.describe()
+        FISViewer(fis).show()
 
     ##
     ## VALIDATION PHASE
     ##
+    
 
     tick()
 

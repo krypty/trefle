@@ -59,6 +59,7 @@ class SimpleEAExperiment(Experiment):
         stats.register("std", np.std)
         stats.register("min", np.min)
         stats.register("max", np.max)
+        # stats.register("len", len)
 
         N_POP = self._kwargs.get("N_POP") or 100
         population = toolbox.population(n=N_POP)
@@ -70,7 +71,10 @@ class SimpleEAExperiment(Experiment):
         algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.1, ngen=NGEN,
                             halloffame=hof,
                             stats=stats)
-        top_n = tools.selBest(population, k=3)
+        self._top_n = tools.selBest(population, k=3)
+
+    def get_top_n(self):
+        return self._top_n
 
         # print("top_n")
         # for tn in top_n:
