@@ -11,6 +11,9 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
         assert len(mf_label_names) == len(labels_weights), \
             "The number of labels must match the number of labels weights"
 
+        assert dataset.y.shape[1] == len(default_rule_output), \
+            "default rule output must have the same shape as dataset.y"
+
         self.n_rules = n_rules
         self.n_max_var_per_rule = n_max_var_per_rule
         self.n_labels = len(mf_label_names)
