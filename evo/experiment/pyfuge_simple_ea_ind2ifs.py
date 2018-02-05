@@ -8,6 +8,8 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
     def __init__(self, n_vars, n_rules, n_max_var_per_rule, mf_label_names,
                  default_rule_output, dataset, labels_weights):
         assert n_max_var_per_rule <= n_vars
+        assert len(mf_label_names) == len(labels_weights), \
+            "The number of labels must match the number of labels weights"
 
         self.n_rules = n_rules
         self.n_max_var_per_rule = n_max_var_per_rule
