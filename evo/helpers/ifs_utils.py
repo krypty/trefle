@@ -277,6 +277,11 @@ class IFSUtils:
         # TODO make sure -1 is correct index (dc_idx ?)
         mf_values_eye = mf_values_eye[:, :-1]  # shape = (N_LABELS, N_LABELS-1)
 
+        # TODO test this !
+        ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
+        ifs_cons = np.append(ifs_cons, default_rule_cons[np.newaxis, :],
+                             axis=0)
+
         defuzzified_outputs = np.full((n_obs, n_consequents), np.nan)
         for obs_i, obs in enumerate(observations):
             # print("tamre", obs.shape)
@@ -351,20 +356,20 @@ class IFSUtils:
             def_rule_act = 1.0 - np.max(rules_act)
             rules_act = np.append(rules_act, def_rule_act)
 
-            # TODO: extract this out of the loop
-            # IMPLICATION
-            ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
-
-            # add default rule consequent to consequents
-            # print("lala")
-            # print(ifs_cons.shape)
-            # print("def")
-            # reshape because np.append expects same shape
-            # default_rule_cons = default_rule_cons.reshape(1, -1)
-            # print(default_rule_cons.shape)
-            # TODO: extract this out of the loop
-            ifs_cons = np.append(ifs_cons, default_rule_cons[np.newaxis, :],
-                                 axis=0)
+            # # TODO: extract this out of the loop
+            # # IMPLICATION
+            # ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
+            #
+            # # add default rule consequent to consequents
+            # # print("lala")
+            # # print(ifs_cons.shape)
+            # # print("def")
+            # # reshape because np.append expects same shape
+            # # default_rule_cons = default_rule_cons.reshape(1, -1)
+            # # print(default_rule_cons.shape)
+            # # TODO: extract this out of the loop
+            # ifs_cons = np.append(ifs_cons, default_rule_cons[np.newaxis, :],
+            #                      axis=0)
 
             # AGGREGATION and DEFUZZIFICATION
             # print("lalala")
