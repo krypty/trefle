@@ -7,13 +7,25 @@ from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def _compute_accuracy(y_true, y_pred):
+    # ACC
+    # y_pred_bin = np.where(y_pred >= 0.5, 1, 0)
+    #
+    # n_good = 0
+    # for row in range(y_pred.shape[0]):
+    #     if np.all(np.equal(y_pred_bin[row], y_true[row])):
+    #         n_good += 1
+    # return n_good / float(y_pred.shape[0])
+
+    # PER CLASS ACC
     y_pred_bin = np.where(y_pred >= 0.5, 1, 0)
 
-    n_good = 0
-    for row in range(y_pred.shape[0]):
-        if np.all(np.equal(y_pred_bin[row], y_true[row])):
-            n_good += 1
-    return n_good / float(y_pred.shape[0])
+    n_classes = y_pred_bin.shape[1]
+    acc_per_class = [-1] * n_classes
+    for c_idx in range(n_classes):
+        acc = (y_true[:, c_idx] == y_pred_bin[:, c_idx]).mean()
+        acc_per_class[c_idx] = acc
+
+    return acc_per_class
 
 
 def WineDataset(test_size=0.3):
