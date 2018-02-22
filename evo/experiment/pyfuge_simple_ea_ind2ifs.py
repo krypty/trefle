@@ -3,6 +3,8 @@ import numpy as np
 from evo.helpers.ifs_utils import IFSUtils
 from evo.helpers.ind_2_ifs import Ind2IFS
 
+from time import time
+
 
 class PyFUGESimpleEAInd2IFS(Ind2IFS):
     def __init__(self, n_vars, n_rules, n_max_var_per_rule, mf_label_names,
@@ -45,6 +47,8 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
         pass
 
     def predict(self, ind):
+        t0 = time()
+
         predicted_outputs = IFSUtils.predict(
             ind=ind,
             observations=self.dataset.X,
@@ -57,5 +61,7 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
             labels_weights=self.labels_weights,
             dc_idx=self.n_labels - 1
         )
+        t1 = time()-t0
+        print("single time: {} ms".format(t1*1000))
 
         return predicted_outputs

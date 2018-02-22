@@ -1,9 +1,9 @@
 import numpy as np
+import pandas as pd
 
 from evo.dataset.pf_dataset import PFDataset
 from evo.helpers import pyfuge_ifs_ind2fis
 from evo.helpers.ifs_utils import IFSUtils
-from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def _compute_accuracy(y_true, y_pred):
@@ -29,15 +29,18 @@ def _compute_accuracy(y_true, y_pred):
 
 
 def WineDataset(test_size=0.3):
-    from sklearn.datasets import load_wine
+    from sklearn.datasets import load_wine as load_ds
     from sklearn.model_selection import train_test_split
 
-    dataset = load_wine()
+    dataset = load_ds()
 
     X = dataset.data
-    y = dataset.target.reshape(-1, 1)  # pd.get_dummies(dataset.target).values
+    y = pd.get_dummies(dataset.target).values
+    print("y shape", y.shape)
     X_names = dataset.feature_names
     y_names = dataset.target_names
+
+    # X = preprocessing.scale(X)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                         test_size=test_size)
@@ -46,12 +49,17 @@ def WineDataset(test_size=0.3):
             PFDataset(X_test, y_test, X_names, y_names))
 
 
+# @profile(sort="cumulative", filename="/tmp/pyfuge.profile")
 def run_with_simple_evo():
     from time import time
     from evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
     from evo.experiment.base.simple_experiment import SimpleEAExperiment
     from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
         PyFUGEFitnessEvaluator
+
+    import random
+    random.seed(10)
+    np.random.seed(10)
 
     t0 = time()
     tick = lambda: print((time() - t0) * 1000)
@@ -65,11 +73,11 @@ def run_with_simple_evo():
     ## EXPERIMENT PARAMETERS
     ##
     n_vars = ds_train.N_VARS
-    n_rules = 3
+    n_rules = 4
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
     mf_label_names = ["LOW", "HIGH", "DC"]
-    default_rule_output = [0]  # [0, 1, 0]  # [class_0, class_1, class_2]
-    labels_weights = np.array([1, 1, 10])
+    default_rule_output = [0, 1, 0]  # [class_0, class_1, class_2]
+    labels_weights = np.array([1, 1, 3])
     dc_index = len(mf_label_names) - 1
 
     ##
@@ -89,14 +97,15 @@ def run_with_simple_evo():
         dataset=ds_train,
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
-        N_POP=200,
-        N_GEN=20
+        N_POP=50,
+        N_GEN=10
     )
 
+    tick()
     top_n = exp.get_top_n()
 
     fis_li = []
-    for ind in top_n:
+    for ind in top_n[:1]:
         print("ind ({}): {}".format(ind.fitness, ind))
         fis = pyfuge_ifs_ind2fis.convert(
             n_vars=n_vars,
@@ -108,8 +117,8 @@ def run_with_simple_evo():
             pretty_vars_names=ds_train.X_names,
             pretty_outputs_names=ds_train.y_names
         )
-        fis.describe()
-        FISViewer(fis).show()
+        # fis.describe()
+        # FISViewer(fis).show()
 
         fis_li.append(fis)
 
@@ -136,8 +145,6 @@ def run_with_simple_evo():
 
         acc = _compute_accuracy(ds_test.y, y_pred_test)
         print("acc ", acc)
-
-    tick()
 
 
 if __name__ == '__main__':
