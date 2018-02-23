@@ -41,6 +41,7 @@ void Point::afficher() const {
 }
 
 void mul_np_array(double *in_array, int length, int scaler) {
+  #pragma omp parallel for
   for (int i = 0; i < length; i++) {
     in_array[i] = in_array[i] * scaler;
   }

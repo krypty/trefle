@@ -62,6 +62,6 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
             dc_idx=self.n_labels - 1
         )
         t1 = time()-t0
-        print("single time: {} ms".format(t1*1000))
+        # print("single time: {} ms".format(t1*1000))
 
         return predicted_outputs

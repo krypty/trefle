@@ -77,7 +77,7 @@ def run_with_simple_evo():
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
     mf_label_names = ["LOW", "HIGH", "DC"]
     default_rule_output = [0, 1, 0]  # [class_0, class_1, class_2]
-    labels_weights = np.array([1, 1, 3])
+    labels_weights = np.array([1, 1, 6])
     dc_index = len(mf_label_names) - 1
 
     ##
@@ -97,7 +97,7 @@ def run_with_simple_evo():
         dataset=ds_train,
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
-        N_POP=50,
+        N_POP=100,
         N_GEN=10
     )
 
@@ -129,7 +129,7 @@ def run_with_simple_evo():
     # make sure the var_range is still set to training set. If not, we cheat
     var_range_train = IFSUtils.compute_vars_range(ds_train.X)
 
-    for ind in top_n:
+    for ind in top_n[:1]:
         y_pred_test = IFSUtils.predict(
             ind,
             observations=ds_test.X,
@@ -142,6 +142,8 @@ def run_with_simple_evo():
             labels_weights=labels_weights,
             dc_idx=dc_index
         )
+
+        print(y_pred_test)
 
         acc = _compute_accuracy(ds_test.y, y_pred_test)
         print("acc ", acc)

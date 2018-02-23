@@ -4,6 +4,8 @@
 #include "iostream"
 #include "omp.h"
 
+#define coutd std::cout << "<<C++>> "
+
 class User {
   std::string name;
 
@@ -60,5 +62,29 @@ extern int cffi_hello() { return mySuperAlgo(); }
 
 extern void c_mul_np_array(double *in_array, int length, int scaler) {
   mul_np_array(in_array, length, scaler);
+}
+
+extern float c_predict(float *ind, int ind_n, double **observations,
+                       int observations_n, int observations_m) {
+  coutd << observations_n << ", " << observations_m << std::endl;
+  coutd << observations[0][0] << ";" << std::endl;
+  float sum = 0.0f;
+
+  const int N_THREADS = omp_get_max_threads();
+
+  float mid_sum[N_THREADS];
+  std::fill(mid_sum, mid_sum + N_THREADS, 0);
+#pragma omp parallel for
+  for (int i = 0; i < observations_n; i++) {
+    // sum += observations[i][0];
+    int tid = omp_get_thread_num();
+    mid_sum[tid] += observations[i][0];
+  }
+
+  for (int i = 0; i < N_THREADS; i++) {
+    sum += mid_sum[i];
+  }
+
+  return sum;
 }
 }
