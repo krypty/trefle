@@ -1,33 +1,15 @@
-#ifndef POINT_H
-#define POINT_H
+#ifndef FIS_H
+#define FIS_H
 
 #include <iostream>
 using namespace std;
 
-class Point
-{
-public:
-  // Constructeurs
-  Point();
-  Point(double x, double y);
+void mul_np_array(double *arr, int arr_n, int scaler);
 
-  //Accesseurs et mutateurs
-  void setX(double x);
-  void setY(double y);
-  double getX() const;
-  double getY() const;
-
-  // Autres méthodes
-  double distance(const Point &P) const;
-  Point milieu(const Point &P) const;
-
-  void saisir();
-  void afficher() const;
-
-private:
-  double x,y;
-};
-
-void mul_np_array(double*, int, int);
+float predict(float *ind, int ind_n, double **observations, int observations_n,
+              int observations_m, int n_rules, int max_vars_per_rules,
+              int n_labels, int n_consequents, int *default_rule_cons,
+              int default_rule_cons_n, double **vars_range, int vars_range_n,
+              int vars_range_m, double *labels_weights, int labels_weights_n);
 
 #endif

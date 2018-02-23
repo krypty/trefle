@@ -52,19 +52,6 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
                                   vars_ranges, labels_weights, dc_idx)
 
 
-def toto():
-    a = np.arange(10).astype(np.float64)
-    # print("a ", a)
-    from time import time
-    t0 = time()
-    fiseval.mul_np_array(a, 3)
-    # a = a*3
-    dt = time() - t0
-    print(dt)
-    # print("a aaa", a)
-    # print("a aaa", a.dtype)
-
-
 def simple_predict():
     import random
     random.seed(10)
@@ -209,13 +196,5 @@ def simple_predict():
 
 if __name__ == '__main__':
     from cpp.FISEval import fiseval
-
-    # # print("lalalalalala")
-    # # a = fiseval.run_func_in_c()
-    # # print(a)
-    #
-    # toto()
-    #
-    # print("lalalalalala")
 
     simple_predict()

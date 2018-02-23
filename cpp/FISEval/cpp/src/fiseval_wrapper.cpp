@@ -6,29 +6,7 @@
 
 #define coutd std::cout << "<<C++>> "
 
-class User {
-  std::string name;
-
-public:
-  User(char *name) : name(name) {}
-  User(std::string &name) : name(name) {}
-
-  std::string greet() { return "hello, " + name; }
-};
-
-void hello(char *name) {
-  User user(name);
-  std::cout << user.greet() << std::endl;
-}
-
-int main() {
-  std::cout << "result : " << mySuperAlgo() << std::endl;
-  return 0;
-}
-
 int mySuperAlgo() {
-  Point *p = new Point();
-
   const int size = 10000;
   double sinTable[size];
 
@@ -43,6 +21,8 @@ int mySuperAlgo() {
       sinTable[i] = std::sin(2 * M_PI * (i + tid) / size);
     }
 
+    cout << "sintable" << sinTable[0] << endl;
+
     out[i % 4] = 5;
   }
 
@@ -50,9 +30,6 @@ int mySuperAlgo() {
   for (int i = 0; i < 4; i++) {
     res += out[i];
   }
-
-  p->afficher();
-  delete p;
 
   return res;
 }
@@ -65,26 +42,14 @@ extern void c_mul_np_array(double *in_array, int length, int scaler) {
 }
 
 extern float c_predict(float *ind, int ind_n, double **observations,
-                       int observations_n, int observations_m) {
-  coutd << observations_n << ", " << observations_m << std::endl;
-  coutd << observations[0][0] << ";" << std::endl;
-  float sum = 0.0f;
-
-  const int N_THREADS = omp_get_max_threads();
-
-  float mid_sum[N_THREADS];
-  std::fill(mid_sum, mid_sum + N_THREADS, 0);
-#pragma omp parallel for
-  for (int i = 0; i < observations_n; i++) {
-    // sum += observations[i][0];
-    int tid = omp_get_thread_num();
-    mid_sum[tid] += observations[i][0];
-  }
-
-  for (int i = 0; i < N_THREADS; i++) {
-    sum += mid_sum[i];
-  }
-
-  return sum;
+                       int observations_n, int observations_m, int n_rules,
+                       int max_vars_per_rules, int n_labels, int n_consequents,
+                       int *default_rule_cons, int default_rule_cons_n,
+                       double **vars_range, int vars_range_n, int vars_range_m,
+                       double *labels_weights, int labels_weights_n) {
+  return predict(ind, ind_n, observations, observations_n, observations_m,
+                 n_rules, max_vars_per_rules, n_labels, n_consequents,
+                 default_rule_cons, default_rule_cons_n, vars_range,
+                 vars_range_n, vars_range_m, labels_weights, labels_weights_n);
 }
 }
