@@ -73,9 +73,11 @@ extern float c_predict(float *ind, int ind_n, double *observations,
 
   // TODO double** --> double*
   // Map<Matrix<double, Dynamic, Dynamic, RowMajor>> mf(
-  Map<MatXd> mf(observations, observations_r, observations_c);
-  coutd << mf << std::endl;
-  coutd << "rows: " << mf.rows() << ", cols= " << mf.cols() << std::endl;
+  // Map<MatXd> mf(observations, observations_r, observations_c);
+  // coutd << mf << std::endl;
+  // coutd << "rows: " << mf.rows() << ", cols= " << mf.cols() << std::endl;
+  // mf = mf * -1;
+  // coutd << mf << endl;
 
   return predict(ind, ind_n, observations, observations_r, observations_c,
                  n_rules, max_vars_per_rules, n_labels, n_consequents,

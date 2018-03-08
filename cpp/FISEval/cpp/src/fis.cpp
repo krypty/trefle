@@ -1,13 +1,16 @@
 #include "../hpp/fis.h"
+#include "../hpp/custom_eigen_td.h"
 #include "omp.h"
+#include <Eigen/Core>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <Eigen/Core>
+#include <vector>
 
 #define coutd std::cout << "<<C++>> " << std::setprecision(2)
 
 using namespace std;
+using namespace Eigen;
 
 void mul_np_array(double *in_array, int length, int scaler) {
 #pragma omp parallel for
@@ -52,28 +55,20 @@ float predict(float *ind, int ind_n, double *observations, int observations_r,
   int n_obs = observations_r;
   int n_vars = observations_c;
 
-  double *evo_mfs[n_vars];
-  for (int i = 0; i < n_vars; i++) {
-    evo_mfs[i] = new double[n_true_labels];
-  }
-  extract_mfs_from_ind(ind, evo_mfs, n_vars, n_true_labels);
-
-  double *evo_ants[n_rules];
-  for (int i = 0; i < n_rules; i++) {
-    evo_ants[i] = new double[n_vars];
-  }
+  Map<MatXf> evo_mfs(ind, n_vars, n_true_labels);
+  coutd << "evo_mfs" << endl;
+  coutd << evo_mfs << endl;
 
   // offset where the antecedents values begin which is after the evo_mfs values
-  float *ind_offset = ind + (n_vars * n_true_labels);
-  extract_ants_from_ind(ind_offset, evo_ants, n_rules, n_vars);
+  float *ind_offset_ants = ind + (n_vars * n_true_labels);
+  Map<MatXf> evo_ants(ind_offset_ants, n_rules, n_vars);
+  coutd << "evo_ants" << endl;
+  coutd << evo_ants << endl;
 
-  // for (int i = 0; i < n_rules; i++) {
-  //   coutd << endl;
-  //   for (int j = 0; j < n_vars; j++) {
-  //     coutd << evo_ants[i][j] << endl;
-  //   }
-  // }
-  // extract_ind(ind, n_vars, n_labels, n_rules, n_consequents);
+  float *ind_offset_cons = ind_offset_ants + (n_rules * n_vars);
+  Map<MatXf> evo_cons(ind_offset_cons, n_rules, n_consequents);
+  coutd << "evo_cons" << endl;
+  cout << evo_cons << endl;
 
   return 12345;
 }
@@ -100,8 +95,8 @@ double omp_sum(double **arr, int arr_n) {
   const int N_THREADS = omp_get_max_threads();
   double sum = 0.0f;
 
-  float mid_sum[N_THREADS];
-  std::fill(mid_sum, mid_sum + N_THREADS, 0);
+  vector<float> mid_sum(N_THREADS);
+  std::fill(mid_sum.begin(), mid_sum.end() - 1, 0);
 
 #pragma omp parallel for
   for (int i = 0; i < arr_n; i++) {
