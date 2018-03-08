@@ -5,8 +5,6 @@ from collections import OrderedDict
 import numpy as np
 from numpy.ctypeslib import ndpointer
 
-from evo.helpers.ifs_utils import IFSUtils
-
 np.set_printoptions(precision=2, suppress=True)
 
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -69,14 +67,15 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
         ("vars_range", _get_np_array_1d_ptr(vars_ranges, C.c_double)),
         ("vars_range_n", vars_ranges.shape[0]),
         ("vars_range_m", vars_ranges.shape[1]),
-        ("labels_weights", _get_np_array_1d_ptr(labels_weights, C.c_double)),
+        ("labels_weights",
+         _get_np_array_1d_ptr(labels_weights.astype(np.float64), C.c_double)),
         ("labels_weights_n", len(labels_weights)),  # FIXME: same as n_labels ?
         ("dc_idx", dc_idx)
     ])
 
     # print("ind", ind)
-    # print("observations")
-    # print(observations)
+    print("observations")
+    print(observations)
     # print(observations.shape)
     # print("n_rules", n_rules)
     # print("max_vars_per_rule", max_vars_per_rule)
@@ -84,7 +83,7 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
     # print("n_consequents", n_consequents)
     # print("default_rule_cons", default_rule_cons)
     # print("vars_ranges\n", vars_ranges)
-    # print("labels_weights", labels_weights)
+    print("labels_weights", labels_weights)
     # print("dc_idx", dc_idx)
 
     # print("shape", observations.shape)

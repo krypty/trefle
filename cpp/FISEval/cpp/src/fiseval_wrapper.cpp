@@ -50,7 +50,7 @@ extern float c_predict(float *ind, int ind_n, double *observations,
                        int max_vars_per_rules, int n_labels, int n_consequents,
                        int *default_rule_cons, int default_rule_cons_n,
                        double *vars_range, int vars_range_r, int vars_range_c,
-                       double *labels_weights, int labels_weights_n) {
+                       double *labels_weights, int labels_weights_n, int dc_idx) {
 
   // Map<VectorXf> mf(ind,ind_n);
 
@@ -82,6 +82,6 @@ extern float c_predict(float *ind, int ind_n, double *observations,
   return predict(ind, ind_n, observations, observations_r, observations_c,
                  n_rules, max_vars_per_rules, n_labels, n_consequents,
                  default_rule_cons, default_rule_cons_n, vars_range,
-                 vars_range_r, vars_range_c, labels_weights, labels_weights_n);
+                 vars_range_r, vars_range_c, labels_weights, labels_weights_n, dc_idx);
 }
 }
