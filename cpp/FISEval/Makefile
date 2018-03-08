@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-W -Wall -pedantic -fPIC -fopenmp -shared -march=native -ffast-math -I cpp/eigen/
+CFLAGS=-W -Wall -pedantic -fPIC -fopenmp -shared -march=native -ffast-math -isystem cpp/eigen/
 LDFLAGS=
 EXEC=fiseval.so
 BUILD_PATH=./cpp/build
