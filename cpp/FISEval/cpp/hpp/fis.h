@@ -25,7 +25,10 @@ void extract_ants_from_ind(float *ind, double **evo_ants, int n_vars,
                            int n_labels);
 
 MatrixXi evo_ants1ifs_ants(const Map<MatXf> &evo_ants,
-                       Map<RowVectorXd> &vec_labels_weights);
+                           Map<RowVectorXd> &vec_labels_weights);
+
+MatrixXd evo_mfs2ifs_mfs(const Map<MatXf> &evo_mfs, Map<MatXd> &m_vars_range);
+
 int unitfloat2idx(float flt, Map<RowVectorXd> &weights);
 
 template <typename T, typename U>

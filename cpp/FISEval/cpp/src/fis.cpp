@@ -43,14 +43,37 @@ MatrixXi evo_ants2ifs_ants(const Map<MatXf> &evo_ants,
   const auto unitfloat2idx_ants = [&](float v) {
     return unitfloat2idx(v, vec_labels_weights);
   };
-  coutd << "before" << evo_ants << endl;
+  // coutd << "before" << evo_ants << endl;
   // MatrixXf ifs_ants;
   // ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants);
   MatrixXi ifs_ants(evo_ants.rows(), evo_ants.cols());
   ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants);
 
-  coutd << "after" << endl << ifs_ants << endl;
+  // coutd << "after" << endl << ifs_ants << endl;
   return ifs_ants;
+}
+
+MatrixXd evo_mfs2ifs_mfs(const Map<MatXf> &evo_mfs, Map<MatXd> &m_vars_range) {
+  int rows = evo_mfs.rows();
+  int cols = evo_mfs.cols();
+  MatrixXd ifs_mfs(rows, cols);
+
+  // FIXME output ifs_mfs is wrong !
+  for (int i = 0; i < rows; i++) {
+    VectorXd row_i = ifs_mfs.row(i);
+
+    for (int j = 0; j < cols; j++) {
+      row_i(j) = evo_mfs(i, j) * m_vars_range(i, 0) + m_vars_range(i, 1);
+    }
+
+    // TODO: sort MF per row
+    std::sort(row_i.data(), row_i.data() + row_i.size());
+    ifs_mfs.row(i) = row_i;
+  }
+
+  coutd << "ifs mfs lala" << endl;
+  cout << setprecision(6) << ifs_mfs << endl;
+  return ifs_mfs;
 }
 
 float predict(float *ind, int ind_n, double *observations, int observations_r,
@@ -93,8 +116,8 @@ float predict(float *ind, int ind_n, double *observations, int observations_r,
   // EXTRACT NEW INDIVIDUAL
   // ind is a float array that is the individual which represents a FIS.
   Map<MatXf> evo_mfs(ind, n_vars, n_true_labels);
-  // coutd << "evo_mfs" << endl;
-  // coutd << evo_mfs << endl;
+  coutd << setprecision(6) << "evo_mfs" << endl;
+  cout << evo_mfs << endl;
 
   // offset where the antecedents values begin which is after the evo_mfs values
   float *ind_offset_ants = ind + (n_vars * n_true_labels);
@@ -111,9 +134,17 @@ float predict(float *ind, int ind_n, double *observations, int observations_r,
   // MatXf ifs_ants =
   Map<RowVectorXd> vec_labels_weights(labels_weights, labels_weights_n);
   MatrixXi ifs_ants = evo_ants2ifs_ants(evo_ants, vec_labels_weights);
-  coutd << "ifs_ants" << endl;
-  cout << ifs_ants << endl;
+  // coutd << "ifs_ants" << endl;
+  // cout << ifs_ants << endl;
+
   // CONVERT EVOLUTION MFS TO IFS MFS (i.e. in_values)
+  // TODO: vars_range_c is always 2, right ? (min, ptp)
+  Map<MatXd> m_vars_range(vars_range, vars_range_r, vars_range_c);
+  coutd << "vars range" << endl;
+  cout << setprecision(6) << m_vars_range << endl;
+  MatrixXd ifs_mfs = evo_mfs2ifs_mfs(evo_mfs, m_vars_range);
+  // coutd << "ifs mfs" << endl;
+  // cout << ifs_mfs << endl;
 
   // CONVERT EVOLUTION CONS TO IFS CONS
   const auto binarize_mat = [&](float v) {
