@@ -90,15 +90,15 @@ class IFSUtils:
 
         :param evo_mfs: np.array of floats in [0, 1]
         [
-            [p0r0, p1r0, p2r0],
-            [p0r1, p1r1, p2r1],
+            [p0v0, p1v0, p2v0],
+            [p0v1, p1v1, p2v1],
         ]
         note: p0 ~= "low", p1 ~= "medium",...
         :param ifs_ants_idx:
         :param vars_range: np.array of floats in [min(var_i), max(var_i)]
         [
-            [p0r0, p1r0, p2r0],
-            [p0r1, p1r1, p2r1],
+            [p0v0, p1v0, p2v0],
+            [p0v1, p1v1, p2v1],
         ]
         note: p0 ~= "low", p1 ~= "medium",...
         :return:
@@ -109,6 +109,8 @@ class IFSUtils:
         # print(vars_range.shape)
         #
         # print(vars_range)
+
+        # FIXME: this is wrong ! Both the computation and the sort
 
         for i in range(evo_mfs.shape[1]):
             selected_var_range = vars_range.take(i, axis=0)
@@ -181,7 +183,8 @@ class IFSUtils:
         # print(evo_mfs)
         # print("ants")
         evo_ants = np.array(evo_ants).reshape(n_rules, n_vars)
-        # print(evo_ants)
+        # print("evo_ants")
+        # print("evo_ants)
         # print("cons")
         # print(n_rules, n_consequents)
         # print(evo_cons)
