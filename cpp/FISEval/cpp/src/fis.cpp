@@ -4,9 +4,10 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #define coutd std::cout << "<<C++>> " << std::setprecision(2)
-
+#define EPSILON 1e-4
 using namespace std;
 using namespace Eigen;
 
@@ -15,6 +16,39 @@ void mul_np_array(double *in_array, int length, int scaler) {
   for (int i = 0; i < length; i++) {
     in_array[i] = in_array[i] * scaler;
   }
+}
+
+double lininterp(const vector<double> &xs, const vector<double> &ys,
+                 const double x) {
+  assert(xs.size() == ys.size());
+  assert(is_sorted(xs.begin(), xs.end()) && "xs is expected to be sorted");
+  // using this image as reference:
+  // https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/LinearInterpolation.svg/300px-LinearInterpolation.svg.png
+
+  if (x <= xs[0]) {
+    return ys[0];
+  }
+  else if(x >= xs[xs.size()-1]){
+    return ys[ys.size()-1];
+  }
+
+  int idx_low = lower_bound(xs.begin(), xs.end(), x) - xs.begin();
+  int idx_up = upper_bound(xs.begin() + idx_low + 1, xs.end(), x) - xs.begin();
+
+  coutd << "idx_low " << idx_low << ", " << idx_up << endl;
+
+  double deltaX = xs[idx_up] - xs[idx_low]; // delta is >= 0
+  if (deltaX < EPSILON) {
+    // delta is too small, interpolation will lead to zero division error.
+    // return the nearest known ys value.
+    // note: index of x0 or x1, does not matter because they pretty much the
+    // same value
+    coutd << "yolo !!!" << endl;
+    return ys[idx_low];
+  }
+  double y =
+      ys[idx_low] + ((x - xs[idx_low]) * (ys[idx_up] - ys[idx_low]) / deltaX);
+  return y;
 }
 
 int unitfloat2idx(float flt, Map<RowVectorXd> &weights) {
@@ -157,6 +191,10 @@ float predict(float *ind, int ind_n, double *observations, int observations_r,
   mf_values_eye.row(n_labels - 1).setOnes();
   // cout << mf_values_eye;
 
+  // create a row-major matrix here because we will returned it to Python
+  MatXd defuzzified_outputs(observations_r, n_consequents);
+  defuzzified_outputs.setConstant(NAN);
+  cout << defuzzified_outputs << endl;
   // Map<MatXd> mat_obs(observations, observations_r, observations_c);
   // for(int i = 0; i < observations_r; i++){
   //   coutd << mat_obs.row(i) << endl;

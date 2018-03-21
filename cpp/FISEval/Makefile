@@ -37,4 +37,4 @@ mrproper: clean
 	rm -rf $(EXEC)
 
 test:
-	$(CC) $(CFLAGS_TESTS) -o $(BUILD_PATH)/run_tests $(SOURCES_TESTS) $(LDFLAGS) && $(BUILD_PATH)/run_tests --success
+	$(CC) $(CFLAGS_TESTS) -o $(BUILD_PATH)/run_tests $(SOURCES) $(SOURCES_TESTS) $(LDFLAGS) && $(BUILD_PATH)/run_tests --success
