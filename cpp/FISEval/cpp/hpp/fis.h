@@ -10,10 +10,10 @@ using namespace std;
 
 void mul_np_array(double *arr, int arr_n, int scaler);
 
-double lininterp(const vector<double> &xs, const vector<double> &ys,
+double lininterp(vector<double> &xs, const vector<double> &ys,
                  const double x);
 
-float predict(float *ind, int ind_n, double *observations, int observations_r,
+double* predict(float *ind, int ind_n, double *observations, int observations_r,
               int observations_c, int n_rules, int max_vars_per_rules,
               int n_labels, int n_consequents, int *default_rule_cons,
               int default_rule_cons_n, double *vars_range, int vars_range_r,

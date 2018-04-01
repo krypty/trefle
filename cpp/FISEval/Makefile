@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-W -std=c++17 -Wall -pedantic -fPIC -fopenmp -shared -march=native -ffast-math -isystem cpp/vendor/eigen/
+CFLAGS=-O3 -W -std=c++17 -Wall -pedantic -fPIC -fopenmp -shared -mtune=native -march=native -ffast-math -isystem cpp/vendor/eigen/
 CFLAGS_TESTS=-W -std=c++17 -Wall -pedantic -fPIC -fopenmp -march=native -ffast-math -isystem cpp/vendor/eigen/ -Icpp/vendor/catch/
 LDFLAGS=
 EXEC=fiseval.so

@@ -5,6 +5,8 @@ from collections import OrderedDict
 import numpy as np
 from numpy.ctypeslib import ndpointer
 
+from evo.helpers.ifs_utils import IFSUtils
+
 np.set_printoptions(precision=2, suppress=True)
 
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -73,9 +75,12 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
         ("dc_idx", dc_idx)
     ])
 
+    out_rows = observations.shape[0]
+    out_cols = n_consequents
+
     # print("ind", ind)
-    print("observations")
-    print(observations)
+    # print("observations")
+    # print(observations)
     # print(observations.shape)
     # print("n_rules", n_rules)
     # print("max_vars_per_rule", max_vars_per_rule)
@@ -83,21 +88,65 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
     # print("n_consequents", n_consequents)
     # print("default_rule_cons", default_rule_cons)
     # print("vars_ranges\n", vars_ranges)
-    print("labels_weights", labels_weights)
+    # print("labels_weights", labels_weights)
     # print("dc_idx", dc_idx)
 
     # print("shape", observations.shape)
     # res = f(c_ind, len(ind))
 
     f = _fiseval_wrapper.c_predict
-    f.restype = C.c_float
-    res = f(*kwargs.values())  # cannot pass keyword args to native function
-    print("res", res)
+    f.restype = C.POINTER(C.c_double)
+    res_ptr = f(*kwargs.values())  # cannot pass keyword args to native function
+    # f(*kwargs.values())  # cannot pass keyword args to native function
 
+    ptr = C.cast(res_ptr, C.POINTER(C.c_double * (out_rows*out_cols)))
+    res = np.frombuffer(ptr.contents)
+
+    # print("res", res.reshape(-1, n_consequents))
+    # print("res", res.shape)
+
+    # arr = (C.c_double * 4).from_address(
+    #     C.addressof(res_ptr.contents))
+    # res = np.ndarray(buffer=arr, dtype=np.double, shape=(4,1),
+    #                  order="C")
+    # print("res Python", res)
+
+    # print(res_ptr)
+    # res = np.ctypeslib.as_array(
+    #     res_ptr, shape=(observations.shape[0], n_consequents),
+    # )
+    # res = np.fromiter(res_ptr, dtype=np.double,
+    #                   count=observations.shape[0] * n_consequents).reshape(-1, n_consequents)
+
+    # img_buffer = (C.c_double * (out_rows) *
+    #               (out_cols)).from_address(C.addressof(res_ptr.contents))
+    # res = np.ndarray(buffer=img_buffer, dtype=np.double, shape=(out_rows,out_cols))
+    # print(res)
+
+    # ArrayType = C.c_double * out_rows * out_cols
+    # addr = C.addressof(res_ptr.contents)
+    # a = np.frombuffer(ArrayType.from_address(addr))
+    # print("res", a)
+
+    # arr = (C.c_double * out_rows * out_cols).from_address(
+    #     C.addressof(res_ptr.contents))
+    # res = np.ndarray(buffer=arr, dtype=np.double, shape=(out_rows, out_cols),order="C")
+    # print("res Python", res)
+
+    # res = np.frombuffer(
+    #     (C.c_float * (observations.shape[0] * n_consequents)).from_address(
+    #         res_ptr), np.double)
+
+    # print("res\n", res)
+
+    # buf = np.ones(shape=(out_rows, out_cols))
+    # arr = np.frombuffer(res_ptr, dtype=C.c_double, count=out_cols * out_rows,
+    #                     offset=0)
+    # print(arr)
     # print("py res", np.sum(observations[:, 0]))
 
-    n_obs = observations.shape[0]
-    n_vars = observations.shape[1]
+    # n_obs = observations.shape[0]
+    # n_vars = observations.shape[1]
     # evo_mfs, evo_ants, evo_cons = IFSUtils.extract_ind_new(ind, n_vars,
     #                                                        n_labels, n_rules,
     #                                                        n_consequents)
@@ -108,10 +157,22 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
     #
     # print("evo_cons shape", evo_cons.shape)
     # print("evo_cons", evo_cons)
+    #
+    # ifs_mfs = IFSUtils.evo_mfs2ifs_mfs_new(evo_mfs, vars_ranges)
+    # print("ifs mfs")
+    # print(ifs_mfs)
+    #
+    # ifs_ants = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
+    # print("ifs_ants")
+    # print(ifs_ants)
+    #
+    # ifs_evo = IFSUtils.evo_cons2ifs_cons(evo_cons)
+    # print("ifs_evo")
+    # print(ifs_evo)
 
-    from time import sleep
-    sleep(0.1)
-    assert False, "trololo"
+    # from time import sleep
+    # sleep(0.1)
+    # assert False, "trololo"
 
-    predicted_outputs = np.array([])
+    predicted_outputs = res.reshape(-1, n_consequents)
     return predicted_outputs

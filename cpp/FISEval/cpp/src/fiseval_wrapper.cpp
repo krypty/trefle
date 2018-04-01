@@ -45,7 +45,7 @@ extern void c_mul_np_array(double *in_array, int length, int scaler) {
   mul_np_array(in_array, length, scaler);
 }
 
-extern float c_predict(float *ind, int ind_n, double *observations,
+extern double* c_predict(float *ind, int ind_n, double *observations,
                        int observations_r, int observations_c, int n_rules,
                        int max_vars_per_rules, int n_labels, int n_consequents,
                        int *default_rule_cons, int default_rule_cons_n,

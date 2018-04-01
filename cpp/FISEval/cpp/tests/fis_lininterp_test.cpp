@@ -2,6 +2,9 @@
 
 #include "../hpp/fis.h"
 
+#include "../hpp/custom_eigen_td.h"
+#include <Eigen/Core>
+
 using namespace std;
 
 TEST_CASE("lininterp xs and ys should have the same size", "[single-file]") {
@@ -31,3 +34,35 @@ TEST_CASE("step function descending", "[single-file]") {
   REQUIRE(lininterp(xs, ys, 2.0) == Approx(1));
   REQUIRE(lininterp(xs, ys, 2.1) == Approx(0));
 }
+
+TEST_CASE("basic interpolation", "[single-file]") {
+  vector<double> xs{1.8, 2.7};
+  vector<double> ys{1, 0};
+
+  REQUIRE(lininterp(xs, ys, 1.7) == Approx(1));
+  REQUIRE(lininterp(xs, ys, 1.8) == Approx(1));
+  REQUIRE(lininterp(xs, ys, 1.9) == Approx(0.888889));
+  REQUIRE(lininterp(xs, ys, 2.6) == Approx(0.111111));
+  REQUIRE(lininterp(xs, ys, 2.7) == Approx(0));
+  REQUIRE(lininterp(xs, ys, 2.8) == Approx(0));
+}
+
+// TEST_CASE("lalal", "[single-file]") {
+
+//   RowVector4d rules_act(0.2, 0.67, 0.33, 0.5);
+
+//   // Vector3d ifs_cons(1.0, 0.5, 0);
+//   Matrix<double, Dynamic, 3> ifs_cons;
+//   ifs_cons.resize(4, 3);
+//   ifs_cons << 0, 0, 1, // cons r1
+//               1, 0, 1, // cons r2
+//               0, 0, 0, // cons r3
+//               1, 1, 1; // cons r4
+
+
+//   cout << rules_act << endl;
+//   cout << ifs_cons << endl;
+
+//   cout << "result: " << endl;
+//   cout << (rules_act * ifs_cons) / rules_act.sum() << endl;
+// }

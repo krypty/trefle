@@ -112,13 +112,23 @@ class IFSUtils:
 
         # FIXME: this is wrong ! Both the computation and the sort
 
-        for i in range(evo_mfs.shape[1]):
-            selected_var_range = vars_range.take(i, axis=0)
-            evo_mfs[:, i] *= selected_var_range[0]
-            evo_mfs[:, i] += selected_var_range[1]
+        # for i in range(evo_mfs.shape[1]):
+        #     selected_var_range = vars_range.take(i, axis=0)
+        #     evo_mfs[:, i] *= selected_var_range[0]
+        #     evo_mfs[:, i] += selected_var_range[1]
+        #     evo_mfs[:, i] = np.sort(evo_mfs[:, i])
 
         # sort the in_values to have increasing membership function
-        evo_mfs.sort(1)
+        # evo_mfs.sort(1)
+
+        # FIXED! might be slower
+        for i in range(evo_mfs.shape[0]):
+            row = evo_mfs[i]
+            for j in range(evo_mfs.shape[1]):
+                row[j] = evo_mfs[i, j] * vars_range[i, 0] + vars_range[i, 1]
+
+            row = np.sort(row)
+            evo_mfs[i] = row
 
         return evo_mfs
 

@@ -1,6 +1,7 @@
 import numpy as np
 
 from evo.examples.evo_wine_classifier import WineDataset, _compute_accuracy
+from evo.helpers import ifs_utils
 
 
 def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
@@ -170,6 +171,8 @@ def simple_predict():
     expected_acc_per_class = [0.8333333333333334, 0.7222222222222222,
                               0.8518518518518519]
 
+    from time import time
+    t0 = time()
     predicted_outputs = predict_native(
         ind=ind,
         observations=ds_test.X,
@@ -182,8 +185,27 @@ def simple_predict():
         labels_weights=labels_weights,
         dc_idx=n_labels - 1
     )
-
+    tCPP = time() - t0
+    print("C++: predicted_outputs")
     print(predicted_outputs)
+
+    t0 = time()
+    py_predicted_outputs = ifs_utils.IFSUtils.predict(
+        ind=ind,
+        observations=ds_test.X,
+        n_rules=n_rules,
+        max_vars_per_rule=n_max_vars_per_rule,
+        n_labels=n_labels,
+        n_consequents=len(default_rule_output),
+        default_rule_cons=np.array(default_rule_output),
+        vars_ranges=vars_range,
+        labels_weights=labels_weights,
+        dc_idx=n_labels - 1
+    )
+
+    tPy = time() - t0
+    print("Python: predicted_outputs")
+    print(py_predicted_outputs)
 
     acc = _compute_accuracy(ds_test.y, predicted_outputs)
 
@@ -192,6 +214,10 @@ def simple_predict():
 
     is_close = np.allclose(predicted_outputs, expected_y_pred)
     print("is close", is_close)
+
+    print("time c++    {:.3f} ms".format(tCPP*1000))
+    print("time python {:.3f} ms".format(tPy*1000))
+    print("speed up    {:.1f}".format(tPy/tCPP))
 
 
 if __name__ == '__main__':
