@@ -134,80 +134,40 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
                 int vars_range_c, double *labels_weights, int labels_weights_n,
                 int dc_idx) {
 
-    // omp_set_num_threads(4);
-  // coutd << "vars_range" << std::endl;
-  // coutd << "shape" << vars_range_n << ", " << vars_range_m << std::endl;
-  // for (int i = 0; i < vars_range_n; i++) {
-  //   coutd << "";
-  //   for (int j = 0; j < vars_range_m; j++) {
-  //     cout << vars_range[i][j] << "; ";
-  //   }
-  //   cout << std::endl;
-  // }
-
-  // coutd << "observations" << std::endl;
-  // coutd << "shape" << observations_r << ", " << observations_c << std::endl;
-  // for (int i = 0; i < observations_r; i++) {
-  //   coutd << "";
-  //   for (int j = 0; j < observations_c; j++) {
-  //     cout << observations[i][j] << "; ";
-  //   }
-  //   cout << std::endl;
-  // }
-
-  // coutd << "default rule cons" << std::endl;
-  // for (int i = 0; i < default_rule_cons_n; i++) {
-  //   coutd << default_rule_cons[i] << std::endl;
-  // }
-
   int n_true_labels = n_labels - 1;
 
   int n_vars = observations_c;
 
   // CONVERT observations to Eigen matrix
-  Map<MatXd> mat_obs(observations, observations_r, observations_c);
+  const Map<MatXd> mat_obs(observations, observations_r, observations_c);
 
   // EXTRACT NEW INDIVIDUAL
   // ind is a float array that is the individual which represents a FIS.
   Map<MatXf> evo_mfs(ind, n_vars, n_true_labels);
-  // coutd << setprecision(6) << "evo_mfs" << endl;
-  // cout << evo_mfs << endl;
 
   // offset where the antecedents values begin which is after the evo_mfs values
   float *ind_offset_ants = ind + (n_vars * n_true_labels);
   Map<MatXf> evo_ants(ind_offset_ants, n_rules, n_vars);
-  // coutd << "evo_ants" << endl;
-  // coutd << evo_ants << endl;
 
   float *ind_offset_cons = ind_offset_ants + (n_rules * n_vars);
   Map<MatXf> evo_cons(ind_offset_cons, n_rules, n_consequents);
-  // coutd << "evo_cons" << endl;
-  // cout << evo_cons << endl;
 
   // CONVERT EVOLUTION ANTS TO IFS ANTS
   // MatXf ifs_ants =
   Map<RowVectorXd> vec_labels_weights(labels_weights, labels_weights_n);
   MatrixXi ifs_ants = evo_ants2ifs_ants(evo_ants, vec_labels_weights);
-  // coutd << "ifs_ants" << endl;
-  // cout << ifs_ants << endl;
 
   // CONVERT EVOLUTION MFS TO IFS MFS (i.e. in_values)
   // TODO: vars_range_c is always 2, right ? (min, ptp)
   Map<MatXd> m_vars_range(vars_range, vars_range_r, vars_range_c);
-  // coutd << "vars range" << endl;
-  // cout << setprecision(6) << m_vars_range << endl;
 
   MatrixXd ifs_mfs = evo_mfs2ifs_mfs(evo_mfs, m_vars_range);
-  // coutd << "ifs mfs" << endl;
-  // cout << ifs_mfs << endl;
 
   // CONVERT EVOLUTION CONS TO IFS CONS
   const auto binarize_mat = [&](float v) {
     return v >= 0.5 ? 1.0 : 0.0;
   }; // TODO: extract this into .h
   MatrixXd ifs_cons = evo_cons.unaryExpr(binarize_mat);
-  // coutd << "ifs_cons" << endl;
-  // cout << ifs_cons << endl;
 
   // add default rule consequents to ifs_cons
   ifs_cons.conservativeResize(ifs_cons.rows() + 1, NoChange);
@@ -222,33 +182,17 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
   // create a row-major matrix here because we will returned it to Python
   MatXd defuzzified_outputs(observations_r, n_consequents);
   defuzzified_outputs.setConstant(NAN);
-  // defuzzified_outputs.setConstant(5);
-  // defuzzified_outputs.col(0).setConstant(12);
-  // cout << defuzzified_outputs << endl;
-  // Map<MatXd> mat_obs(observations, observations_r, observations_c);
-  // for(int i = 0; i < observations_r; i++){
-  //   coutd << mat_obs.row(i) << endl;
-  //   coutd << "yolo" << endl;
-  // }
-  int tot = observations_r * n_consequents;
-  // coutd << "tot " << tot << endl;
-  // for (int i = 0; i < tot; i++) {
-  //   coutd << *(defuzzified_outputs.data() + i) << endl;
-  // }
 
   const int N_ANTECEDENTS = ifs_ants.cols();
-  // coutd << "N_ANTECEDENTS = " << N_ANTECEDENTS << endl;
 
-  // EVALUATE
-  #pragma omp parallel for
+// EVALUATE
+#pragma omp parallel for
   for (int i = 0; i < observations_r; i++) {
-    VectorXd obs = mat_obs.row(i);
+    const VectorXd obs = mat_obs.row(i);
 
     // a rule can be implicated in [0, 1]
-    // double max_rule_implication = 0.0;
-    RowVectorXd rule_activations(n_rules + 1); // +1 is for default rule
-    rule_activations.setConstant(0);
-
+    RowVectorXd rules_activations(n_rules + 1); // +1 is for default rule
+    rules_activations.setConstant(0);
 
     for (int ri = 0; ri < n_rules; ri++) {
       VectorXi ants_ri = ifs_ants.row(ri);
@@ -262,6 +206,7 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
       // an antecedent can be implicated in [0, 1]
       double min_antecedent_implication = 1.0;
 
+      // coutd << "fuz ants" << endl;
       for (int ai = 0; ai < N_ANTECEDENTS; ai++) {
         // ai is the i-th antecedent. Each rule has as many antecedents
         // as there are variables, so the ai is also the i-th variable.
@@ -277,56 +222,23 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
         vector<double> ys(mf_values.data(),
                           mf_values.data() + mf_values.size());
 
-        // coutd << "xs: ";
-        // for (auto const &x : xs) {
-        //   cout << x << ' ';
-        // }
-        // cout << endl;
-
-        // coutd << "in_values \n" << in_values << endl;
-
-        double fuzzified_x = lininterp(xs, ys, obs(ai));
-        // cout << endl;
-        // cout << endl;
-        // cout << endl;
-        // cout << endl;
-        // coutd << "fuzzified x " << fuzzified_x << endl;
+        const double fuzzified_x = lininterp(xs, ys, obs(ai));
         min_antecedent_implication =
             min(min_antecedent_implication, fuzzified_x);
       }
-      rule_activations(ri) = min_antecedent_implication;
+      rules_activations(ri) = min_antecedent_implication;
     }
     // compute default rule activation
-    rule_activations(rule_activations.size() - 1) =
-        1 - rule_activations.maxCoeff();
+    rules_activations(rules_activations.size() - 1) =
+        1 - rules_activations.maxCoeff();
 
-    // cout << endl;
-    // cout << endl;
-    // cout << endl;
-    // cout << endl;
-    // coutd << "OBS " << i << endl;
-    // coutd << "rule activations \n" << rule_activations << endl;
-    // coutd << "ifs_cons \n" << ifs_cons << endl;
-
+    // coutd << "rule
     VectorXd defuzz_out =
-        (rule_activations * ifs_cons) / rule_activations.sum();
-    // coutd << "deffuz \n" << defuzz_out << endl;
-    // cout << endl;
-    // cout << endl;
-    // cout << endl;
-    // cout << endl;
+        (rules_activations * ifs_cons) / rules_activations.sum();
 
     defuzzified_outputs.row(i) = defuzz_out;
   }
   // END EVALUATE
-
-  // return the pointer itself
-  // double d[4] = {1,2,3,4};
-  // double *d = new double[4];
-  // for (int i = 0; i < 4; i++) {
-  //   d[i] = i * 10;
-  // }
-  // return d;
 
   // for some unknown reason, we cannot simple return the myMatrix.data() to
   // the caller (Python)
@@ -338,18 +250,14 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
   // 3. there is a problem of indexing (rowmajor vs columnmajor)
   // 4. there is a problem of iterating from one elm to another because the step
   // size is wrong (void* instead of double* ? padding ?)
-  double *p = new double[tot];
+  double *predictions_outputs = new double[observations_r * n_consequents];
   for (int i = 0; i < observations_r; i++) {
     for (int j = 0; j < n_consequents; j++) {
-      // coutd << i << "," << j << endl;
-      // coutd <<  defuzzified_outputs(i, j) << endl;
-      p[i * n_consequents + j] = defuzzified_outputs(i, j);
+      predictions_outputs[i * n_consequents + j] = defuzzified_outputs(i, j);
     }
   }
 
-  return p;
-
-  // return defuzzified_outputs.data();
+  return predictions_outputs;
 }
 
 void extract_mfs_from_ind(float *ind, double **evo_mfs, int n_vars,
