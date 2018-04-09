@@ -28,7 +28,7 @@ def _compute_accuracy(y_true, y_pred):
     return acc_per_class
 
 
-def WineDataset(test_size=0.3):
+def loadWineDataset(test_size=0.3):
     from sklearn.datasets import load_wine as load_ds
     from sklearn.model_selection import train_test_split
 
@@ -67,7 +67,7 @@ def run_with_simple_evo():
     ##
     ## LOAD DATASET
     ##
-    ds_train, ds_test = WineDataset(test_size=0.3)
+    ds_train, ds_test = loadWineDataset(test_size=0.3)
 
     ##
     ## EXPERIMENT PARAMETERS
@@ -97,8 +97,8 @@ def run_with_simple_evo():
         dataset=ds_train,
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
-        N_POP=100,
-        N_GEN=10
+        N_POP=200,
+        N_GEN=100
     )
 
     tick()
