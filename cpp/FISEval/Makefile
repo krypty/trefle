@@ -1,5 +1,6 @@
 CC=g++
-CFLAGS=-O3 -W -std=c++17 -Wall -pedantic -fPIC -fopenmp -shared -mtune=native -march=native -ffast-math -isystem cpp/vendor/eigen/
+CFLAGS=-O3 -ftree-vectorize -mavx -W -std=c++17 -Wall -pedantic -fPIC -fopenmp -shared -mtune=native -march=native -mfpmath=sse -DDEBUG  -isystem cpp/vendor/eigen/
+# CFLAGS=-W -std=c++17 -Wall -pedantic -fPIC -fopenmp -shared -mtune=native -march=native -mfpmath=sse -DDEBUG  -isystem cpp/vendor/eigen/
 CFLAGS_TESTS=-W -std=c++17 -Wall -pedantic -fPIC -fopenmp -march=native -ffast-math -isystem cpp/vendor/eigen/ -Icpp/vendor/catch/
 LDFLAGS=
 EXEC=fiseval.so

@@ -1,5 +1,3 @@
-#define NDEBUG
-
 #include "../hpp/fis.h"
 #include "omp.h"
 #include <algorithm>
@@ -8,9 +6,8 @@
 #include <iostream>
 #include <vector>
 
-
-// #define coutd std::cout << "<<C++>> " << std::setprecision(2)
-#define coutd std::cout << "<<C++>> "
+#define coutd std::cout << "<<C++>> " << std::setprecision(3)
+// #define coutd std::cout << "<<C++>> "
 #define EPSILON 1e-9
 using namespace std;
 using namespace Eigen;
