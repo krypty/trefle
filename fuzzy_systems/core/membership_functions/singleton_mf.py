@@ -1,3 +1,5 @@
+import numpy as np
+
 from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
 
 
