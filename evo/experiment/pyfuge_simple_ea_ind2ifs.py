@@ -1,9 +1,6 @@
-from time import time
-
 import numpy as np
 
 from cpp.FISEval import fiseval
-from evo.helpers import NativeIFSUtils
 from evo.helpers.ifs_utils import IFSUtils
 from evo.helpers.ind_2_ifs import Ind2IFS
 
@@ -49,10 +46,8 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
         pass
 
     def predict(self, ind):
-        # t0 = time()
-
-        predicted_outputs = IFSUtils.predict(
-        # predicted_outputs = fiseval.predict_native(
+        # predicted_outputs = IFSUtils.predict(
+        predicted_outputs = fiseval.predict_native(
             ind=ind,
             observations=self.dataset.X,
             n_rules=self.n_rules,
@@ -64,7 +59,4 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
             labels_weights=self.labels_weights,
             dc_idx=self.n_labels - 1
         )
-        # t1 = time() - t0
-        # print("single time: {} ms".format(t1*1000))
-
         return predicted_outputs
