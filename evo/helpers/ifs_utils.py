@@ -140,7 +140,7 @@ class IFSUtils:
         :param evo_cons:
         :return:
         """
-        return np.where(evo_cons >= 0.5, 1, 0)
+        return np.where(evo_cons >= 0.5, 1.0, 0.0)
 
     @staticmethod
     def compute_vars_range(observations):
