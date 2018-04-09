@@ -296,7 +296,7 @@ class IFSUtils:
             # FUZZIFY INPUTS
             # fuz_ants = np.empty_like(ifs_ants_idx, dtype=np.float)
 
-            rules_act = np.empty(n_rules)
+            rules_act = np.zeros(n_rules, dtype=np.float64)
 
             for ri in range(n_rules):
                 # print("yolo\n", ifs_ants_idx)
@@ -305,7 +305,7 @@ class IFSUtils:
                 # print("dci\n", dc_idx)
 
                 # by default all rules are not triggered
-                fuz_ants = np.zeros_like(ants_ri)
+                fuz_ants = np.zeros_like(ants_ri, dtype=np.float64)
                 # print("fuz_ants", fuz_ants)
 
                 # ignore rule with all antecedents set to DC
