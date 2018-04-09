@@ -1,10 +1,9 @@
-import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 from evo.dataset.pf_dataset import PFDataset
 from evo.helpers import pyfuge_ifs_ind2fis
 from evo.helpers.ifs_utils import IFSUtils
-from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def _compute_accuracy(y_true, y_pred):
@@ -29,7 +28,7 @@ def _compute_accuracy(y_true, y_pred):
     return acc_per_class
 
 
-def CancerDataset(test_size=0.3):
+def loadCancerDataset(test_size=0.3):
     df = pd.read_csv(r"CancerDiag2_headers.csv", sep=";")
 
     dfX = df.drop(["out", "CASE_LBL"], axis=1)
@@ -42,40 +41,29 @@ def CancerDataset(test_size=0.3):
 
     # X = preprocessing.scale(X)
 
-    # X_train, X_test, y_train, y_test = train_test_split(X, y,
-    #                                                     test_size=test_size)
-
-    X_train, X_test, y_train, y_test = X, X, y, y
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                        test_size=test_size)
 
     return (PFDataset(X_train, y_train, X_names, y_names),
             PFDataset(X_test, y_test, X_names, y_names))
 
 
-# @profile(sort="cumulative", filename="/tmp/pyfuge.profile")
 def run_with_simple_evo():
-    from time import time
     from evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
     from evo.experiment.base.simple_experiment import SimpleEAExperiment
     from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
         PyFUGEFitnessEvaluator
 
-    # import random
-    # random.seed(10)
-    # np.random.seed(10)
-
-    t0 = time()
-    tick = lambda: print((time() - t0) * 1000)
-
     ##
     ## LOAD DATASET
     ##
-    ds_train, ds_test = CancerDataset(test_size=0.3)
+    ds_train, ds_test = loadCancerDataset(test_size=0.3)
 
     ##
     ## EXPERIMENT PARAMETERS
     ##
     n_vars = ds_train.N_VARS
-    n_rules = 5
+    n_rules = 6
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
     mf_label_names = ["LOW", "HIGH", "DC"]
     default_rule_output = [1]  # [class_0]
@@ -100,10 +88,9 @@ def run_with_simple_evo():
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=200,
-        N_GEN=10
+        N_GEN=50
     )
 
-    tick()
     top_n = exp.get_top_n()
 
     fis_li = []
@@ -171,6 +158,11 @@ def run_with_simple_evo():
 
 if __name__ == '__main__':
     from time import time
+    import numpy as np
+    import random
+
+    random.seed(20)
+    np.random.seed(20)
 
     t0 = time()
     run_with_simple_evo()
