@@ -1,6 +1,6 @@
 import numpy as np
 
-from evo.examples.evo_wine_classifier import WineDataset, _compute_accuracy
+from evo.examples.evo_wine_classifier import loadWineDataset
 from evo.helpers import ifs_utils
 
 
@@ -58,15 +58,17 @@ def simple_predict():
     random.seed(10)
     np.random.seed(10)
 
+    np.set_printoptions(precision=6)
+
     ##
     ## LOAD DATASET
     ##
-    ds_train, ds_test = WineDataset(test_size=0.3)
+    ds_train, ds_test = loadWineDataset(test_size=0.3)
 
     ##
     ## EXPERIMENT PARAMETERS
     ##
-    n_vars = ds_train.N_VARS
+    # n_vars = ds_train.N_VARS
     n_rules = 4
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
     mf_label_names = ["LOW", "HIGH", "DC"]
@@ -79,6 +81,9 @@ def simple_predict():
     vars_range[:, 1] = ds_train.X.min(axis=0)
 
     n_labels = len(mf_label_names)
+
+    # FIXME
+    assert len(mf_label_names) == len(labels_weights)
 
     ind = [0.4014568272507354, 0.02086371261509734, 0.530756810210902,
            0.3093307757344431, 0.08247854740559168, 0.7019633839142663,
@@ -111,113 +116,49 @@ def simple_predict():
            0.21373491313776627, 0.7295233734199151, 0.3420745660412098,
            0.07917707524907425, 0.14810283014260428, 0.5386148763532943]
 
-    expected_fitness = 0.5698924731182795
-
-    expected_y_pred = [[0., 1., 0.],
-                       [0., 0., 1.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [0., 1., 0.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [1., 0., 0.],
-                       [1., 0., 0.],
-                       [0.5, 0., 0.5],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [0., 0., 1.],
-                       [0., 1., 0.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [1., 0., 0.],
-                       [0., 0., 1.],
-                       [1., 0., 0.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [0.5, 0., 0.5],
-                       [0., 0., 1.],
-                       [0., 0., 1.],
-                       [1., 0., 0.],
-                       [0., 0., 1.],
-                       [0., 0., 1.],
-                       [0., 0., 1.],
-                       [0., 0., 1.],
-                       [0., 1., 0.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [0., 1., 0.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [0., 1., 0.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [1., 0., 0.],
-                       [0., 1., 0.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [0., 1., 0.],
-                       [0., 0., 1.],
-                       [1., 0., 0.]]
-
-    expected_acc_per_class = [0.8333333333333334, 0.7222222222222222,
-                              0.8518518518518519]
-
     from time import time
+    N = 100
+
     t0 = time()
-    predicted_outputs = predict_native(
-        ind=ind,
-        observations=ds_test.X,
-        n_rules=n_rules,
-        max_vars_per_rule=n_max_vars_per_rule,
-        n_labels=n_labels,
-        n_consequents=len(default_rule_output),
-        default_rule_cons=np.array(default_rule_output),
-        vars_ranges=vars_range,
-        labels_weights=labels_weights,
-        dc_idx=n_labels - 1
-    )
+    for _ in range(N):
+        predicted_outputs = predict_native(
+            ind=ind,
+            observations=ds_test.X,
+            n_rules=n_rules,
+            max_vars_per_rule=n_max_vars_per_rule,
+            n_labels=n_labels,
+            n_consequents=len(default_rule_output),
+            default_rule_cons=np.array(default_rule_output),
+            vars_ranges=vars_range,
+            labels_weights=labels_weights,
+            dc_idx=dc_index
+        )
     tCPP = time() - t0
-    print("C++: predicted_outputs")
-    print(predicted_outputs)
+    tCPP /= N
 
     t0 = time()
-    py_predicted_outputs = ifs_utils.IFSUtils.predict(
-        ind=ind,
-        observations=ds_test.X,
-        n_rules=n_rules,
-        max_vars_per_rule=n_max_vars_per_rule,
-        n_labels=n_labels,
-        n_consequents=len(default_rule_output),
-        default_rule_cons=np.array(default_rule_output),
-        vars_ranges=vars_range,
-        labels_weights=labels_weights,
-        dc_idx=n_labels - 1
-    )
-
+    for _ in range(N):
+        py_predicted_outputs = ifs_utils.IFSUtils.predict(
+            ind=ind,
+            observations=ds_test.X,
+            n_rules=n_rules,
+            max_vars_per_rule=n_max_vars_per_rule,
+            n_labels=n_labels,
+            n_consequents=len(default_rule_output),
+            default_rule_cons=np.array(default_rule_output),
+            vars_ranges=vars_range,
+            labels_weights=labels_weights,
+            dc_idx=dc_index
+        )
     tPy = time() - t0
-    print("Python: predicted_outputs")
-    print(py_predicted_outputs)
+    tPy /= N
 
-    acc = _compute_accuracy(ds_test.y, predicted_outputs)
+    print("time c++    {:.3f} ms".format(tCPP * 1000))
+    print("time python {:.3f} ms".format(tPy * 1000))
+    print("speed up    {:.1f}".format(tPy / tCPP))
 
-    is_close = np.allclose(acc, expected_acc_per_class)
-    print("is close", is_close)
-
-    is_close = np.allclose(predicted_outputs, expected_y_pred)
-    print("is close", is_close)
-
-    print("time c++    {:.3f} ms".format(tCPP*1000))
-    print("time python {:.3f} ms".format(tPy*1000))
-    print("speed up    {:.1f}".format(tPy/tCPP))
+    is_close = np.allclose(predicted_outputs, py_predicted_outputs)
+    print("is close C++/Python", is_close)
 
 
 if __name__ == '__main__':
