@@ -224,7 +224,7 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
 
   // create a row-major matrix here because we will returned it to Python
   MatXd defuzzified_outputs(observations_r, n_consequents);
-  defuzzified_outputs.setConstant(999);
+  defuzzified_outputs.setConstant(NAN);
   // defuzzified_outputs.setConstant(5);
   // defuzzified_outputs.col(0).setConstant(12);
   // cout << defuzzified_outputs << endl;
