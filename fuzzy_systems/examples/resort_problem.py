@@ -1,6 +1,6 @@
 import numpy as np
 
-from fuzzy_systems.core.fis.fis import FIS, AND_min, OR_max, COA_func, MIN
+from fuzzy_systems.core.fis.fis import AND_min, OR_max, MIN, COA_func, FIS
 from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
 from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
@@ -87,7 +87,7 @@ def resort_problem():
     print("difference     : {}".format(expected_value - predicted_value))
 
     # View the FIS
-    fisv = FISViewer(fis)
+    fisv = FISViewer(fis, figsize=(12, 10))
     describe_fis(fis)
     # fisv.save("/tmp/out.png")
     fisv.show()
