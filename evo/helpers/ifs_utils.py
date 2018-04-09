@@ -178,26 +178,21 @@ class IFSUtils:
     @staticmethod
     def extract_ind_new(ind, n_vars, n_labels, n_rules, n_consequents):
         # n_labels-1 because we don't generate a MF for DC label
-        mfs_idx_len = (n_labels - 1) * n_vars
+        n_true_labels = n_labels - 1
+
+        mfs_idx_len = n_vars * n_true_labels
+
         evo_mfs = ind[:mfs_idx_len]
-        # print("lala", len(evo_mfs))
+        evo_mfs = np.array(evo_mfs, dtype=np.float).reshape(n_vars,
+                                                            n_true_labels)
+
         ants_idx_len = n_vars * n_rules
         ants_idx_end = mfs_idx_len + ants_idx_len
-        evo_ants = ind[mfs_idx_len:ants_idx_end]
-        # cons_idx_len = n_rules * n_consequents
-        evo_cons = ind[ants_idx_end:]
-        # print("mfs")
 
-        evo_mfs = np.array(evo_mfs, dtype=np.float).reshape(n_vars,
-                                                            n_labels - 1)
-        # print(evo_mfs)
-        # print("ants")
+        evo_ants = ind[mfs_idx_len:ants_idx_end]
         evo_ants = np.array(evo_ants).reshape(n_rules, n_vars)
-        # print("evo_ants")
-        # print("evo_ants)
-        # print("cons")
-        # print(n_rules, n_consequents)
-        # print(evo_cons)
+
+        evo_cons = ind[ants_idx_end:]
         evo_cons = np.array(evo_cons, dtype=np.float).reshape(n_rules,
                                                               n_consequents)
 
