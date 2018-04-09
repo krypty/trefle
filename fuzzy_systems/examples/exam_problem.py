@@ -6,7 +6,7 @@ from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
 from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
-from fuzzy_systems.view.fis_viewer import FISViewer
+from fuzzy_systems.view.fis_surface import show_surface
 
 """
 The outputs come from external_references/SANTAMARIA_LFA_LABO4-5/Labo-5.
@@ -249,6 +249,19 @@ def main():
                               'remaining_work': 0,
                               'time_to_exam': 30})
 
+    # Example of using show_surface() with >2 input variables
+    other_labels = {"time_to_exam": 4, "remaining_work": 80}
+    show_surface(fis, title="Car Problem Mamdani",
+                 x_label="difficulty", y_label="importance", z_label="priority",
+                 n_pts=15, x_range=(0, 10), y_range=(0, 10), z_range=(0, 1),
+                 other_labels=other_labels)
+
+    other_labels = {"time_to_exam": 4, "remaining_work": 20}
+    show_surface(fis, title="Car Problem Mamdani",
+                 x_label="difficulty", y_label="importance", z_label="priority",
+                 n_pts=15, x_range=(0, 10), y_range=(0, 10), z_range=(0, 1),
+                 other_labels=other_labels)
+
     a = [
         (1, 0.530666027791088),
         (2, 0.530409356725146),
@@ -277,9 +290,10 @@ def main():
 
 def fis_predict(results, fis, crisp_values):
     res = fis.predict(crisp_values)
-    fisv = FISViewer(fis)
-    fisv.save("/tmp/out.png")
-    input("Press enter...")
+    # fisv = FISViewer(fis)
+    # fisv.save("/tmp/out.png")
+    # fisv.show()
+    # input("Press enter...")
     results.append(res)
 
 
