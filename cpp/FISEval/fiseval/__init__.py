@@ -5,8 +5,6 @@ from collections import OrderedDict
 import numpy as np
 from numpy.ctypeslib import ndpointer
 
-from evo.helpers.ifs_utils import IFSUtils
-
 np.set_printoptions(precision=2, suppress=True)
 
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -47,6 +45,10 @@ def _get_array_1d_ptr(arr, ctype_type):
 
 
 def _get_np_array_1d_ptr(arr, ctype_type):
+    try:
+        arr.shape[1]
+    except IndexError:
+        assert False, "arr must not be a 1D array !"
     return arr.ctypes.data_as(C.POINTER(ctype_type))
 
 
@@ -54,23 +56,29 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
                    n_consequents, default_rule_cons, vars_ranges,
                    labels_weights,
                    dc_idx):
+    # fix weird bug when dealing with 1D int numpy array
+    default_rule_cons = default_rule_cons.tolist()
+
+    # FIXME use .ravel() to pass 1d array to c++
+    # TODO find a way to avoid copy when passing to c++ (id(a) != id(a.ravel())
+
     kwargs = OrderedDict([
         ("ind", _get_array_1d_ptr(ind, C.c_float)),
         ("ind_n", len(ind)),
-        ("observations", (_get_np_array_1d_ptr(observations, C.c_double))),
-        ("observations_n", observations.shape[0]),
-        ("observations_m", observations.shape[1]),
+        ("observations", (_get_array_1d_ptr(observations.ravel(), C.c_double))),
+        ("observations_r", observations.shape[0]),
+        ("observations_c", observations.shape[1]),
         ("n_rules", n_rules),
         ("max_vars_per_rules", max_vars_per_rule),
         ("n_labels", n_labels),
         ("n_consequents", n_consequents),
-        ("default_rule_cons", _get_np_array_1d_ptr(default_rule_cons, C.c_int)),
+        ("default_rule_cons", _get_array_1d_ptr(default_rule_cons, C.c_int)),
         ("default_rule_cons_n", len(default_rule_cons)),
         ("vars_range", _get_np_array_1d_ptr(vars_ranges, C.c_double)),
-        ("vars_range_n", vars_ranges.shape[0]),
-        ("vars_range_m", vars_ranges.shape[1]),
+        ("vars_range_r", vars_ranges.shape[0]),
+        ("vars_range_c", vars_ranges.shape[1]),
         ("labels_weights",
-         _get_np_array_1d_ptr(labels_weights.astype(np.float64), C.c_double)),
+         _get_array_1d_ptr(labels_weights.astype(np.float64), C.c_double)),
         ("labels_weights_n", len(labels_weights)),  # FIXME: same as n_labels ?
         ("dc_idx", dc_idx)
     ])
@@ -99,7 +107,7 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
     res_ptr = f(*kwargs.values())  # cannot pass keyword args to native function
     # f(*kwargs.values())  # cannot pass keyword args to native function
 
-    ptr = C.cast(res_ptr, C.POINTER(C.c_double * (out_rows*out_cols)))
+    ptr = C.cast(res_ptr, C.POINTER(C.c_double * (out_rows * out_cols)))
     res = np.frombuffer(ptr.contents)
 
     # print("res", res.reshape(-1, n_consequents))
