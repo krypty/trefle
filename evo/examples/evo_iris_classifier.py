@@ -16,7 +16,7 @@ def run_without_evo():
 
     import pandas as pd
 
-    fname = r"/home/gary/CI4CB/PyFUGE/fuzzy_systems/examples/iris/iris.data"
+    fname = r"/home/gary/CI4CB/PyFUGE/datasets/iris.data"
     iris_dataset = pd.read_csv(fname, sep=",",
                                names=["SL", "SW", "PL", "PW", "OUT"])
 
@@ -121,7 +121,7 @@ def run_with_simple_evo():
     ## LOAD DATASET
     ##
     ds_train, ds_test = Iris2PFDataset(
-        fname=r"../../fuzzy_systems/examples/iris/iris.data")
+        fname=r"../../datasets/iris.data")
 
     ##
     ## EXPERIMENT PARAMETERS

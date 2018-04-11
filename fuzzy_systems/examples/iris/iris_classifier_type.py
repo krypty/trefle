@@ -91,7 +91,7 @@ def main():
     fis = SingletonFIS(rules=rules, default_rule=dr)
 
     # Read Iris dataset
-    iris_data = np.loadtxt('iris.data', delimiter=",",
+    iris_data = np.loadtxt(r'../../../datasets/iris.data', delimiter=",",
                            dtype="f8,f8,f8,f8,|U15")
 
     def check_prediction(predicted, expected, counter):
