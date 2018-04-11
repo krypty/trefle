@@ -167,7 +167,7 @@ class FISViewer:
             elif rule is None:
                 continue
             else:
-                rows.append("Rule {} {}".format(row + 1, rule._ant_act_func[1]))
+                rows.append("R{} {}".format(row + 1, rule._ant_act_func[1]))
 
         for ax, col in zip(axarr[0], col_ants):
             ax.set_title(col)
