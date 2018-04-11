@@ -66,7 +66,7 @@ class SimpleEAExperiment(Experiment):
 
         NGEN = self._kwargs.get("N_GEN") or 10
 
-        hof = tools.HallOfFame(self._kwargs.get("HOF") or 2)
+        hof = tools.HallOfFame(self._kwargs.get("HOF") or 5)
 
         algorithms.eaSimple(population, toolbox, cxpb=0.8, mutpb=0.3, ngen=NGEN,
                             halloffame=hof,
