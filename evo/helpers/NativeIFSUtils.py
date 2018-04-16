@@ -1,6 +1,7 @@
 import numpy as np
 
-from evo.examples.evo_wine_classifier import loadWineDataset
+import cpp.FISEval.fiseval as feval
+from evo.examples.evo_wine_classifier import load_wine_dataset
 from evo.helpers import ifs_utils
 
 
@@ -48,9 +49,9 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
     :return: an array of defuzzified outputs (i.e. non-thresholded outputs)
     """
 
-    return fiseval.predict_native(ind, observations, n_rules, max_vars_per_rule,
-                                  n_labels, n_consequents, default_rule_cons,
-                                  vars_ranges, labels_weights, dc_idx)
+    return feval.predict_native(ind, observations, n_rules, max_vars_per_rule,
+                                n_labels, n_consequents, default_rule_cons,
+                                vars_ranges, labels_weights, dc_idx)
 
 
 def simple_predict():
@@ -63,7 +64,7 @@ def simple_predict():
     ##
     ## LOAD DATASET
     ##
-    ds_train, ds_test = loadWineDataset(test_size=0.3)
+    ds_train, ds_test = load_wine_dataset(test_size=0.3)
 
     ##
     ## EXPERIMENT PARAMETERS
@@ -162,6 +163,4 @@ def simple_predict():
 
 
 if __name__ == '__main__':
-    from cpp.FISEval import fiseval
-
     simple_predict()
