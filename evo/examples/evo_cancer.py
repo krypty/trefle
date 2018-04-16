@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from evo.dataset.pf_dataset import PFDataset
 from evo.helpers import pyfuge_ifs_ind2fis
 from evo.helpers.ifs_utils import IFSUtils
+from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def _compute_accuracy(y_true, y_pred):
@@ -28,8 +29,8 @@ def _compute_accuracy(y_true, y_pred):
     return acc_per_class
 
 
-def loadCancerDataset(test_size=0.3):
-    df = pd.read_csv(r"CancerDiag2_headers.csv", sep=";")
+def load_cancer_dataset(test_size=0.3):
+    df = pd.read_csv(r"../../datasets/CancerDiag2_headers.csv", sep=";")
 
     dfX = df.drop(["out", "CASE_LBL"], axis=1)
     X = dfX.values
@@ -57,17 +58,17 @@ def run_with_simple_evo():
     ##
     ## LOAD DATASET
     ##
-    ds_train, ds_test = loadCancerDataset(test_size=0.3)
+    ds_train, ds_test = load_cancer_dataset(test_size=0.3)
 
     ##
     ## EXPERIMENT PARAMETERS
     ##
     n_vars = ds_train.N_VARS
-    n_rules = 6
+    n_rules = 4
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
-    mf_label_names = ["LOW", "HIGH", "DC"]
+    mf_label_names = ["LOW", "MEDIUM", "HIGH", "DC"]
     default_rule_output = [1]  # [class_0]
-    labels_weights = np.array([1, 1, 10])
+    labels_weights = np.array([1, 1, 1, 10])
     dc_index = len(mf_label_names) - 1
 
     ##
@@ -87,8 +88,9 @@ def run_with_simple_evo():
         dataset=ds_train,
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
-        N_POP=200,
-        N_GEN=50
+        N_POP=400,
+        N_GEN=100,
+        HOF=3
     )
 
     top_n = exp.get_top_n()
@@ -106,8 +108,8 @@ def run_with_simple_evo():
             pretty_vars_names=ds_train.X_names,
             pretty_outputs_names=ds_train.y_names
         )
-        # fis.describe()
-        # FISViewer(fis).show()
+        fis.describe()
+        FISViewer(fis).show()
 
         fis_li.append(fis)
 
@@ -159,10 +161,10 @@ def run_with_simple_evo():
 if __name__ == '__main__':
     from time import time
     import numpy as np
-    import random
+    # import random
 
-    random.seed(20)
-    np.random.seed(20)
+    # random.seed(20)
+    # np.random.seed(20)
 
     t0 = time()
     run_with_simple_evo()
