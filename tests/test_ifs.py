@@ -1,6 +1,6 @@
 import numpy as np
 
-from evo.playground.ifs_without_evo import IFSUtils
+from evo.helpers.ifs_utils import IFSUtils
 
 
 def test_unitfloat2idx_equal_weights():
