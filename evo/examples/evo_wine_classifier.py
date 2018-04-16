@@ -4,6 +4,7 @@ import pandas as pd
 from evo.dataset.pf_dataset import PFDataset
 from evo.helpers import pyfuge_ifs_ind2fis
 from evo.helpers.ifs_utils import IFSUtils
+from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def _compute_accuracy(y_true, y_pred):
@@ -28,7 +29,25 @@ def _compute_accuracy(y_true, y_pred):
     return acc_per_class
 
 
-def loadWineDataset(test_size=0.3):
+def load_fake_dataset(test_size=0.3):
+    from sklearn.datasets import make_classification
+    from sklearn.model_selection import train_test_split
+    X, y = make_classification(n_samples=600, n_features=1000, n_informative=3,
+                               n_redundant=0, n_classes=2,
+                               weights=[0.5, 0.5]
+                               )
+    y = y.reshape(-1, 1)
+    print("X shape", X.shape)
+    print("y shape", y.shape)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                        test_size=test_size)
+
+    return (PFDataset(X_train, y_train),
+            PFDataset(X_test, y_test))
+
+
+def load_wine_dataset(test_size=0.3):
     from sklearn.datasets import load_wine as load_ds
     from sklearn.model_selection import train_test_split
 
@@ -36,7 +55,10 @@ def loadWineDataset(test_size=0.3):
 
     X = dataset.data
     y = pd.get_dummies(dataset.target).values
+
+    print("X shape", X.shape)
     print("y shape", y.shape)
+
     X_names = dataset.feature_names
     y_names = dataset.target_names
 
@@ -67,7 +89,8 @@ def run_with_simple_evo():
     ##
     ## LOAD DATASET
     ##
-    ds_train, ds_test = loadWineDataset(test_size=0.3)
+    # ds_train, ds_test = loadWineDataset(test_size=0.3)
+    ds_train, ds_test = load_fake_dataset(test_size=0.3)
 
     ##
     ## EXPERIMENT PARAMETERS
@@ -76,8 +99,8 @@ def run_with_simple_evo():
     n_rules = 4
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
     mf_label_names = ["LOW", "HIGH", "DC"]
-    default_rule_output = [0, 1, 0]  # [class_0, class_1, class_2]
-    labels_weights = np.array([1, 1, 6])
+    default_rule_output = [1]  # [class_0, class_1, class_2]
+    labels_weights = np.array([1, 1, 10])
     dc_index = len(mf_label_names) - 1
 
     ##
@@ -117,8 +140,8 @@ def run_with_simple_evo():
             pretty_vars_names=ds_train.X_names,
             pretty_outputs_names=ds_train.y_names
         )
-        # fis.describe()
-        # FISViewer(fis).show()
+        fis.describe()
+        FISViewer(fis).show()
 
         fis_li.append(fis)
 
@@ -146,7 +169,7 @@ def run_with_simple_evo():
         print(y_pred_test)
 
         acc = _compute_accuracy(ds_test.y, y_pred_test)
-        print("acc ", acc)
+        print("acc test", acc)
 
 
 if __name__ == '__main__':
