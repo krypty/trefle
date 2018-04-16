@@ -7,6 +7,7 @@ from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
 from fuzzy_systems.view.fis_surface import show_surface
+from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def car_accel_problem():
