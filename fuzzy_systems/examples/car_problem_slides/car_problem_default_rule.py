@@ -1,6 +1,4 @@
-import numpy as np
-
-from fuzzy_systems.core.fis.fis import COA_func, AND_min, MIN
+from fuzzy_systems.core.fis.fis import AND_min, MIN
 from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
 from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable

@@ -52,7 +52,7 @@ class SimpleEAExperiment(Experiment):
         toolbox.register("mate", tools.cxTwoPoint)
         toolbox.register("mutate", tools.mutShuffleIndexes,
                          indpb=1.0 / target_length)
-        toolbox.register("select", tools.selTournament, tournsize=5)
+        toolbox.register("select", tools.selTournament, tournsize=3)
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
@@ -66,9 +66,9 @@ class SimpleEAExperiment(Experiment):
 
         NGEN = self._kwargs.get("N_GEN") or 10
 
-        hof = tools.HallOfFame(self._kwargs.get("HOF") or 2)
+        hof = tools.HallOfFame(self._kwargs.get("HOF") or 5)
 
-        algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.1, ngen=NGEN,
+        algorithms.eaSimple(population, toolbox, cxpb=0.8, mutpb=0.3, ngen=NGEN,
                             halloffame=hof,
                             stats=stats)
         self._top_n = tools.selBest(population, k=3)

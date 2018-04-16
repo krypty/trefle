@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from evo.dataset.pf_dataset import PFDataset
 from evo.helpers import pyfuge_ifs_ind2fis
@@ -28,16 +29,40 @@ def _compute_accuracy(y_true, y_pred):
     return acc_per_class
 
 
-def WineDataset(test_size=0.3):
-    from sklearn.datasets import load_wine
+def load_fake_dataset(test_size=0.3):
+    from sklearn.datasets import make_classification
+    from sklearn.model_selection import train_test_split
+    X, y = make_classification(n_samples=600, n_features=1000, n_informative=3,
+                               n_redundant=0, n_classes=2,
+                               weights=[0.5, 0.5]
+                               )
+    y = y.reshape(-1, 1)
+    print("X shape", X.shape)
+    print("y shape", y.shape)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                        test_size=test_size)
+
+    return (PFDataset(X_train, y_train),
+            PFDataset(X_test, y_test))
+
+
+def load_wine_dataset(test_size=0.3):
+    from sklearn.datasets import load_wine as load_ds
     from sklearn.model_selection import train_test_split
 
-    dataset = load_wine()
+    dataset = load_ds()
 
     X = dataset.data
-    y = dataset.target.reshape(-1, 1)  # pd.get_dummies(dataset.target).values
+    y = pd.get_dummies(dataset.target).values
+
+    print("X shape", X.shape)
+    print("y shape", y.shape)
+
     X_names = dataset.feature_names
     y_names = dataset.target_names
+
+    # X = preprocessing.scale(X)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                         test_size=test_size)
@@ -46,6 +71,7 @@ def WineDataset(test_size=0.3):
             PFDataset(X_test, y_test, X_names, y_names))
 
 
+# @profile(sort="cumulative", filename="/tmp/pyfuge.profile")
 def run_with_simple_evo():
     from time import time
     from evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
@@ -53,22 +79,27 @@ def run_with_simple_evo():
     from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
         PyFUGEFitnessEvaluator
 
+    import random
+    random.seed(10)
+    np.random.seed(10)
+
     t0 = time()
     tick = lambda: print((time() - t0) * 1000)
 
     ##
     ## LOAD DATASET
     ##
-    ds_train, ds_test = WineDataset(test_size=0.3)
+    # ds_train, ds_test = loadWineDataset(test_size=0.3)
+    ds_train, ds_test = load_fake_dataset(test_size=0.3)
 
     ##
     ## EXPERIMENT PARAMETERS
     ##
     n_vars = ds_train.N_VARS
-    n_rules = 3
+    n_rules = 4
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
     mf_label_names = ["LOW", "HIGH", "DC"]
-    default_rule_output = [0]  # [0, 1, 0]  # [class_0, class_1, class_2]
+    default_rule_output = [1]  # [class_0, class_1, class_2]
     labels_weights = np.array([1, 1, 10])
     dc_index = len(mf_label_names) - 1
 
@@ -90,13 +121,14 @@ def run_with_simple_evo():
         ind2ifs=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=200,
-        N_GEN=20
+        N_GEN=100
     )
 
+    tick()
     top_n = exp.get_top_n()
 
     fis_li = []
-    for ind in top_n:
+    for ind in top_n[:1]:
         print("ind ({}): {}".format(ind.fitness, ind))
         fis = pyfuge_ifs_ind2fis.convert(
             n_vars=n_vars,
@@ -120,7 +152,7 @@ def run_with_simple_evo():
     # make sure the var_range is still set to training set. If not, we cheat
     var_range_train = IFSUtils.compute_vars_range(ds_train.X)
 
-    for ind in top_n:
+    for ind in top_n[:1]:
         y_pred_test = IFSUtils.predict(
             ind,
             observations=ds_test.X,
@@ -134,10 +166,10 @@ def run_with_simple_evo():
             dc_idx=dc_index
         )
 
-        acc = _compute_accuracy(ds_test.y, y_pred_test)
-        print("acc ", acc)
+        print(y_pred_test)
 
-    tick()
+        acc = _compute_accuracy(ds_test.y, y_pred_test)
+        print("acc test", acc)
 
 
 if __name__ == '__main__':

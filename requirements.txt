@@ -6,6 +6,7 @@ Cython==0.27.3
 deap==1.2.2
 decorator==4.1.2
 entrypoints==0.2.3
+gprof2dot==2017.9.19
 graphviz==0.8.2
 greenlet==0.4.12
 html5lib==1.0.1
@@ -26,7 +27,7 @@ mistune==0.8.3
 nbconvert==5.3.1
 nbformat==4.4.0
 notebook==5.2.2
-numpy==1.13.3
+numpy==1.14.0
 pandas==0.22.0
 pandocfilters==1.4.2
 parso==0.1.1

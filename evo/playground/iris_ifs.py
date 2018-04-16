@@ -36,6 +36,7 @@ def Iris2PFDataset(fname):
 
 if __name__ == '__main__':
     from time import time
+    import numpy as np
 
     # from datetime import datetime
     #
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     ## TRAINING PHASE
     ##
     ds_train, ds_test = Iris2PFDataset(
-        fname=r"../fuzzy_systems/examples/iris/iris.data")
+        fname=r"../../datasets/iris.data")
 
     pyfuge_ind_2_ifs = PyFUGESimpleEAInd2IFS(
         n_vars=ds_train.N_VARS,
@@ -55,6 +56,7 @@ if __name__ == '__main__':
         n_max_var_per_rule=4,
         mf_label_names=["LOW", "MEDIUM", "HIGH", "DC"],
         default_rule_output=[0, 0, 1],  # [setosa, versicolor, virginica]
+        labels_weights=np.array([1, 1, 1, 10]),
         dataset=ds_train,
     )
 

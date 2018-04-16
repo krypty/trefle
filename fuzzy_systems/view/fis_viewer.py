@@ -167,7 +167,7 @@ class FISViewer:
             elif rule is None:
                 continue
             else:
-                rows.append("Rule {} {}".format(row + 1, rule._ant_act_func[1]))
+                rows.append("R{} {}".format(row + 1, rule._ant_act_func[1]))
 
         for ax, col in zip(axarr[0], col_ants):
             ax.set_title(col)
@@ -184,10 +184,7 @@ class FISViewer:
 
         cons_labels = list(aggr_cons.keys())
         mf = list(aggr_cons.values())[cons_index]
-        MembershipFunctionViewer(mf, ax=ax,
-                                 label="[{}]".format(
-                                     cons_labels[cons_index]) + " aggregated",
-                                 color="orange")
+        MembershipFunctionViewer(mf, ax=ax, color="orange")
 
         # show last crisp inputs
         crisp_values = self.__fis.last_crisp_values
@@ -198,9 +195,8 @@ class FISViewer:
         # ax.plot([in_value, in_value], [0, fuzzified], 'r')
 
         defuzz = list(self.__fis.last_defuzzified_outputs.values())[cons_index]
-        ax.plot([defuzz, defuzz], [0, 1],
-                label="output = {:.3f}".format(defuzz))
-        ax.legend()
+        ax.plot([defuzz, defuzz], [0, 1])
+        ax.set_xlabel("[{}] = {:.3f}".format(cons_labels[cons_index], defuzz))
 
         ax.axis("on")
 

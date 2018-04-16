@@ -1,9 +1,9 @@
-from fuzzy_systems.core.fis.fis import OR_max, MIN
-from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
+import numpy as np
+
+from fuzzy_systems.core.fis.fis import OR_max, MIN, FIS, COA_func
 from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
 from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
-from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
 from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
 from fuzzy_systems.view.fis_viewer import FISViewer
@@ -23,13 +23,13 @@ def tip_problem():
     })
 
     lv_tip = LinguisticVariable(name="tip", ling_values_dict={
-        "low": SingletonMF(0),  # LinPWMF([0, 1], [13, 0]),
-        "medium": SingletonMF(25 // 2),  # LinPWMF([0, 0], [13, 1], [25, 0]),
-        "high": SingletonMF(25)  # LinPWMF([13, 0], [25, 1])
+        # "low": SingletonMF(0),  # LinPWMF([0, 1], [13, 0]),
+        # "medium": SingletonMF(25 // 2),  # LinPWMF([0, 0], [13, 1], [25, 0]),
+        # "high": SingletonMF(25)  # LinPWMF([13, 0], [25, 1])
 
-        # "low": LinPWMF([0, 1], [13, 0]),
-        # "medium": LinPWMF([0, 0], [13, 1], [25, 0]),
-        # "high": LinPWMF([13, 0], [25, 1])
+        "low": LinPWMF([0, 1], [13, 0]),
+        "medium": LinPWMF([0, 0], [13, 1], [25, 0]),
+        "high": LinPWMF([13, 0], [25, 1])
     })
 
     r1 = FuzzyRule(
@@ -67,9 +67,13 @@ def tip_problem():
         impl_func=MIN
     )
 
-    fis = SingletonFIS(rules=[r1, r2, r3])
+    fis = FIS(
+        rules=[r1, r2, r3],
+        aggr_func=np.max,
+        defuzz_func=COA_func
+    )
 
-    input_values = {'quality': 3, 'service': 3}
+    input_values = {'quality': 4.5, 'service': 3}
     predicted_value = fis.predict(input_values)["tip"]
 
     expected_value = 48.3

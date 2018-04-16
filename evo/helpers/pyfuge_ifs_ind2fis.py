@@ -21,8 +21,7 @@ def convert(n_vars, ind, n_rules, n_labels, n_max_vars_per_rule,
 
     # CONVERT EVOLUTION MFS TO IFS MFS
     ifs_ants_idx = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
-    # in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, ifs_ants_idx, vars_ranges)
-    in_values = IFSUtils.evo_mfs2ifs_mfs_new(evo_mfs, vars_ranges)
+    in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, vars_ranges)
 
     def get_var_name(i):
         if pretty_vars_names is None:

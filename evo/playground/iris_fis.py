@@ -19,7 +19,7 @@ from fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def main():
-    fname = r"../fuzzy_systems/examples/iris/iris.data"
+    fname = r"../../datasets/iris.data"
     iris_dataset = pd.read_csv(fname, sep=",",
                                names=["SL", "SW", "PL", "PW", "OUT"])
 

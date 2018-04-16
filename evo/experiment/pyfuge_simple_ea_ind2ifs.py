@@ -1,6 +1,6 @@
 import numpy as np
 
-from evo.helpers.ifs_utils import IFSUtils
+from cpp.FISEval import fiseval
 from evo.helpers.ind_2_ifs import Ind2IFS
 
 
@@ -9,9 +9,13 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
                  default_rule_output, dataset, labels_weights):
         assert n_max_var_per_rule <= n_vars
         assert n_rules >= 1, "you must set at least 1 rule"
-        
+
         assert len(mf_label_names) == len(labels_weights), \
             "The number of labels must match the number of labels weights"
+
+        if dataset.y.ndim == 1:
+            assert False, "y must be a 2D np array. Maybe you should call " \
+                          "pd.get_dummies(y)? "
 
         assert dataset.y.shape[1] == len(default_rule_output), \
             "default rule output must have the same shape as dataset.y"
@@ -45,7 +49,8 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
         pass
 
     def predict(self, ind):
-        predicted_outputs = IFSUtils.predict(
+        # predicted_outputs = IFSUtils.predict(
+        predicted_outputs = fiseval.predict_native(
             ind=ind,
             observations=self.dataset.X,
             n_rules=self.n_rules,
@@ -57,5 +62,4 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
             labels_weights=self.labels_weights,
             dc_idx=self.n_labels - 1
         )
-
         return predicted_outputs

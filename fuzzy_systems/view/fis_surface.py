@@ -7,7 +7,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def show_surface(fis, x_label, y_label, z_label, n_pts=25, x_range=None,
-                 y_range=None, z_range=None, ax=None, title=None):
+                 y_range=None, z_range=None, ax=None, title=None,
+                 other_labels=None):
     if ax is None:
         fig = plt.figure(figsize=(4, 8))
         _ax = fig.gca(projection='3d')
@@ -27,8 +28,13 @@ def show_surface(fis, x_label, y_label, z_label, n_pts=25, x_range=None,
     Y = np.linspace(*lv_y_range, n_pts)
     X, Y = np.meshgrid(X, Y)
 
+    crisp_values = {}
+    if other_labels is not None:
+        crisp_values.update(other_labels)
+
     def f(x, y):
-        return fis.predict({x_label: x, y_label: y})[z_label]
+        crisp_values.update({x_label: x, y_label: y})
+        return fis.predict(crisp_values)[z_label]
 
     f_vect = np.vectorize(f)
     v_out = f_vect(X, Y)
