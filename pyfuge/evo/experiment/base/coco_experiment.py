@@ -1,4 +1,4 @@
-from evo.experiment.base.experiment import Experiment
+from pyfuge.evo.experiment.base.experiment import Experiment
 
 
 class CoCoExperiment(Experiment):

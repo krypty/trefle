@@ -1,8 +1,10 @@
 from matplotlib.ticker import MaxNLocator
 
-from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
-from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
-from fuzzy_systems.view.viewer import Viewer
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
+from pyfuge.fuzzy_systems.core.membership_functions.lin_piece_wise_mf import \
+    LinPWMF
+from pyfuge.fuzzy_systems.view.viewer import Viewer
 
 
 class MembershipFunctionViewer(Viewer):

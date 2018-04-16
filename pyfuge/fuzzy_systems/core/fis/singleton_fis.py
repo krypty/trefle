@@ -2,11 +2,13 @@ import sys
 from itertools import chain
 from typing import List
 
-from fuzzy_systems.core.fis.fis import FIS
-from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
-from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.fis.fis import FIS
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
+from pyfuge.fuzzy_systems.core.membership_functions.singleton_mf import \
+    SingletonMF
+from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 
 
 def are_all_consequents_singleton(rules: List[FuzzyRule]):

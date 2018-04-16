@@ -1,6 +1,6 @@
-from evo.dataset.pf_dataset import PFDataset
-from evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
-from evo.helpers.ind_2_ifs import Ind2IFS
+from pyfuge.evo.dataset.pf_dataset import PFDataset
+from pyfuge.evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
+from pyfuge.evo.helpers.ind_2_ifs import Ind2IFS
 
 
 class Experiment:

@@ -1,7 +1,8 @@
 from abc import ABCMeta
 from typing import Dict
 
-from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
 
 
 class LinguisticVariable(metaclass=ABCMeta):

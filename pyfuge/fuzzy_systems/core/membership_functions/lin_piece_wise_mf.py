@@ -1,6 +1,7 @@
 import numpy as np
 
-from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
 
 
 def gen_line(p0, p1, n_points):
@@ -63,7 +64,7 @@ class LinPWMF(FreeShapeMF):
 
 
 if __name__ == '__main__':
-    from fuzzy_systems.view.mf_viewer import MembershipFunctionViewer
+    from pyfuge.fuzzy_systems.view.mf_viewer import MembershipFunctionViewer
 
     lin1 = LinPWMF([0, 0], [2, 1], [5, 1], [6, 0.5], [10, 0])
     MembershipFunctionViewer(lin1).show()

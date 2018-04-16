@@ -2,8 +2,10 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, List, Callable, Tuple
 
-from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
-from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, \
+    Consequent
 
 
 class FuzzyRule:

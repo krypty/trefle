@@ -1,7 +1,7 @@
 from typing import List, Callable, Tuple
 
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule_element import Consequent
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Consequent
 
 
 class DefaultFuzzyRule(FuzzyRule):

@@ -1,12 +1,13 @@
 from abc import ABCMeta
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from typing import List, Callable, Tuple
 
 import numpy as np
 
-from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
-from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
+from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
 
 COA_func = (lambda v, m: np.sum(np.multiply(v, m)) / np.sum(m), "COA_func")
 OR_max = (np.max, "OR_max")

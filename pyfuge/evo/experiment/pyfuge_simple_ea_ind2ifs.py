@@ -1,7 +1,7 @@
 import numpy as np
 
-from cpp.FISEval import fiseval
-from evo.helpers.ind_2_ifs import Ind2IFS
+from pyfuge.cpp.FISEval import fiseval
+from pyfuge.evo.helpers.ind_2_ifs import Ind2IFS
 
 
 class PyFUGESimpleEAInd2IFS(Ind2IFS):

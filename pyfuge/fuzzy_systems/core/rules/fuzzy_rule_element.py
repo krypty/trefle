@@ -1,4 +1,4 @@
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
 
 

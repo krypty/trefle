@@ -1,7 +1,7 @@
-from evo.dataset.pf_dataset import PFDataset
-from evo.experiment.base.simple_experiment import SimpleEAExperiment
-from evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
-from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
+from pyfuge.evo.dataset.pf_dataset import PFDataset
+from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
+from pyfuge.evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
+from pyfuge.evo.fitness_evaluator.pyfuge_fitness_evaluator import \
     PyFUGEFitnessEvaluator
 
 

@@ -1,15 +1,17 @@
 import numpy as np
 
-from fuzzy_systems.core.fis.fis import MIN, AND_min
-from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fuzzy_systems.core.fis.fis import MIN, AND_min
+from pyfuge.fuzzy_systems.core.fis.singleton_fis import SingletonFIS
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from fuzzy_systems.core.linguistic_variables.three_points_lv import \
+from pyfuge.fuzzy_systems.core.linguistic_variables.three_points_lv import \
     ThreePointsLV
-from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
+from pyfuge.fuzzy_systems.core.membership_functions.singleton_mf import \
+    SingletonMF
+from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, \
+    Consequent
 
 """
 IRIS DATASET SOURCE: 

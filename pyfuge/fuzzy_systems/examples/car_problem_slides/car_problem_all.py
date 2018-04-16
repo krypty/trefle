@@ -1,14 +1,14 @@
 from matplotlib import pyplot as plt
 
-from fuzzy_systems.examples.car_problem_slides.car_problem_default_rule import \
+from pyfuge.fuzzy_systems.examples.car_problem_slides.car_problem_default_rule import \
     car_accel_problem as cap_default_rule
-from fuzzy_systems.examples.car_problem_slides.car_problem_default_rule_and_not import \
+from pyfuge.fuzzy_systems.examples.car_problem_slides.car_problem_default_rule_and_not import \
     car_accel_problem as cap_default_rule_and_not
-from fuzzy_systems.examples.car_problem_slides.car_problem_mamdani import \
+from pyfuge.fuzzy_systems.examples.car_problem_slides.car_problem_mamdani import \
     car_accel_problem as cap_mamdani
-from fuzzy_systems.examples.car_problem_slides.car_problem_singleton import \
+from pyfuge.fuzzy_systems.examples.car_problem_slides.car_problem_singleton import \
     car_accel_problem as cap_singleton
-from fuzzy_systems.view.fis_surface import show_surface
+from pyfuge.fuzzy_systems.view.fis_surface import show_surface
 
 
 def main():

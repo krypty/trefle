@@ -1,13 +1,16 @@
 import numpy as np
 
-from fuzzy_systems.core.fis.fis import COA_func, MIN, FIS, AND_min
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fuzzy_systems.core.fis.fis import COA_func, MIN, FIS, AND_min
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from fuzzy_systems.core.membership_functions.gaussian_mf import GaussianMF
-from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
-from fuzzy_systems.view.fis_viewer import FISViewer
+from pyfuge.fuzzy_systems.core.membership_functions.gaussian_mf import \
+    GaussianMF
+from pyfuge.fuzzy_systems.core.membership_functions.lin_piece_wise_mf import \
+    LinPWMF
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, \
+    Consequent
+from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def tip_problem():

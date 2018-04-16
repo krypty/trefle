@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 
-from evo.dataset.pf_dataset import PFDataset
-from evo.helpers import pyfuge_ifs_ind2fis
-from evo.helpers.ifs_utils import IFSUtils
-from fuzzy_systems.view.fis_viewer import FISViewer
+from pyfuge.evo.dataset.pf_dataset import PFDataset
+from pyfuge.evo.helpers import pyfuge_ifs_ind2fis
+from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def _compute_accuracy(y_true, y_pred):
@@ -74,9 +74,10 @@ def load_wine_dataset(test_size=0.3):
 # @profile(sort="cumulative", filename="/tmp/pyfuge.profile")
 def run_with_simple_evo():
     from time import time
-    from evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
-    from evo.experiment.base.simple_experiment import SimpleEAExperiment
-    from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
+    from pyfuge.evo.experiment.pyfuge_simple_ea_ind2ifs import \
+        PyFUGESimpleEAInd2IFS
+    from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
+    from pyfuge.evo.fitness_evaluator.pyfuge_fitness_evaluator import \
         PyFUGEFitnessEvaluator
 
     import random

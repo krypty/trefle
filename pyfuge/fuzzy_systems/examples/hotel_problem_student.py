@@ -1,15 +1,16 @@
 import numpy as np
 
-from fuzzy_systems.core.fis.fis import FIS, OR_max, COA_func, MIN, AND_min
-from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fuzzy_systems.core.fis.fis import FIS, OR_max, COA_func, MIN, \
+    AND_min
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
-from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule_element import Consequent, Antecedent
-from fuzzy_systems.view.fis_viewer import FISViewer
+from pyfuge.fuzzy_systems.core.membership_functions.lin_piece_wise_mf import \
+    LinPWMF
+from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Consequent, \
+    Antecedent
+from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def hotel_problem():

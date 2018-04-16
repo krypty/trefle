@@ -1,6 +1,7 @@
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
+from pyfuge.fuzzy_systems.core.membership_functions.lin_piece_wise_mf import \
+    LinPWMF
 
 
 class TwoPointsPDLV(LinguisticVariable):

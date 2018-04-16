@@ -1,7 +1,7 @@
 from sklearn.metrics import mean_absolute_error
 
-from evo.dataset.pf_dataset import PFDataset
-from evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
+from pyfuge.evo.dataset.pf_dataset import PFDataset
+from pyfuge.evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
 
 
 class PyFUGEFitnessEvaluator(FitnessEvaluator):

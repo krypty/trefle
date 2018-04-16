@@ -1,13 +1,16 @@
-from fuzzy_systems.core.fis.fis import AND_min, MIN
-from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fuzzy_systems.core.fis.fis import AND_min, MIN
+from pyfuge.fuzzy_systems.core.fis.singleton_fis import SingletonFIS
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
-from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
-from fuzzy_systems.view.fis_surface import show_surface
+from pyfuge.fuzzy_systems.core.membership_functions.lin_piece_wise_mf import \
+    LinPWMF
+from pyfuge.fuzzy_systems.core.membership_functions.singleton_mf import \
+    SingletonMF
+from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, \
+    Consequent
+from pyfuge.fuzzy_systems.view.fis_surface import show_surface
 
 
 def car_accel_problem():

@@ -1,12 +1,14 @@
 import numpy as np
 
-from fuzzy_systems.core.fis.fis import FIS, COA_func, AND_min, MIN
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fuzzy_systems.core.fis.fis import FIS, COA_func, AND_min, MIN
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from fuzzy_systems.core.membership_functions.lin_piece_wise_mf import LinPWMF
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
-from fuzzy_systems.view.fis_viewer import FISViewer
+from pyfuge.fuzzy_systems.core.membership_functions.lin_piece_wise_mf import \
+    LinPWMF
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, \
+    Consequent
+from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def car_accel_problem():

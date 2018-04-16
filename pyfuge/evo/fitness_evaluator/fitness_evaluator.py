@@ -1,6 +1,6 @@
 from abc import ABCMeta
 
-from evo.dataset.pf_dataset import PFDataset
+from pyfuge.evo.dataset.pf_dataset import PFDataset
 
 
 class FitnessEvaluator(metaclass=ABCMeta):

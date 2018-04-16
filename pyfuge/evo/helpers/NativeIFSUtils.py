@@ -1,8 +1,8 @@
 import numpy as np
 
-import cpp.FISEval.fiseval as feval
-from evo.examples.evo_wine_classifier import load_wine_dataset
-from evo.helpers import ifs_utils
+import pyfuge.cpp.FISEval.fiseval as feval
+from pyfuge.evo.examples.evo_wine_classifier import load_wine_dataset
+from pyfuge.evo.helpers import ifs_utils
 
 
 def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,

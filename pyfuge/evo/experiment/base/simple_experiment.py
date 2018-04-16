@@ -1,9 +1,9 @@
 import numpy as np
 
-from evo.dataset.pf_dataset import PFDataset
-from evo.experiment.base.experiment import Experiment
-from evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
-from evo.helpers.ind_2_ifs import Ind2IFS
+from pyfuge.evo.dataset.pf_dataset import PFDataset
+from pyfuge.evo.experiment.base.experiment import Experiment
+from pyfuge.evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
+from pyfuge.evo.helpers.ind_2_ifs import Ind2IFS
 
 
 class SimpleEAExperiment(Experiment):

@@ -1,8 +1,8 @@
 import numpy as np
 
-from evo.helpers import pyfuge_ifs_ind2fis
-from evo.helpers.ifs_utils import IFSUtils
-from fuzzy_systems.view.fis_viewer import FISViewer
+from pyfuge.evo.helpers import pyfuge_ifs_ind2fis
+from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
 
 
 def run_without_evo():
@@ -108,10 +108,11 @@ def _compute_accuracy(y_true, y_pred):
 
 def run_with_simple_evo():
     from time import time
-    from evo.playground.iris_ifs import Iris2PFDataset
-    from evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
-    from evo.experiment.base.simple_experiment import SimpleEAExperiment
-    from evo.fitness_evaluator.pyfuge_fitness_evaluator import \
+    from pyfuge.evo.playground.iris_ifs import Iris2PFDataset
+    from pyfuge.evo.experiment.pyfuge_simple_ea_ind2ifs import \
+        PyFUGESimpleEAInd2IFS
+    from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
+    from pyfuge.evo.fitness_evaluator.pyfuge_fitness_evaluator import \
         PyFUGEFitnessEvaluator
 
     t0 = time()

@@ -1,15 +1,18 @@
 import numpy as np
 
-from evo.helpers.ifs_utils import IFSUtils
-from fuzzy_systems.core.fis.fis import AND_min, MIN
-from fuzzy_systems.core.fis.singleton_fis import SingletonFIS
-from fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.fuzzy_systems.core.fis.fis import AND_min, MIN
+from pyfuge.fuzzy_systems.core.fis.singleton_fis import SingletonFIS
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from fuzzy_systems.core.membership_functions.free_shape_mf import FreeShapeMF
-from fuzzy_systems.core.membership_functions.singleton_mf import SingletonMF
-from fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, Consequent
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
+from pyfuge.fuzzy_systems.core.membership_functions.singleton_mf import \
+    SingletonMF
+from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, \
+    Consequent
 
 
 def convert(n_vars, ind, n_rules, n_labels, n_max_vars_per_rule,
