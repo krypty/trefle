@@ -1,6 +1,6 @@
 import numpy as np
 
-from evo.helpers.ifs_utils import IFSUtils
+from pyfuge.evo.helpers.ifs_utils import IFSUtils
 
 
 def test_unitfloat2idx_equal_weights():
