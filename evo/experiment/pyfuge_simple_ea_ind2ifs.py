@@ -1,7 +1,6 @@
 import numpy as np
 
 from cpp.FISEval import fiseval
-from evo.helpers.ifs_utils import IFSUtils
 from evo.helpers.ind_2_ifs import Ind2IFS
 
 
@@ -13,6 +12,10 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
 
         assert len(mf_label_names) == len(labels_weights), \
             "The number of labels must match the number of labels weights"
+
+        if dataset.y.ndim == 1:
+            assert False, "y must be a 2D np array. Maybe you should call " \
+                          "pd.get_dummies(y)? "
 
         assert dataset.y.shape[1] == len(default_rule_output), \
             "default rule output must have the same shape as dataset.y"
