@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyfuge.cpp.FISEval import fiseval
+from pyfuge import py_fiseval
 from pyfuge.evo.helpers.ind_2_ifs import Ind2IFS
 
 
@@ -50,7 +50,7 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
 
     def predict(self, ind):
         # predicted_outputs = IFSUtils.predict(
-        predicted_outputs = fiseval.predict_native(
+        predicted_outputs = py_fiseval.predict_native(
             ind=ind,
             observations=self.dataset.X,
             n_rules=self.n_rules,

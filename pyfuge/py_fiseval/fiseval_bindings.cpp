@@ -1,16 +1,9 @@
-#include "../hpp/custom_eigen_td.h"
-#include "../hpp/fis.h"
-#include "../hpp/fiseval_wrapper.h"
-#include "cmath"
-#include "iostream"
-#include "omp.h"
-#include <Eigen/Core>
+#include "FISEval/cpp/hpp/fis.h"
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-using namespace Eigen;
 using namespace std;
 
 typedef py::array_t<double, py::array::c_style | py::array::forcecast>
@@ -18,8 +11,6 @@ typedef py::array_t<double, py::array::c_style | py::array::forcecast>
 typedef py::array_t<float, py::array::c_style | py::array::forcecast>
                  py_array_f;
 typedef py::array_t<int, py::array::c_style | py::array::forcecast> py_array_i;
-
-#define coutd std::cout << "<<C++>> "
 
 py::array_t<double> predict_c(py_array_f ind, py_array_d observations,
           const int n_rules, const int max_vars_per_rule, const int n_labels,

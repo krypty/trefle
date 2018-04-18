@@ -6,7 +6,7 @@ LDFLAGS=
 EXEC=fiseval.so
 BUILD_PATH=./cpp/build
 SRC_PATH=./cpp/src
-SOURCES=$(SRC_PATH)/fis.cpp $(SRC_PATH)/fiseval_wrapper.cpp
+SOURCES=$(SRC_PATH)/fis.cpp
 SOURCES_TESTS=$(wildcard ./cpp/tests/*.cpp)
 
 # EXTERNAL LIBS VERSIONS

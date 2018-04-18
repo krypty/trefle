@@ -9,16 +9,21 @@ pyfuge_module = Extension(
     'pyfuge_c',
     include_dirs=[
         os.path.join(HERE,
-                     'pyfuge/cpp/FISEval/cpp/vendor/catch'),
+                     'pyfuge/py_fiseval/FISEval/cpp/vendor/catch'),
         os.path.join(HERE,
-                     'pyfuge/cpp/FISEval/cpp/vendor/eigen'),
+                     'pyfuge/py_fiseval/FISEval/cpp/vendor/eigen'),
         os.path.join(HERE,
-                     'pyfuge/cpp/FISEval/cpp/vendor/pybind11/include'),
+                     'pyfuge/py_fiseval/pybind11/include'),
     ],
-    sources=glob.glob(
-        os.path.join(HERE, 'pyfuge/cpp/FISEval/cpp/src/*.cpp')),
+    sources=(
+        # sources for fiseval itself
+        glob.glob(os.path.join(HERE, 'pyfuge/py_fiseval/FISEval/cpp/src/*.cpp'))
+
+        # sources for the python bindings
+        + glob.glob(os.path.join(HERE, 'pyfuge/py_fiseval/*.cpp'))
+    ),
     depends=glob.glob(
-        os.path.join(HERE, 'pyfuge/cpp/FISEval/cpp/src/*.hpp')),
+        os.path.join(HERE, 'pyfuge/py_fiseval/FISEval/cpp/src/*.hpp')),
     extra_compile_args=['-fopenmp'],
     extra_link_args=['-fopenmp'],
 
