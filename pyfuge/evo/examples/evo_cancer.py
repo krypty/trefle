@@ -1,3 +1,6 @@
+from time import time
+
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -50,6 +53,11 @@ def load_cancer_dataset(test_size=0.3):
 
 
 def run_with_simple_evo():
+    import random
+
+    random.seed(20)
+    np.random.seed(20)
+
     from pyfuge.evo.experiment.pyfuge_simple_ea_ind2ifs import \
         PyFUGESimpleEAInd2IFS
     from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
@@ -160,14 +168,6 @@ def run_with_simple_evo():
 
 
 if __name__ == '__main__':
-    from time import time
-    import numpy as np
-
-    # import random
-
-    # random.seed(20)
-    # np.random.seed(20)
-
     t0 = time()
     run_with_simple_evo()
     t1 = time() - t0
