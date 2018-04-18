@@ -32,15 +32,18 @@ setup(
     url='http://iict-space.heig-vd.ch/cpn/',
     long_description=open(os.path.join(HERE, "README.md")).read(),
     ext_modules=[pyfuge_module],
-    packages=find_packages(),
+    packages=find_packages(exclude=[
+        "*playground*", "*.tests", "*.tests.*", "tests.*", "tests"
+    ]),
     python_requires=">3.4",
     install_requires=[
         "deap==1.2.2",
         "matplotlib==2.1.1",
         "numpy==1.14.0",
         "pandas==0.22.0",
-        "pytest==3.3.2",
         "scikit-learn==0.19.1",
         "scipy==1.0.0",
-    ]
+    ],
+    setup_requires=['pytest-runner'],
+    tests_require=["pytest==3.3.2"],
 )
