@@ -4,7 +4,6 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <vector>
 
 #define coutd std::cout << "<<C++>> " << std::setprecision(3)
 // #define coutd std::cout << "<<C++>> "

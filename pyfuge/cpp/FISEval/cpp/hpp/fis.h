@@ -4,6 +4,7 @@
 #include "../hpp/custom_eigen_td.h"
 #include <Eigen/Core>
 #include <iostream>
+#include <vector>
 
 using namespace Eigen;
 using namespace std;
