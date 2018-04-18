@@ -25,7 +25,7 @@ pyfuge_module = Extension(
 )
 
 setup(
-    name='PyFUGE',
+    name='pyfuge',
     version='0.1',
     description='PyFUGE is an educational library to play with fuzzy systems',
     author='Gary Marigliano',
