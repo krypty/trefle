@@ -11,13 +11,6 @@
 using namespace std;
 using namespace Eigen;
 
-void mul_np_array(double *in_array, int length, int scaler) {
-#pragma omp parallel for
-  for (int i = 0; i < length; i++) {
-    in_array[i] = in_array[i] * scaler;
-  }
-}
-
 double lininterp(vector<double> &xs, const vector<double> &ys, const double x) {
   assert(xs.size() == ys.size());
   sort(xs.begin(), xs.end());
