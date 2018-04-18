@@ -33,7 +33,10 @@ def _compute_accuracy(y_true, y_pred):
 
 
 def load_cancer_dataset(test_size=0.3):
-    df = pd.read_csv(r"../../datasets/CancerDiag2_headers.csv", sep=";")
+    # df = pd.read_csv(r"../../datasets/CancerDiag2_headers.csv", sep=";")
+    df = pd.read_csv(
+        r"/home/gary/CI4CB/PyFUGE/pyfuge/datasets/CancerDiag2_headers.csv",
+        sep=";")
 
     dfX = df.drop(["out", "CASE_LBL"], axis=1)
     X = dfX.values
