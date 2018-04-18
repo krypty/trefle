@@ -22,4 +22,4 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
+pyfuge*.so
