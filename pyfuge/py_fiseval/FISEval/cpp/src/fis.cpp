@@ -90,7 +90,7 @@ MatrixXi evo_ants2ifs_ants(const Map<MatXf> &evo_ants,
   // MatrixXf ifs_ants;
   // ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants);
   MatrixXi ifs_ants(evo_ants.rows(), evo_ants.cols());
-  ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants);
+  ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants).cast<int>();
 
   // coutd << "after" << endl << ifs_ants << endl;
   return ifs_ants;
@@ -159,7 +159,7 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
   const auto binarize_mat = [&](float v) {
     return v >= 0.5 ? 1.0 : 0.0;
   }; // TODO: extract this into .h
-  MatrixXd ifs_cons = evo_cons.unaryExpr(binarize_mat);
+  MatrixXd ifs_cons = evo_cons.unaryExpr(binarize_mat).cast<double>();
 
   // add default rule consequents to ifs_cons
   ifs_cons.conservativeResize(ifs_cons.rows() + 1, NoChange);
