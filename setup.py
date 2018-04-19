@@ -1,9 +1,17 @@
 import glob
 import os
+import sys
 
 from setuptools import setup, find_packages, Extension
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+extra_compile_args = ["-fopenmp"]
+extra_link_args = ["-fopenmp"]
+
+if sys.platform == "win32":
+    extra_compile_args = ["-D_hypot=hypot", "-openmp"]
+    extra_link_args = ["-static"]
 
 pyfuge_module = Extension(
     'pyfuge_c',
@@ -24,9 +32,8 @@ pyfuge_module = Extension(
     ),
     depends=glob.glob(
         os.path.join(HERE, 'pyfuge/py_fiseval/FISEval/cpp/src/*.hpp')),
-    extra_compile_args=['-fopenmp'],
-    extra_link_args=['-fopenmp'],
-
+    extra_compile_args=extra_compile_args,
+    extra_link_args=extra_link_args,
 )
 
 setup(
