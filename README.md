@@ -31,3 +31,9 @@ from pyfuge.evo.examples import evo_cancer
 evo_cancer.run_with_simple_evo()
 ```
 
+# NEW !
+```bash
+export VCPKG_ROOT=/home/gary/CI4CB/PyFUGE/pyfuge/py_fiseval/FISEval/vcpkg
+#activate your virtualenv
+python setup.py install
+```

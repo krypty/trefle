@@ -1,7 +1,7 @@
 #ifndef FIS_H
 #define FIS_H
 
-#include "../hpp/custom_eigen_td.h"
+#include "custom_eigen_td.h"
 #include <Eigen/Core>
 #include <iostream>
 #include <vector>

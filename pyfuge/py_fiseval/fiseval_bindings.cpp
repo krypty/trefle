@@ -1,4 +1,4 @@
-#include "FISEval/cpp/hpp/fis.h"
+#include "fis.h"
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 

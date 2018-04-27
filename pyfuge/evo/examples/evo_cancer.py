@@ -169,6 +169,8 @@ def run_with_simple_evo():
         acc = _compute_accuracy(ds_test.y, y_pred_test)
         print("acc test ", acc)
 
+def run():
+    run_with_simple_evo()
 
 if __name__ == '__main__':
     t0 = time()

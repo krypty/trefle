@@ -1,4 +1,4 @@
-#include "../hpp/fis.h"
+#include "fis.h"
 #include "omp.h"
 #include <algorithm>
 #include <cmath>
