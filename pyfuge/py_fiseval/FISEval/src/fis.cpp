@@ -1,23 +1,15 @@
-#include "../hpp/fis.h"
+#include "fis.h"
 #include "omp.h"
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <vector>
 
 #define coutd std::cout << "<<C++>> " << std::setprecision(3)
 // #define coutd std::cout << "<<C++>> "
 #define EPSILON 1e-9
 using namespace std;
 using namespace Eigen;
-
-void mul_np_array(double *in_array, int length, int scaler) {
-#pragma omp parallel for
-  for (int i = 0; i < length; i++) {
-    in_array[i] = in_array[i] * scaler;
-  }
-}
 
 double lininterp(vector<double> &xs, const vector<double> &ys, const double x) {
   assert(xs.size() == ys.size());
@@ -98,7 +90,7 @@ MatrixXi evo_ants2ifs_ants(const Map<MatXf> &evo_ants,
   // MatrixXf ifs_ants;
   // ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants);
   MatrixXi ifs_ants(evo_ants.rows(), evo_ants.cols());
-  ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants);
+  ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants).cast<int>();
 
   // coutd << "after" << endl << ifs_ants << endl;
   return ifs_ants;
@@ -167,7 +159,7 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
   const auto binarize_mat = [&](float v) {
     return v >= 0.5 ? 1.0 : 0.0;
   }; // TODO: extract this into .h
-  MatrixXd ifs_cons = evo_cons.unaryExpr(binarize_mat);
+  MatrixXd ifs_cons = evo_cons.unaryExpr(binarize_mat).cast<double>();
 
   // add default rule consequents to ifs_cons
   ifs_cons.conservativeResize(ifs_cons.rows() + 1, NoChange);
@@ -258,43 +250,4 @@ double *predict(float *ind, int ind_n, double *observations, int observations_r,
   }
 
   return predictions_outputs;
-}
-
-void extract_mfs_from_ind(float *ind, double **evo_mfs, int n_vars,
-                          int n_labels) {
-  array1d_to_2d(ind, evo_mfs, n_vars, n_labels);
-}
-void extract_ants_from_ind(float *ind, double **evo_ants, int n_rules,
-                           int n_vars) {
-  array1d_to_2d(ind, evo_ants, n_rules, n_vars);
-}
-
-template <typename T, typename U>
-void array1d_to_2d(T *in, U **out, int n, int ifs_ants) {
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < ifs_ants; j++) {
-      out[i][j] = in[i * ifs_ants + j];
-    }
-  }
-}
-
-double omp_sum(double **arr, int arr_n) {
-  const int N_THREADS = omp_get_max_threads();
-  double sum = 0.0f;
-
-  vector<float> mid_sum(N_THREADS);
-  std::fill(mid_sum.begin(), mid_sum.end() - 1, 0);
-
-#pragma omp parallel for
-  for (int i = 0; i < arr_n; i++) {
-    // sum += arr[i][0];
-    int tid = omp_get_thread_num();
-    mid_sum[tid] += arr[i][0];
-  }
-
-  for (int i = 0; i < N_THREADS; i++) {
-    sum += mid_sum[i];
-  }
-
-  return sum;
 }

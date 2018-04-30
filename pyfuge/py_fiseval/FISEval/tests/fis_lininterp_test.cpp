@@ -1,8 +1,8 @@
-#include "../vendor/catch/catch.hpp"
+#include "catch.hpp"
 
-#include "../hpp/fis.h"
+#include "fis.h"
 
-#include "../hpp/custom_eigen_td.h"
+#include "custom_eigen_td.h"
 #include <Eigen/Core>
 
 using namespace std;

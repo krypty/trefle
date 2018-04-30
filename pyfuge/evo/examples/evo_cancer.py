@@ -1,3 +1,6 @@
+from time import time
+
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -30,7 +33,10 @@ def _compute_accuracy(y_true, y_pred):
 
 
 def load_cancer_dataset(test_size=0.3):
-    df = pd.read_csv(r"../../datasets/CancerDiag2_headers.csv", sep=";")
+    # df = pd.read_csv(r"../../datasets/CancerDiag2_headers.csv", sep=";")
+    df = pd.read_csv(
+        r"/home/gary/CI4CB/PyFUGE/pyfuge/datasets/CancerDiag2_headers.csv",
+        sep=";")
 
     dfX = df.drop(["out", "CASE_LBL"], axis=1)
     X = dfX.values
@@ -50,6 +56,11 @@ def load_cancer_dataset(test_size=0.3):
 
 
 def run_with_simple_evo():
+    import random
+
+    random.seed(20)
+    np.random.seed(20)
+
     from pyfuge.evo.experiment.pyfuge_simple_ea_ind2ifs import \
         PyFUGESimpleEAInd2IFS
     from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
@@ -158,16 +169,10 @@ def run_with_simple_evo():
         acc = _compute_accuracy(ds_test.y, y_pred_test)
         print("acc test ", acc)
 
+def run():
+    run_with_simple_evo()
 
 if __name__ == '__main__':
-    from time import time
-    import numpy as np
-
-    # import random
-
-    # random.seed(20)
-    # np.random.seed(20)
-
     t0 = time()
     run_with_simple_evo()
     t1 = time() - t0

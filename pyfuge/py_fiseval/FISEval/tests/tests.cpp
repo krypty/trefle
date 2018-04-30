@@ -4,7 +4,7 @@
 // Let Catch provide main():
 #define CATCH_CONFIG_MAIN
 
-#include "../vendor/catch/catch.hpp"
+#include "catch.hpp"
 
 // That's it
 
