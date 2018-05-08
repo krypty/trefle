@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from time import time
 
 import numpy as np
@@ -8,6 +10,8 @@ from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.helpers import pyfuge_ifs_ind2fis
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
 from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
+
+PRJ_ROOT = Path(__file__).parents[2]
 
 
 def _compute_accuracy(y_true, y_pred):
@@ -33,9 +37,10 @@ def _compute_accuracy(y_true, y_pred):
 
 
 def load_cancer_dataset(test_size=0.3):
-    # df = pd.read_csv(r"../../datasets/CancerDiag2_headers.csv", sep=";")
+    filename = os.path.join(PRJ_ROOT, "datasets", "CancerDiag2_headers.csv")
+    print("cancer filew", filename)
     df = pd.read_csv(
-        r"/home/gary/CI4CB/PyFUGE/pyfuge/datasets/CancerDiag2_headers.csv",
+        filename,
         sep=";")
 
     dfX = df.drop(["out", "CASE_LBL"], axis=1)
@@ -169,8 +174,10 @@ def run_with_simple_evo():
         acc = _compute_accuracy(ds_test.y, y_pred_test)
         print("acc test ", acc)
 
+
 def run():
     run_with_simple_evo()
+
 
 if __name__ == '__main__':
     t0 = time()
