@@ -129,4 +129,5 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=["pytest==3.3.2"],
     zip_safe=False,
+    include_package_data=True,
 )
