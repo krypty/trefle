@@ -106,11 +106,12 @@ pyfuge_module = CMakeExtension("pyfuge")
 
 setup(
     name='pyfuge',
-    version='0.1',
+    version='0.1.4',
     description='PyFUGE is an educational library to play with fuzzy systems',
     author='Gary Marigliano',
     url='http://iict-space.heig-vd.ch/cpn/',
     long_description=open(os.path.join(HERE, "README.md")).read(),
+    long_description_content_type="text/markdown",
     ext_modules=[pyfuge_module],
     cmdclass=dict(build_ext=CMakeBuild),
     packages=find_packages(exclude=[
