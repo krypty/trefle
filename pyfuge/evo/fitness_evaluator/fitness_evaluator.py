@@ -1,18 +1,13 @@
 from abc import ABCMeta
 
-from pyfuge.evo.dataset.pf_dataset import PFDataset
-
 
 class FitnessEvaluator(metaclass=ABCMeta):
-    def eval(self, ifs, dataset: PFDataset):
+    def eval(self, y_pred, y_true):
         """
-        evaluate the IFS against the dataset and return a fitness value for
-        this IFS. The user of this class chooses the way the fitness is computed
-        :param ifs:
-        :param dataset:
-        :return: a fitness float value for this IFS
-        """
-        raise NotImplementedError()
 
-    def eval_fitness(self, y_pred, dataset: PFDataset):
+        :param y_pred: a vector (or matrix if multiple consequents) containing
+        the predicted outputs given the train dataset
+        :param dataset:
+        :return: a fitness float value for this fuzzy system
+        """
         raise NotImplementedError()

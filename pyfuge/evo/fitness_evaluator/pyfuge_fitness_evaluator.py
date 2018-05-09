@@ -1,6 +1,5 @@
 from sklearn.metrics import mean_absolute_error
 
-from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
 
 
@@ -21,9 +20,5 @@ class PyFUGEFitnessEvaluator(FitnessEvaluator):
         #         n_good += 1
         # return n_good / float(y_pred.shape[0])
 
-    def eval(self, ifs, dataset: PFDataset):
-        pass
-
-    def eval_fitness(self, y_preds, dataset: PFDataset):
-        y_true = dataset.y
+    def eval(self, y_preds, y_true):
         return self._compute_metric(y_preds, y_true)

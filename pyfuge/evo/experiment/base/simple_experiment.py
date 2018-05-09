@@ -45,7 +45,7 @@ class SimpleEAExperiment(Experiment):
             # fitness = self._fiteval.eval(ifs, self._dataset)
 
             y_preds = self._ind2ifs.predict(ind)
-            fitness = self._fiteval.eval_fitness(y_preds, self._dataset)
+            fitness = self._fiteval.eval(y_preds, self._dataset.y)
             return [fitness]
 
         toolbox.register("evaluate", eval_ind)
