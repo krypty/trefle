@@ -3,10 +3,9 @@ import platform
 import re
 import subprocess
 import sys
-import sysconfig
 from distutils.version import LooseVersion
-from shutil import copyfile, copymode
 from glob import glob
+from shutil import copyfile, copymode
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
@@ -43,7 +42,8 @@ class CMakeBuild(build_ext):
             os.path.dirname(self.get_ext_fullpath(ext.name)))
 
         # add vcpkg to toolpath chain
-        toolchain_path = os.path.join(os.environ["VCPKG_ROOT"],"scripts", "buildsystems","vcpkg.cmake" )
+        toolchain_path = os.path.join(os.environ["VCPKG_ROOT"], "scripts",
+                                      "buildsystems", "vcpkg.cmake")
         cmake_args = [
             '-DCMAKE_TOOLCHAIN_FILE={}'.format(toolchain_path),
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
@@ -57,7 +57,7 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
                 cfg.upper(),
                 extdir)]
-            if sys.maxsize > 2**32:
+            if sys.maxsize > 2 ** 32:
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']
         else:
