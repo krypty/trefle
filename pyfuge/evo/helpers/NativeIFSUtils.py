@@ -73,7 +73,6 @@ def simple_predict():
     mf_label_names = ["LOW", "HIGH", "DC"]
     default_rule_output = [0, 1, 0]  # [class_0, class_1, class_2]
     labels_weights = np.array([1, 1, 6])
-    dc_index = len(mf_label_names) - 1
 
     vars_range = np.empty((ds_train.X.shape[1], 2))
     vars_range[:, 0] = ds_train.X.ptp(axis=0)
@@ -130,7 +129,6 @@ def simple_predict():
             default_rule_cons=np.array(default_rule_output),
             vars_ranges=vars_range,
             labels_weights=labels_weights,
-            dc_idx=dc_index
         )
     tCPP = time() - t0
     tCPP /= N
@@ -147,7 +145,6 @@ def simple_predict():
             default_rule_cons=np.array(default_rule_output),
             vars_ranges=vars_range,
             labels_weights=labels_weights,
-            dc_idx=dc_index
         )
     tPy = time() - t0
     tPy /= N

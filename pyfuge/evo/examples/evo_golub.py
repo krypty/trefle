@@ -92,7 +92,6 @@ def run_with_simple_evo():
     mf_label_names = ["LOW", "HIGH", "DC"]
     default_rule_output = [0]  # [class_0]
     labels_weights = np.array([1, 1, 100])
-    dc_index = len(mf_label_names) - 1
 
     ##
     ## TRAINING PHASE

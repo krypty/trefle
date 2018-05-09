@@ -162,6 +162,7 @@ class IFSUtils:
         Must be >=0. negative index will not work !
         :return: an array of defuzzified outputs (i.e. non-thresholded outputs)
         """
+        # we have decided that the don't care index will always be the last label
         dc_idx = len(n_labels) - 1
         n_obs, n_vars = observations.shape
 

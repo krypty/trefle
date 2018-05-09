@@ -72,7 +72,6 @@ def run_without_evo():
         default_rule_cons=default_rule_cons,
         vars_ranges=iris_vars_range,
         labels_weights=np.ones(n_labels),
-        dc_idx=n_labels - 1
     )
 
     print((time() - t0) * 1000, "ms")
@@ -133,7 +132,6 @@ def run_with_simple_evo():
     mf_label_names = ["LOW", "HIGH", "DC"]
     default_rule_output = [0, 1, 0]  # [setosa, versicolor, virginica]
     labels_weights = np.ones(len(mf_label_names))
-    dc_index = len(mf_label_names) - 1
 
     ##
     ## TRAINING PHASE

@@ -84,6 +84,7 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
 
         self._ind_len += self.n_consequents * n_rules
 
+        # we have decided the don't care index will always be the last label
         self._dc_index = len(mf_label_names) - 1
 
     def convert(self, ind):
