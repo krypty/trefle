@@ -9,6 +9,9 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
                    n_consequents, default_rule_cons, vars_ranges,
                    labels_weights):
     """
+    Make the prediction (i.e. given an individual, it creates a FIS and finally returns the
+    predictions aka y_preds) using a C++ engine (faster)
+
     Assumptions:
     - singleton (aggregation and defuzzification done according the book)
     - classifier type (multiple consequents in [0, 1])

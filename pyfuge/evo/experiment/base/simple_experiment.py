@@ -6,7 +6,7 @@ from deap import creator, base, tools, algorithms
 from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.experiment.base.experiment import Experiment
 from pyfuge.evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
-from pyfuge.evo.helpers.ind_2_ifs import Ind2IFS
+from pyfuge.evo.helpers.fis_individual import FISIndividual
 
 
 class SimpleEAExperiment(Experiment):
@@ -15,12 +15,12 @@ class SimpleEAExperiment(Experiment):
     algorithm) with DEAP library.
     """
 
-    def __init__(self, dataset: PFDataset, ind2ifs: Ind2IFS,
+    def __init__(self, dataset: PFDataset, fis_individual: FISIndividual,
                  fitevaluator: FitnessEvaluator, **kwargs):
-        super(SimpleEAExperiment, self).__init__(dataset, ind2ifs, fitevaluator,
-                                                 **kwargs)
+        super(SimpleEAExperiment, self).__init__(dataset, fis_individual,
+                                                 fitevaluator, **kwargs)
 
-        target_length = self._ind2ifs.ind_length()
+        target_length = self._fis_individual.ind_length()
 
         print("target len", target_length)
 
@@ -36,7 +36,7 @@ class SimpleEAExperiment(Experiment):
                          toolbox.individual)
 
         def eval_ind(ind):
-            y_preds = self._ind2ifs.predict(ind)
+            y_preds = self._fis_individual.predict(ind)
             fitness = self._fiteval.eval(y_preds, self._dataset.y)
             return [fitness]
 

@@ -1,8 +1,8 @@
 import numpy as np
 
-from pyfuge import py_fiseval
+from pyfuge.evo.helpers import NativeIFSUtils
+from pyfuge.evo.helpers.fis_individual import FISIndividual
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
-from pyfuge.evo.helpers.ind_2_ifs import Ind2IFS
 from pyfuge.fuzzy_systems.core.fis.fis import MIN, AND_min
 from pyfuge.fuzzy_systems.core.fis.singleton_fis import SingletonFIS
 from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
@@ -42,7 +42,22 @@ def _create_ling_var(var_name, in_values_vi):
     return LinguisticVariable(var_name, ling_values_dict)
 
 
-class PyFUGESimpleEAInd2IFS(Ind2IFS):
+def _create_rule(ant_idx_ri, cons_idx_ri, labels, ling_vars,
+                 output_vars,
+                 dc_index):
+    ants = [Antecedent(ling_vars[i], labels[ant]) for i, ant in
+            enumerate(ant_idx_ri) if ant != dc_index]
+
+    cons = [Consequent(lv_name=output_vars[i], lv_value=cons) for i, cons in
+            enumerate(cons_idx_ri)]
+
+    return FuzzyRule(ant_act_func=AND_min,
+                     ants=ants,
+                     cons=cons,
+                     impl_func=MIN)
+
+
+class SimpleFISIndividual(FISIndividual):
     def __init__(self, n_vars, n_rules, n_max_var_per_rule, mf_label_names,
                  default_rule_output, dataset, labels_weights):
         assert n_max_var_per_rule <= n_vars
@@ -71,7 +86,7 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
         self.vars_range[:, 0] = self.dataset.X.ptp(axis=0)
         self.vars_range[:, 1] = self.dataset.X.min(axis=0)
 
-        super(PyFUGESimpleEAInd2IFS, self).__init__()
+        super(SimpleFISIndividual, self).__init__()
 
         # mf_label_names = ["LOW", "MEDIUM", "HIGH"]
         self._ind_len = 0
@@ -87,7 +102,7 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
         # we have decided the don't care index will always be the last label
         self._dc_index = len(mf_label_names) - 1
 
-    def convert(self, ind):
+    def convert_to_fis(self, ind):
         n_consequents = len(self.default_rule)
         evo_mfs, evo_ants, evo_cons = \
             IFSUtils.extract_ind_new(ind, self.n_vars, self.n_labels,
@@ -125,61 +140,18 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
 
         rules = []
         for i in range(len(ifs_ants_idx)):
-            r = self._create_rule(ifs_ants_idx[i], ifs_cons[i], labels,
-                                  ling_vars, output_vars, self._dc_index)
+            r = _create_rule(ifs_ants_idx[i], ifs_cons[i], labels,
+                             ling_vars, output_vars, self._dc_index)
             rules.append(r)
 
-        dr_cons = [Consequent(lv_name=output_vars[i], lv_value=cons) for i, cons
-                   in
-                   enumerate(self.default_rule)]
+        dr_cons = [Consequent(lv_name=output_vars[i], lv_value=cons)
+                   for i, cons in enumerate(self.default_rule)]
         dr = DefaultFuzzyRule(cons=dr_cons, impl_func=MIN)
 
-        # print("evo_mfs")
-        # print(evo_mfs)
-        #
-        # print("evo_ants")
-        # print(evo_ants)
-        #
-        # print("evo_cons")
-        # print(evo_cons)
-        #
-        # print("in_values")
-        # print(in_values)
-        #
-        # print("ifs_ants_idx")
-        # print(ifs_ants_idx)
-
-        return SingletonFIS(
-            rules=rules,
-            default_rule=dr,
-        )
-
-    @staticmethod
-    def _create_rule(ant_idx_ri, cons_idx_ri, labels, ling_vars,
-                     output_vars,
-                     dc_index):
-        ants = [Antecedent(ling_vars[i], labels[ant]) for i, ant in
-                enumerate(ant_idx_ri) if ant != dc_index]
-
-        # ants = []
-        # for i, ant in enumerate(ant_idx_ri):
-        #     if ant != dc_index:
-        #         print("ant, dcix", ant, dc_index)
-        #         toto = ling_vars[i]
-        #         titi = labels[ant]
-        #         ants.append(Antecedent(toto, titi))
-
-        cons = [Consequent(lv_name=output_vars[i], lv_value=cons) for i, cons in
-                enumerate(cons_idx_ri)]
-
-        return FuzzyRule(ant_act_func=AND_min,
-                         ants=ants,
-                         cons=cons,
-                         impl_func=MIN)
+        return SingletonFIS(rules=rules, default_rule=dr)
 
     def predict(self, ind):
-        # predicted_outputs = IFSUtils.predict(
-        predicted_outputs = py_fiseval.predict_native(
+        predicted_outputs = NativeIFSUtils.predict_native(
             ind=ind,
             observations=self.dataset.X,
             n_rules=self.n_rules,

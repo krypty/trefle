@@ -1,6 +1,6 @@
 from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
-from pyfuge.evo.experiment.pyfuge_simple_ea_ind2ifs import PyFUGESimpleEAInd2IFS
+from pyfuge.evo.experiment.simple_fis_individual import SimpleFISIndividual
 from pyfuge.evo.fitness_evaluator.pyfuge_fitness_evaluator import \
     PyFUGEFitnessEvaluator
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     ds_train, ds_test = Iris2PFDataset(
         fname=r"../../datasets/iris.data")
 
-    pyfuge_ind_2_ifs = PyFUGESimpleEAInd2IFS(
+    pyfuge_ind_2_ifs = SimpleFISIndividual(
         n_vars=ds_train.N_VARS,
         n_rules=3,
         n_max_var_per_rule=4,
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     SimpleEAExperiment(
         dataset=ds_train,
-        ind2ifs=pyfuge_ind_2_ifs,
+        fis_individual=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=300,
         N_GEN=5

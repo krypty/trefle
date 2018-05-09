@@ -108,8 +108,8 @@ def _compute_accuracy(y_true, y_pred):
 def run_with_simple_evo():
     from time import time
     from pyfuge.evo.playground.iris_ifs import Iris2PFDataset
-    from pyfuge.evo.experiment.pyfuge_simple_ea_ind2ifs import \
-        PyFUGESimpleEAInd2IFS
+    from pyfuge.evo.experiment.simple_fis_individual import \
+        SimpleFISIndividual
     from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
     from pyfuge.evo.fitness_evaluator.pyfuge_fitness_evaluator import \
         PyFUGEFitnessEvaluator
@@ -136,7 +136,7 @@ def run_with_simple_evo():
     ##
     ## TRAINING PHASE
     ##
-    pyfuge_ind_2_ifs = PyFUGESimpleEAInd2IFS(
+    pyfuge_ind_2_ifs = SimpleFISIndividual(
         n_vars=n_vars,
         n_rules=n_rules,
         n_max_var_per_rule=n_max_vars_per_rule,
@@ -148,7 +148,7 @@ def run_with_simple_evo():
 
     exp = SimpleEAExperiment(
         dataset=ds_train,
-        ind2ifs=pyfuge_ind_2_ifs,
+        fis_individual=pyfuge_ind_2_ifs,
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=400,
         N_GEN=50
@@ -159,7 +159,7 @@ def run_with_simple_evo():
     fis_li = []
     for ind in top_n:
         print("ind ({}): {}".format(ind.fitness, ind))
-        fis = pyfuge_ind_2_ifs.convert(ind)
+        fis = pyfuge_ind_2_ifs.convert_to_fis(ind)
         fis.describe()
         FISViewer(fis).show()
 
