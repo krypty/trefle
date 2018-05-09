@@ -1,4 +1,7 @@
+import random
+
 import numpy as np
+from deap import creator, base, tools, algorithms
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.experiment.base.experiment import Experiment
@@ -12,14 +15,10 @@ class SimpleEAExperiment(Experiment):
     algorithm) with DEAP library.
     """
 
-    # @profile(sort="tottime", filename="/tmp/yolo.profile")
     def __init__(self, dataset: PFDataset, ind2ifs: Ind2IFS,
                  fitevaluator: FitnessEvaluator, **kwargs):
         super(SimpleEAExperiment, self).__init__(dataset, ind2ifs, fitevaluator,
                                                  **kwargs)
-
-        import random
-        from deap import creator, base, tools, algorithms
 
         target_length = self._ind2ifs.ind_length()
 
@@ -29,10 +28,6 @@ class SimpleEAExperiment(Experiment):
         creator.create("Individual", list, fitness=creator.FitnessMax)
 
         toolbox = base.Toolbox()
-        # import multiprocessing
-        #
-        # pool = multiprocessing.Pool()
-        # toolbox.register("map", pool.map)
 
         toolbox.register("attr_bool", random.random)
         toolbox.register("individual", tools.initRepeat, creator.Individual,
@@ -41,9 +36,6 @@ class SimpleEAExperiment(Experiment):
                          toolbox.individual)
 
         def eval_ind(ind):
-            # ifs = self._ind2ifs.convert(ind)
-            # fitness = self._fiteval.eval(ifs, self._dataset)
-
             y_preds = self._ind2ifs.predict(ind)
             fitness = self._fiteval.eval(y_preds, self._dataset.y)
             return [fitness]
@@ -69,13 +61,8 @@ class SimpleEAExperiment(Experiment):
         hof = tools.HallOfFame(self._kwargs.get("HOF") or 5)
 
         algorithms.eaSimple(population, toolbox, cxpb=0.8, mutpb=0.3, ngen=NGEN,
-                            halloffame=hof,
-                            stats=stats)
+                            halloffame=hof, stats=stats)
         self._top_n = tools.selBest(population, k=3)
 
     def get_top_n(self):
         return self._top_n
-
-        # print("top_n")
-        # for tn in top_n:
-        #     print(tn)

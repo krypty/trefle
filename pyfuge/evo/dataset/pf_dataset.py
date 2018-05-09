@@ -20,9 +20,9 @@ class PFDataset:
 
         :param y: labels/classes for each observation represented as an
         np.ndarray (Nx1) where N is the number of observations. Each class must
-        be represented by a unique number. TODO: should work great for numerical
-        and categorical ordinal variables but not for categorical non-ordinal
-        classes.
+        be represented by a unique number. WARNING: should work great for
+        numerical and categorical ordinal variables but not for categorical
+        non-ordinal classes.
 
         :param X_names: name of the observations, if any. Might be useful to
         retrieve a particular observation afterwards
