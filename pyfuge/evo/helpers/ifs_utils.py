@@ -120,8 +120,7 @@ class IFSUtils:
     @staticmethod
     def predict(ind, observations, n_rules, max_vars_per_rule, n_labels,
                 n_consequents, default_rule_cons, vars_ranges,
-                labels_weights,
-                dc_idx):
+                labels_weights):
         # FIXME: use max_vars_per_rule
         """
         Assumptions:
@@ -163,6 +162,7 @@ class IFSUtils:
         Must be >=0. negative index will not work !
         :return: an array of defuzzified outputs (i.e. non-thresholded outputs)
         """
+        dc_idx = len(n_labels) - 1
         n_obs, n_vars = observations.shape
 
         evo_mfs, evo_ants, evo_cons = IFSUtils.extract_ind_new(ind, n_vars,

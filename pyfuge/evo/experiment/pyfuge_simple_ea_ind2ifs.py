@@ -1,7 +1,45 @@
 import numpy as np
 
 from pyfuge import py_fiseval
+from pyfuge.evo.helpers.ifs_utils import IFSUtils
 from pyfuge.evo.helpers.ind_2_ifs import Ind2IFS
+from pyfuge.fuzzy_systems.core.fis.fis import MIN, AND_min
+from pyfuge.fuzzy_systems.core.fis.singleton_fis import SingletonFIS
+from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+    LinguisticVariable
+from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+    FreeShapeMF
+from pyfuge.fuzzy_systems.core.membership_functions.singleton_mf import \
+    SingletonMF
+from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Consequent, \
+    Antecedent
+
+# this will raise KeyError if invalid
+labels_str_dict = {
+    2: ("LOW", "HIGH"),
+    3: ("LOW", "MEDIUM", "HIGH"),
+    4: ("LOW", "MEDIUM", "HIGH", "VERY HIGH"),
+    5: ("VERY LOW", "LOW", "MEDIUM", "HIGH", "VERY HIGH"),
+}
+
+_consequents = {
+    0: SingletonMF(0),
+    1: SingletonMF(1)
+}
+
+
+def _create_ling_var(var_name, in_values_vi):
+    labels = labels_str_dict[len(in_values_vi)]
+
+    mf_values = np.eye(len(labels))
+    ling_values_dict = {}
+    for i, labels_i in enumerate(labels):
+        ling_values_dict[labels_i] = FreeShapeMF(in_values_vi.tolist(),
+                                                 mf_values[i].tolist())
+
+    return LinguisticVariable(var_name, ling_values_dict)
 
 
 class PyFUGESimpleEAInd2IFS(Ind2IFS):
@@ -27,6 +65,7 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
         self.default_rule = np.array(default_rule_output)
         self.dataset = dataset
         self.labels_weights = labels_weights
+        self.n_vars = dataset.N_VARS
 
         self.vars_range = np.empty((dataset.X.shape[1], 2))
         self.vars_range[:, 0] = self.dataset.X.ptp(axis=0)
@@ -45,8 +84,97 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
 
         self._ind_len += self.n_consequents * n_rules
 
+        self._dc_index = len(mf_label_names) - 1
+
     def convert(self, ind):
-        pass
+        n_consequents = len(self.default_rule)
+        evo_mfs, evo_ants, evo_cons = \
+            IFSUtils.extract_ind_new(ind, self.n_vars, self.n_labels,
+                                     self.n_rules, self.n_consequents)
+
+        # CONVERT EVOLUTION MFS TO IFS MFS
+        ifs_ants_idx = IFSUtils.evo_ants2ifs_ants(evo_ants, self.labels_weights)
+        in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, self.vars_range)
+
+        pretty_vars_names = self.dataset.X_names
+        pretty_outputs_names = self.dataset.y_names
+
+        def get_var_name(i):
+            if pretty_vars_names is None:
+                return "v{}".format(i)
+            else:
+                return pretty_vars_names[i]
+
+        ling_vars = [_create_ling_var(get_var_name(i), in_values_vi) for
+                     i, in_values_vi in enumerate(in_values)]
+
+        def get_output_name(i):
+            if pretty_vars_names is None:
+                return "OUT{}".format(i)
+            else:
+                return pretty_outputs_names[i]
+
+        output_vars = [LinguisticVariable(name=get_output_name(i),
+                                          ling_values_dict=_consequents)
+                       for i in range(n_consequents)]
+
+        labels = labels_str_dict[self.n_labels - 1]
+
+        ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
+
+        rules = []
+        for i in range(len(ifs_ants_idx)):
+            r = self._create_rule(ifs_ants_idx[i], ifs_cons[i], labels,
+                                  ling_vars, output_vars, self._dc_index)
+            rules.append(r)
+
+        dr_cons = [Consequent(lv_name=output_vars[i], lv_value=cons) for i, cons
+                   in
+                   enumerate(self.default_rule)]
+        dr = DefaultFuzzyRule(cons=dr_cons, impl_func=MIN)
+
+        # print("evo_mfs")
+        # print(evo_mfs)
+        #
+        # print("evo_ants")
+        # print(evo_ants)
+        #
+        # print("evo_cons")
+        # print(evo_cons)
+        #
+        # print("in_values")
+        # print(in_values)
+        #
+        # print("ifs_ants_idx")
+        # print(ifs_ants_idx)
+
+        return SingletonFIS(
+            rules=rules,
+            default_rule=dr,
+        )
+
+    @staticmethod
+    def _create_rule(ant_idx_ri, cons_idx_ri, labels, ling_vars,
+                     output_vars,
+                     dc_index):
+        ants = [Antecedent(ling_vars[i], labels[ant]) for i, ant in
+                enumerate(ant_idx_ri) if ant != dc_index]
+
+        # ants = []
+        # for i, ant in enumerate(ant_idx_ri):
+        #     if ant != dc_index:
+        #         print("ant, dcix", ant, dc_index)
+        #         toto = ling_vars[i]
+        #         titi = labels[ant]
+        #         ants.append(Antecedent(toto, titi))
+
+        cons = [Consequent(lv_name=output_vars[i], lv_value=cons) for i, cons in
+                enumerate(cons_idx_ri)]
+
+        return FuzzyRule(ant_act_func=AND_min,
+                         ants=ants,
+                         cons=cons,
+                         impl_func=MIN)
 
     def predict(self, ind):
         # predicted_outputs = IFSUtils.predict(
@@ -60,6 +188,5 @@ class PyFUGESimpleEAInd2IFS(Ind2IFS):
             default_rule_cons=self.default_rule,
             vars_ranges=self.vars_range,
             labels_weights=self.labels_weights,
-            dc_idx=self.n_labels - 1
         )
         return predicted_outputs

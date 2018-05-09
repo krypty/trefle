@@ -1,13 +1,13 @@
 import numpy as np
 
-import pyfuge.cpp.FISEval.fiseval as feval
+import pyfuge.py_fiseval as feval
 from pyfuge.evo.examples.evo_wine_classifier import load_wine_dataset
 from pyfuge.evo.helpers import ifs_utils
 
 
 def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
                    n_consequents, default_rule_cons, vars_ranges,
-                   labels_weights, dc_idx):
+                   labels_weights):
     """
     Assumptions:
     - singleton (aggregation and defuzzification done according the book)
@@ -44,14 +44,12 @@ def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
     don't care (DC) label 4 times more often (on average) than the others
     labels. If none is provided, then all labels have the same probability to be
     chosen.
-    :param dc_idx: Specify the don't care index in labels_weights array.
-    Must be >=0. negative index will not work !
     :return: an array of defuzzified outputs (i.e. non-thresholded outputs)
     """
 
     return feval.predict_native(ind, observations, n_rules, max_vars_per_rule,
                                 n_labels, n_consequents, default_rule_cons,
-                                vars_ranges, labels_weights, dc_idx)
+                                vars_ranges, labels_weights)
 
 
 def simple_predict():

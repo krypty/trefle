@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn import preprocessing
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
-from pyfuge.evo.helpers import pyfuge_ifs_ind2fis, NativeIFSUtils
+from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
 
 
@@ -67,8 +67,8 @@ def load_golub_dataset():
 
     print(X_train.shape, y_train.shape)
 
-    return (PFDataset(X_train, y_train),
-            PFDataset(X_test, y_test))
+    return (PFDataset(X_train[:, :300], y_train),
+            PFDataset(X_test[:, :300], y_test))
 
 
 def run_with_simple_evo():
@@ -121,16 +121,7 @@ def run_with_simple_evo():
     fis_li = []
     for ind in top_n[:1]:
         print("ind ({}): {}".format(ind.fitness, ind))
-        fis = pyfuge_ifs_ind2fis.convert(
-            n_vars=n_vars,
-            ind=ind, n_rules=n_rules, n_labels=len(mf_label_names),
-            n_max_vars_per_rule=n_max_vars_per_rule,
-            vars_ranges=IFSUtils.compute_vars_range(ds_train.X),
-            labels_weights=labels_weights,
-            dc_index=dc_index, default_rule_cons=default_rule_output,
-            pretty_vars_names=ds_train.X_names,
-            pretty_outputs_names=ds_train.y_names
-        )
+        fis = pyfuge_ind_2_ifs.convert(ind)
         fis.describe()
         # FISViewer(fis).show()
 
@@ -155,7 +146,6 @@ def run_with_simple_evo():
             default_rule_cons=np.array(default_rule_output),
             vars_ranges=var_range_train,
             labels_weights=labels_weights,
-            dc_idx=dc_index
         )
 
         acc = _compute_accuracy(ds_train.y, y_pred_train)
@@ -172,7 +162,6 @@ def run_with_simple_evo():
             default_rule_cons=np.array(default_rule_output),
             vars_ranges=var_range_train,
             labels_weights=labels_weights,
-            dc_idx=dc_index
         )
 
         print(y_pred_test)

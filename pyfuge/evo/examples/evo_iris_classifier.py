@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyfuge.evo.helpers import pyfuge_ifs_ind2fis
+from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
 from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
 
@@ -161,16 +161,7 @@ def run_with_simple_evo():
     fis_li = []
     for ind in top_n:
         print("ind ({}): {}".format(ind.fitness, ind))
-        fis = pyfuge_ifs_ind2fis.convert(
-            n_vars=n_vars,
-            ind=ind, n_rules=n_rules, n_labels=len(mf_label_names),
-            n_max_vars_per_rule=n_max_vars_per_rule,
-            vars_ranges=IFSUtils.compute_vars_range(ds_train.X),
-            labels_weights=labels_weights,
-            dc_index=dc_index, default_rule_cons=default_rule_output,
-            pretty_vars_names=ds_train.X_names,
-            pretty_outputs_names=ds_train.y_names
-        )
+        fis = pyfuge_ind_2_ifs.convert(ind)
         fis.describe()
         FISViewer(fis).show()
 
@@ -184,7 +175,7 @@ def run_with_simple_evo():
     var_range_train = IFSUtils.compute_vars_range(ds_train.X)
 
     for ind in top_n:
-        y_pred_test = IFSUtils.predict(
+        y_pred_test = NativeIFSUtils.predict_native(
             ind,
             observations=ds_test.X,
             n_rules=n_rules,
@@ -194,7 +185,6 @@ def run_with_simple_evo():
             default_rule_cons=np.array(default_rule_output),
             vars_ranges=var_range_train,
             labels_weights=labels_weights,
-            dc_idx=dc_index
         )
 
         acc = _compute_accuracy(ds_test.y, y_pred_test)

@@ -7,11 +7,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
-from pyfuge.evo.helpers import pyfuge_ifs_ind2fis
+from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
 from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
-
-PRJ_ROOT = Path(__file__).parents[2]
 
 
 def _compute_accuracy(y_true, y_pred):
@@ -37,8 +35,9 @@ def _compute_accuracy(y_true, y_pred):
 
 
 def load_cancer_dataset(test_size=0.3):
+    PRJ_ROOT = Path(__file__).parents[2]
     filename = os.path.join(PRJ_ROOT, "datasets", "CancerDiag2_headers.csv")
-    print("cancer filew", filename)
+    print("dataset file", filename)
     df = pd.read_csv(
         filename,
         sep=";")
@@ -60,7 +59,7 @@ def load_cancer_dataset(test_size=0.3):
             PFDataset(X_test, y_test, X_names, y_names))
 
 
-def run_with_simple_evo():
+def run():
     import random
 
     random.seed(20)
@@ -83,10 +82,9 @@ def run_with_simple_evo():
     n_vars = ds_train.N_VARS
     n_rules = 4
     n_max_vars_per_rule = 2  # FIXME: don't ignore it
-    mf_label_names = ["LOW", "MEDIUM", "HIGH", "DC"]
+    mf_label_names = ["LOW", "MEDIUM", "HIGH", "DC"]  # DC is always the last
     default_rule_output = [1]  # [class_0]
     labels_weights = np.array([1, 1, 1, 10])
-    dc_index = len(mf_label_names) - 1
 
     ##
     ## TRAINING PHASE
@@ -115,16 +113,7 @@ def run_with_simple_evo():
     fis_li = []
     for ind in top_n[:1]:
         print("ind ({}): {}".format(ind.fitness, ind))
-        fis = pyfuge_ifs_ind2fis.convert(
-            n_vars=n_vars,
-            ind=ind, n_rules=n_rules, n_labels=len(mf_label_names),
-            n_max_vars_per_rule=n_max_vars_per_rule,
-            vars_ranges=IFSUtils.compute_vars_range(ds_train.X),
-            labels_weights=labels_weights,
-            dc_index=dc_index, default_rule_cons=default_rule_output,
-            pretty_vars_names=ds_train.X_names,
-            pretty_outputs_names=ds_train.y_names
-        )
+        fis = pyfuge_ind_2_ifs.convert(ind)
         fis.describe()
         FISViewer(fis).show()
 
@@ -139,7 +128,7 @@ def run_with_simple_evo():
 
     for ind in top_n[:1]:
         # train
-        y_pred_train = IFSUtils.predict(
+        y_pred_train = NativeIFSUtils.predict_native(
             ind,
             observations=ds_train.X,
             n_rules=n_rules,
@@ -149,14 +138,13 @@ def run_with_simple_evo():
             default_rule_cons=np.array(default_rule_output),
             vars_ranges=var_range_train,
             labels_weights=labels_weights,
-            dc_idx=dc_index
         )
 
         acc = _compute_accuracy(ds_train.y, y_pred_train)
         print("acc train ", acc)
 
         # test
-        y_pred_test = IFSUtils.predict(
+        y_pred_test = NativeIFSUtils.predict_native(
             ind,
             observations=ds_test.X,
             n_rules=n_rules,
@@ -166,7 +154,6 @@ def run_with_simple_evo():
             default_rule_cons=np.array(default_rule_output),
             vars_ranges=var_range_train,
             labels_weights=labels_weights,
-            dc_idx=dc_index
         )
 
         print(y_pred_test)
@@ -175,12 +162,8 @@ def run_with_simple_evo():
         print("acc test ", acc)
 
 
-def run():
-    run_with_simple_evo()
-
-
 if __name__ == '__main__':
     t0 = time()
-    run_with_simple_evo()
+    run()
     t1 = time() - t0
     print("evo cancer {:.3f} ms".format(t1 * 1000))
