@@ -73,6 +73,20 @@ cd PyFUGE
 python setup.py build
 ```
 
+_Note On Mac OS X, adapt the Linux instructions and don't forget to:_
+
+```bash
+brew install python
+brew install gcc --without-multilib
+export CC=/usr/local/bin/gcc-8
+export CXX=/usr/local/bin/g++-8
+pip install cmake
+python setup.py build
+python setup.py install
+pip install wheel twine
+# ...
+```
+
 
 ## Run tests
 
