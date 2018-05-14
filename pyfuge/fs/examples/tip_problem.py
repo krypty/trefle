@@ -3,7 +3,7 @@ import numpy as np
 from pyfuge.fs.core.fis.fis import OR_max, MIN, FIS, COA_func
 from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
+from pyfuge.fs.core.mf.lin_piece_wise_mf import \
     LinPWMF
 from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule_element import Antecedent, \

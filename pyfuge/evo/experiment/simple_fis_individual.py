@@ -7,9 +7,9 @@ from pyfuge.fs.core.fis.fis import MIN, AND_min
 from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
 from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fs.core.membership_functions.free_shape_mf import \
+from pyfuge.fs.core.mf.free_shape_mf import \
     FreeShapeMF
-from pyfuge.fs.core.membership_functions.singleton_mf import \
+from pyfuge.fs.core.mf.singleton_mf import \
     SingletonMF
 from pyfuge.fs.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule

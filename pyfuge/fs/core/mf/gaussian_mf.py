@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyfuge.fs.core.membership_functions.free_shape_mf import \
+from pyfuge.fs.core.mf.free_shape_mf import \
     FreeShapeMF
 from pyfuge.fs.view.mf_viewer import MembershipFunctionViewer
 

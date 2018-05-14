@@ -1,4 +1,4 @@
-from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
+from pyfuge.fs.core.mf.lin_piece_wise_mf import \
     LinPWMF
 
 

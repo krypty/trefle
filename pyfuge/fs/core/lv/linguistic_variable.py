@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from typing import Dict
 
-from pyfuge.fs.core.membership_functions.free_shape_mf import \
+from pyfuge.fs.core.mf.free_shape_mf import \
     FreeShapeMF
 
 

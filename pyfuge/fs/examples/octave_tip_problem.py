@@ -3,9 +3,9 @@ import numpy as np
 from pyfuge.fs.core.fis.fis import COA_func, MIN, FIS, AND_min
 from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fs.core.membership_functions.gaussian_mf import \
+from pyfuge.fs.core.mf.gaussian_mf import \
     GaussianMF
-from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
+from pyfuge.fs.core.mf.lin_piece_wise_mf import \
     LinPWMF
 from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule_element import Antecedent, \

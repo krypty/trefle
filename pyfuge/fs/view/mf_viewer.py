@@ -1,8 +1,8 @@
 from matplotlib.ticker import MaxNLocator
 
-from pyfuge.fs.core.membership_functions.free_shape_mf import \
+from pyfuge.fs.core.mf.free_shape_mf import \
     FreeShapeMF
-from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
+from pyfuge.fs.core.mf.lin_piece_wise_mf import \
     LinPWMF
 from pyfuge.fs.view.viewer import Viewer
 

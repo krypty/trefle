@@ -4,9 +4,9 @@ from pyfuge.fs.core.fis.fis import AND_min, OR_max, MIN, COA_func, \
     FIS
 from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
+from pyfuge.fs.core.mf.lin_piece_wise_mf import \
     LinPWMF
-from pyfuge.fs.core.membership_functions.triangular_mf import \
+from pyfuge.fs.core.mf.triangular_mf import \
     TriangularMF
 from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule_element import Antecedent, \

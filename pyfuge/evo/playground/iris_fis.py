@@ -11,7 +11,7 @@ from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
 from pyfuge.fs.core.lv.two_points_lv import \
     TwoPointsPDLV
-from pyfuge.fs.core.membership_functions.singleton_mf import \
+from pyfuge.fs.core.mf.singleton_mf import \
     SingletonMF
 from pyfuge.fs.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule

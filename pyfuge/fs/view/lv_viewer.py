@@ -2,7 +2,7 @@ from typing import List
 
 from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
+from pyfuge.fs.core.mf.lin_piece_wise_mf import \
     LinPWMF
 from pyfuge.fs.view.mf_viewer import MembershipFunctionViewer
 from pyfuge.fs.view.viewer import Viewer
