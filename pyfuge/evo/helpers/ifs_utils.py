@@ -95,7 +95,7 @@ class IFSUtils:
         return _vars_range
 
     @staticmethod
-    def extract_ind_new(ind, n_vars, n_labels, n_rules, n_consequents):
+    def extract_ind(ind, n_vars, n_labels, n_rules, n_consequents):
         # n_labels-1 because we don't generate a MF for DC label
         n_true_labels = n_labels - 1
 
@@ -166,10 +166,10 @@ class IFSUtils:
         dc_idx = len(n_labels) - 1
         n_obs, n_vars = observations.shape
 
-        evo_mfs, evo_ants, evo_cons = IFSUtils.extract_ind_new(ind, n_vars,
-                                                               n_labels,
-                                                               n_rules,
-                                                               n_consequents)
+        evo_mfs, evo_ants, evo_cons = IFSUtils.extract_ind(ind, n_vars,
+                                                           n_labels,
+                                                           n_rules,
+                                                           n_consequents)
 
         # CONVERT EVOLUTION ANTS TO IFS ANTS
         ifs_ants_idx = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)

@@ -105,8 +105,8 @@ class SimpleFISIndividual(FISIndividual):
     def convert_to_fis(self, ind):
         n_consequents = len(self.default_rule)
         evo_mfs, evo_ants, evo_cons = \
-            IFSUtils.extract_ind_new(ind, self.n_vars, self.n_labels,
-                                     self.n_rules, self.n_consequents)
+            IFSUtils.extract_ind(ind, self.n_vars, self.n_labels,
+                                 self.n_rules, self.n_consequents)
 
         # CONVERT EVOLUTION MFS TO IFS MFS
         ifs_ants_idx = IFSUtils.evo_ants2ifs_ants(evo_ants, self.labels_weights)
