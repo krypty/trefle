@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
-from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
+from pyfuge.fs.view.fis_viewer import FISViewer
 
 
 def _compute_accuracy(y_true, y_pred):

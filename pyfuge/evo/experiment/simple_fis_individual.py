@@ -3,17 +3,17 @@ import numpy as np
 from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.fis_individual import FISIndividual
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
-from pyfuge.fuzzy_systems.core.fis.fis import MIN, AND_min
-from pyfuge.fuzzy_systems.core.fis.singleton_fis import SingletonFIS
-from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.fis.fis import MIN, AND_min
+from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
+from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fuzzy_systems.core.membership_functions.free_shape_mf import \
+from pyfuge.fs.core.membership_functions.free_shape_mf import \
     FreeShapeMF
-from pyfuge.fuzzy_systems.core.membership_functions.singleton_mf import \
+from pyfuge.fs.core.membership_functions.singleton_mf import \
     SingletonMF
-from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Consequent, \
+from pyfuge.fs.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fs.core.rules.fuzzy_rule_element import Consequent, \
     Antecedent
 
 # this will raise KeyError if invalid

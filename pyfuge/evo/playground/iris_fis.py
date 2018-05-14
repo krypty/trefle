@@ -5,19 +5,19 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from pyfuge.fuzzy_systems.core.fis.fis import AND_min, MIN
-from pyfuge.fuzzy_systems.core.fis.singleton_fis import SingletonFIS
-from pyfuge.fuzzy_systems.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.fis.fis import AND_min, MIN
+from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
+from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fuzzy_systems.core.linguistic_variables.two_points_lv import \
+from pyfuge.fs.core.linguistic_variables.two_points_lv import \
     TwoPointsPDLV
-from pyfuge.fuzzy_systems.core.membership_functions.singleton_mf import \
+from pyfuge.fs.core.membership_functions.singleton_mf import \
     SingletonMF
-from pyfuge.fuzzy_systems.core.rules.default_fuzzy_rule import DefaultFuzzyRule
-from pyfuge.fuzzy_systems.core.rules.fuzzy_rule import FuzzyRule
-from pyfuge.fuzzy_systems.core.rules.fuzzy_rule_element import Antecedent, \
+from pyfuge.fs.core.rules.default_fuzzy_rule import DefaultFuzzyRule
+from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule
+from pyfuge.fs.core.rules.fuzzy_rule_element import Antecedent, \
     Consequent
-from pyfuge.fuzzy_systems.view.fis_viewer import FISViewer
+from pyfuge.fs.view.fis_viewer import FISViewer
 
 
 def main():
