@@ -163,7 +163,7 @@ class IFSUtils:
         :return: an array of defuzzified outputs (i.e. non-thresholded outputs)
         """
         # we have decided that the don't care index will always be the last label
-        dc_idx = len(n_labels) - 1
+        dc_idx = n_labels - 1
         n_obs, n_vars = observations.shape
 
         evo_mfs, evo_ants, evo_cons = IFSUtils.extract_ind(ind, n_vars,
