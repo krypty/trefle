@@ -9,10 +9,10 @@ class Experiment:
         """
 
         :param dataset: a PyFUGE-formatted dataset
-        :param fis_individual: a function that converts an individual to an IFS
-        (interpretable fuzzy system)
+        :param fis_individual: a class that uses an individual to return
+        predictions
         :param fitevaluator: an instance of FitnessEvaluator that returns a
-        fitness from a IFS
+        fitness from predictions
         :param kwargs: other experiment parameters
         """
         self._dataset = dataset

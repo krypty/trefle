@@ -96,7 +96,7 @@ def run_with_simple_evo():
     ##
     ## TRAINING PHASE
     ##
-    pyfuge_ind_2_ifs = SimpleFISIndividual(
+    fis_ind = SimpleFISIndividual(
         n_vars=n_vars,
         n_rules=n_rules,
         n_max_var_per_rule=n_max_vars_per_rule,
@@ -108,10 +108,10 @@ def run_with_simple_evo():
 
     exp = SimpleEAExperiment(
         dataset=ds_train,
-        fis_individual=pyfuge_ind_2_ifs,
+        fis_individual=fis_ind,
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=100,
-        N_GEN=10,
+        N_GEN=50,
         HOF=3
     )
 
@@ -120,7 +120,7 @@ def run_with_simple_evo():
     fis_li = []
     for ind in top_n[:1]:
         print("ind ({}): {}".format(ind.fitness, ind))
-        fis = pyfuge_ind_2_ifs.convert_to_fis(ind)
+        fis = fis_ind.convert_to_fis(ind)
         fis.describe()
         # FISViewer(fis).show()
 
