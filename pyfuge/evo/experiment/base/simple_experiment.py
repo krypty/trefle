@@ -1,3 +1,4 @@
+import math
 import random
 
 import numpy as np
@@ -43,7 +44,8 @@ class SimpleEAExperiment(Experiment):
         toolbox.register("evaluate", eval_ind)
         toolbox.register("mate", tools.cxTwoPoint)
         toolbox.register("mutate", tools.mutShuffleIndexes,
-                         indpb=1.0 / target_length)
+                         indpb=1.0 / (10.0 * math.ceil(
+                             math.log(target_length, 10)))),
         toolbox.register("select", tools.selTournament, tournsize=3)
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
