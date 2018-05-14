@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyfuge.fs.core.fis.fis import COA_func, MIN, FIS, AND_min
-from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
 from pyfuge.fs.core.membership_functions.gaussian_mf import \
     GaussianMF

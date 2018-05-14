@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyfuge.fs.core.fis.fis import FIS, OR_max, COA_func, MIN
-from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
 from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
     LinPWMF

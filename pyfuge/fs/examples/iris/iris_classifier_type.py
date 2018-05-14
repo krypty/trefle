@@ -2,9 +2,9 @@ import numpy as np
 
 from pyfuge.fs.core.fis.fis import MIN, AND_min
 from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
-from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fs.core.linguistic_variables.three_points_lv import \
+from pyfuge.fs.core.lv.three_points_lv import \
     ThreePointsLV
 from pyfuge.fs.core.membership_functions.singleton_mf import \
     SingletonMF

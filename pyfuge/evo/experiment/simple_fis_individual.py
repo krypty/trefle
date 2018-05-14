@@ -5,7 +5,7 @@ from pyfuge.evo.helpers.fis_individual import FISIndividual
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
 from pyfuge.fs.core.fis.fis import MIN, AND_min
 from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
-from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
 from pyfuge.fs.core.membership_functions.free_shape_mf import \
     FreeShapeMF

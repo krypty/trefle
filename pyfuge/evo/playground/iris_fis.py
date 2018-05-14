@@ -7,9 +7,9 @@ from sklearn.model_selection import train_test_split
 
 from pyfuge.fs.core.fis.fis import AND_min, MIN
 from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
-from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
-from pyfuge.fs.core.linguistic_variables.two_points_lv import \
+from pyfuge.fs.core.lv.two_points_lv import \
     TwoPointsPDLV
 from pyfuge.fs.core.membership_functions.singleton_mf import \
     SingletonMF

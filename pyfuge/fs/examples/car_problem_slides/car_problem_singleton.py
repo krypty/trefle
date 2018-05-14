@@ -1,6 +1,6 @@
 from pyfuge.fs.core.fis.fis import AND_min, MIN
 from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
-from pyfuge.fs.core.linguistic_variables.linguistic_variable import \
+from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
 from pyfuge.fs.core.membership_functions.lin_piece_wise_mf import \
     LinPWMF
