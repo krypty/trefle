@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
-from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 from pyfuge.fs.view.fis_viewer import FISViewer
 
 
@@ -143,20 +143,20 @@ def run_with_simple_evo():
     # make sure the var_range is still set to training set. If not, we cheat
     var_range_train = IFSUtils.compute_vars_range(ds_train.X)
 
-    for ind in top_n[:1]:
-        y_pred_test = NativeIFSUtils.predict_native(
-            ind,
-            observations=ds_test.X,
-            n_rules=n_rules,
-            max_vars_per_rule=n_max_vars_per_rule,
-            n_labels=len(mf_label_names),
-            n_consequents=len(default_rule_output),
-            default_rule_cons=np.array(default_rule_output),
-            vars_ranges=var_range_train,
-            labels_weights=labels_weights,
-        )
+    fis_evaluator = NativeIndEvaluator(
+        ind_n=len(ind),
+        observations=ds_test.X,
+        n_rules=n_rules,
+        max_vars_per_rule=n_max_vars_per_rule,
+        n_labels=len(mf_label_names),
+        n_consequents=len(default_rule_output),
+        default_rule_cons=np.array(default_rule_output),
+        vars_ranges=var_range_train,
+        labels_weights=labels_weights
+    )
 
-        print(y_pred_test)
+    for ind in top_n[:1]:
+        y_pred_test = fis_evaluator.predict_native(ind)
 
         acc = _compute_accuracy(ds_test.y, y_pred_test)
         print("acc test", acc)

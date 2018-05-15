@@ -6,19 +6,16 @@
 #include <iostream>
 
 #define coutd std::cout << "<<C++>> " << std::setprecision(3)
-// #define coutd std::cout << "<<C++>> "
 using namespace std;
 using namespace Eigen;
 
 int FISEval::unitfloat2idx(float flt, Map<RowVectorXd> &weights) {
   vector<int> indices;
 
-  // coutd << weights << endl;
-  // coutd << weights.maxCoeff() << endl;
-  weights = weights / weights.minCoeff();
+  RowVectorXd weights_normed = weights / weights.minCoeff();
 
-  for (int i = 0; i < weights.size(); i++) {
-    for (int j = 0; j < weights(i); j++) {
+  for (int i = 0; i < weights_normed.size(); i++) {
+    for (int j = 0; j < weights_normed(i); j++) {
       indices.push_back(i);
     }
   }
@@ -27,7 +24,6 @@ int FISEval::unitfloat2idx(float flt, Map<RowVectorXd> &weights) {
   int idx = flt * vec_n;
   int safe_idx = max(0, min(idx, vec_n - 1));
   int to_ret = indices[int(safe_idx)];
-  // coutd << "to ret " << to_ret << endl;
   return to_ret;
 }
 
@@ -36,18 +32,15 @@ MatrixXi FISEval::evo_ants2ifs_ants(const Map<MatXf> &evo_ants,
   const auto unitfloat2idx_ants = [&](float v) {
     return unitfloat2idx(v, vec_labels_weights);
   };
-  // coutd << "before" << evo_ants << endl;
-  // MatrixXf ifs_ants;
-  // ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants);
+
   MatrixXi ifs_ants(evo_ants.rows(), evo_ants.cols());
   ifs_ants = evo_ants.unaryExpr(unitfloat2idx_ants).cast<int>();
 
-  // coutd << "after" << endl << ifs_ants << endl;
   return ifs_ants;
 }
 
 MatrixXd FISEval::evo_mfs2ifs_mfs(const Map<MatXf> &evo_mfs,
-                                  Map<MatXd> &m_vars_range) {
+                                  Map<MatXd> &mat_vars_ranges) {
   int rows = evo_mfs.rows();
   int cols = evo_mfs.cols();
   MatrixXd ifs_mfs(rows, cols);
@@ -57,35 +50,51 @@ MatrixXd FISEval::evo_mfs2ifs_mfs(const Map<MatXf> &evo_mfs,
     VectorXd row_i = ifs_mfs.row(i);
 
     for (int j = 0; j < cols; j++) {
-      row_i(j) = evo_mfs(i, j) * m_vars_range(i, 0) + m_vars_range(i, 1);
+      row_i(j) = evo_mfs(i, j) * mat_vars_ranges(i, 0) + mat_vars_ranges(i, 1);
     }
 
-    // TODO: sort MF per row
+    // sort MF per row to always have increasing p0,p1,pN
     sort(row_i.data(), row_i.data() + row_i.size());
     ifs_mfs.row(i) = row_i;
   }
 
-  // coutd << "ifs mfs lala" << endl;
-  // cout << setprecision(6) << ifs_mfs << endl;
   return ifs_mfs;
 }
 
-double *FISEval::predict(float *ind, int ind_n, double *observations,
-                         int observations_r, int observations_c, int n_rules,
-                         int max_vars_per_rules, int n_labels,
-                         int n_consequents, int *default_rule_cons,
-                         int default_rule_cons_n, double *vars_range,
-                         int vars_range_r, int vars_range_c,
-                         double *labels_weights, int labels_weights_n,
-                         int dc_idx) {
+FISEval::FISEval(int ind_n, double *observations, int observations_r,
+                 int observations_c, const int n_rules, int max_vars_per_rules,
+                 int n_labels, int n_consequents, int *default_rule_cons,
+                 int default_rule_cons_n, double *vars_range, int vars_range_r,
+                 int vars_range_c, double *labels_weights, int labels_weights_n,
+                 int dc_idx)
+    : mat_obs(observations, observations_r, observations_c),
+      mat_default_rule_cons_i(default_rule_cons, default_rule_cons_n),
+      mat_vars_ranges(vars_range, vars_range_r, vars_range_c),
+      vec_labels_weights(labels_weights, labels_weights_n) {
 
-  int n_true_labels = n_labels - 1;
+  this->ind_n = ind_n;
 
-  int n_vars = observations_c;
+  this->observations_r = observations_r;
+  this->observations_c = observations_c;
 
-  // CONVERT observations to Eigen matrix
-  const Map<MatXd> mat_obs(observations, observations_r, observations_c);
+  this->n_rules = n_rules;
+  this->max_vars_per_rules = max_vars_per_rules;
+  this->n_labels = n_labels;
+  this->n_true_labels = n_labels - 1;
+  this->n_consequents = n_consequents;
+  this->n_vars = observations_c;
+  this->mat_default_rule_cons = mat_default_rule_cons_i.cast<double>();
 
+  this->mf_values_eye = MatrixXd::Identity(n_labels, n_labels - 1);
+  this->dc_idx = dc_idx;
+
+  // set DC row to 1. This will neutralize the effect of AND_min
+  this->mf_values_eye.row(dc_idx).setOnes();
+}
+
+FISEval::~FISEval() {}
+
+double *FISEval::predict(float *ind) {
   // EXTRACT NEW INDIVIDUAL
   // ind is a float array that is the individual which represents a FIS.
   Map<MatXf> evo_mfs(ind, n_vars, n_true_labels);
@@ -99,31 +108,18 @@ double *FISEval::predict(float *ind, int ind_n, double *observations,
   Map<MatXf> evo_cons(ind_offset_cons, n_rules, n_consequents);
 
   // CONVERT EVOLUTION ANTS TO IFS ANTS
-  // MatXf ifs_ants =
-  Map<RowVectorXd> vec_labels_weights(labels_weights, labels_weights_n);
-  MatrixXi ifs_ants = this->evo_ants2ifs_ants(evo_ants, vec_labels_weights);
+  MatrixXi ifs_ants = evo_ants2ifs_ants(evo_ants, vec_labels_weights);
 
-  // CONVERT EVOLUTION MFS TO IFS MFS (i.e. in_values)
-  // TODO: vars_range_c is always 2, right ? (min, ptp)
-  Map<MatXd> m_vars_range(vars_range, vars_range_r, vars_range_c);
-
-  MatrixXd ifs_mfs = evo_mfs2ifs_mfs(evo_mfs, m_vars_range);
+  // CONVERT EVOLUTION MFS TO IFS MFS
+  MatrixXd ifs_mfs = evo_mfs2ifs_mfs(evo_mfs, mat_vars_ranges);
 
   // CONVERT EVOLUTION CONS TO IFS CONS
-  const auto binarize_mat = [&](float v) {
-    return v >= 0.5 ? 1.0 : 0.0;
-  }; // TODO: extract this into .h
+  const auto binarize_mat = [&](float v) { return v >= 0.5 ? 1.0 : 0.0; };
   MatrixXd ifs_cons = evo_cons.unaryExpr(binarize_mat).cast<double>();
 
   // add default rule consequents to ifs_cons
   ifs_cons.conservativeResize(ifs_cons.rows() + 1, NoChange);
-  ifs_cons.row(ifs_cons.rows() - 1) =
-      Map<RowVectorXi>(default_rule_cons, default_rule_cons_n).cast<double>();
-
-  MatrixXd mf_values_eye = MatrixXd::Identity(n_labels, n_labels - 1);
-  // set DC row to 1. This will neutralize the effect of AND_min
-  mf_values_eye.row(n_labels - 1).setOnes();
-  // coutd << endl << mf_values_eye;
+  ifs_cons.row(ifs_cons.rows() - 1) = mat_default_rule_cons;
 
   // create a row-major matrix here because we will returned it to Python
   MatXd defuzzified_outputs(observations_r, n_consequents);
@@ -138,15 +134,14 @@ double *FISEval::predict(float *ind, int ind_n, double *observations,
 
     // a rule can be implicated in [0, 1]
     RowVectorXd rules_activations(n_rules + 1); // +1 is for default rule
-    rules_activations.setConstant(0);
+    rules_activations.setConstant(0.0);
 
     for (int ri = 0; ri < n_rules; ri++) {
       VectorXi ants_ri = ifs_ants.row(ri);
 
       if ((ants_ri.array() == dc_idx).all()) {
         // ignore rule with all antecedents set to DONT_CARE
-        // coutd << "ignored rule " << ri << " because all ants are DC" <<
-        // endl;
+        // coutd << "ignored rule " << ri << " because all ants are DC" << endl;
         continue;
       }
 
@@ -179,12 +174,12 @@ double *FISEval::predict(float *ind, int ind_n, double *observations,
     rules_activations(rules_activations.size() - 1) =
         1 - rules_activations.maxCoeff();
 
-    // coutd << "rule
     VectorXd defuzz_out =
         (rules_activations * ifs_cons) / rules_activations.sum();
 
     defuzzified_outputs.row(i) = defuzz_out;
   }
+
   // END EVALUATE
 
   // for some unknown reason, we cannot simple return the myMatrix.data() to

@@ -1,58 +1,8 @@
 import numpy as np
 
-import pyfuge.py_fiseval as feval
 from pyfuge.evo.examples.evo_wine_classifier import load_wine_dataset
 from pyfuge.evo.helpers import ifs_utils
-
-
-def predict_native(ind, observations, n_rules, max_vars_per_rule, n_labels,
-                   n_consequents, default_rule_cons, vars_ranges,
-                   labels_weights):
-    """
-    Make the prediction (i.e. given an individual, it creates a FIS and finally returns the
-    predictions aka y_preds) using a C++ engine (faster)
-
-    Assumptions:
-    - singleton (aggregation and defuzzification done according the book)
-    - classifier type (multiple consequents in [0, 1])
-    - AND_min is the implication/rule operator
-    - mandatory default rule
-    - not operator unsupported FIXME ?
-    - max_vars_per_rule <= n_rules
-    -
-    -
-
-    :param ind: a list of floats with the following format
-    ind = [ v0p0, v0p1, v0p2, v1p0, v1p1, v1p2.. a0r0, a1r0, a0r1, a1r1,.. c0r0,
-     c1r0, c0r1, c1r1 ]
-    len(ind) = ((n_labels-1) * max_vars_per_rule) * n_rules
-    + max_vars_per_rule * n_rules + n_consequents * n_rules
-
-    :param observations: a NxM np.array N=n_observations, M=n_vars
-    :param n_rules:
-    :param max_vars_per_rule: maximum of variables per rule. Must be <= n_vars
-    :param n_labels: number of linguistic labels (e.g. LOW, MEDIUM, HIGH,
-    DONT_CARE). You must include the don't care label e.g.
-    ["low", "medium", "high"] --> 3 + 1 (don't care) --> n_labels=4
-    :param n_consequents:
-    :param default_rule_cons: an np.array defining the consequents for the
-    default rule. E.g. [0, 0, 1] if there is 3 consequents. Each consequent must
-    be either 0 or 1 since IFS is a classifier type singleton
-    fuzzy system
-    :param vars_ranges: a Nx2 np.array where each row contains the ith variable
-    ptp (range) and minimum. It will be used to scale a float in [0, 1].
-    Example, [[v0_ptp, v0_min], [v1_ptp, v1_min]].
-    :param labels_weights: an array of length n_labels. Set the labels weights.
-    For example, [1, 1, 4] will set the chance to set an antecedent to
-    don't care (DC) label 4 times more often (on average) than the others
-    labels. If none is provided, then all labels have the same probability to be
-    chosen.
-    :return: an array of defuzzified outputs (i.e. non-thresholded outputs)
-    """
-
-    return feval.predict_native(ind, observations, n_rules, max_vars_per_rule,
-                                n_labels, n_consequents, default_rule_cons,
-                                vars_ranges, labels_weights)
+from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 
 
 def simple_predict():
@@ -120,19 +70,19 @@ def simple_predict():
     from time import time
     N = 100
 
+    ind_evaluator = NativeIndEvaluator(len(ind), observations=ds_test.X,
+                                       n_rules=n_rules,
+                                       max_vars_per_rule=n_max_vars_per_rule,
+                                       n_labels=n_labels,
+                                       n_consequents=len(default_rule_output),
+                                       default_rule_cons=np.array(
+                                           default_rule_output),
+                                       vars_ranges=vars_range,
+                                       labels_weights=labels_weights)
+
     t0 = time()
     for _ in range(N):
-        predicted_outputs = predict_native(
-            ind=ind,
-            observations=ds_test.X,
-            n_rules=n_rules,
-            max_vars_per_rule=n_max_vars_per_rule,
-            n_labels=n_labels,
-            n_consequents=len(default_rule_output),
-            default_rule_cons=np.array(default_rule_output),
-            vars_ranges=vars_range,
-            labels_weights=labels_weights,
-        )
+        predicted_outputs = ind_evaluator.predict_native(ind)
     tCPP = time() - t0
     tCPP /= N
 
@@ -158,6 +108,9 @@ def simple_predict():
 
     is_close = np.allclose(predicted_outputs, py_predicted_outputs)
     print("is close C++/Python", is_close)
+
+    # print(predicted_outputs)
+    # print(py_predicted_outputs)
 
 
 if __name__ == '__main__':

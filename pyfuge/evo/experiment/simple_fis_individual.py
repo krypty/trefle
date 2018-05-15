@@ -1,8 +1,8 @@
 import numpy as np
 
-from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.fis_individual import FISIndividual
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 from pyfuge.fs.core.fis.fis import MIN, AND_min
 from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
 from pyfuge.fs.core.lv.linguistic_variable import \
@@ -102,6 +102,19 @@ class SimpleFISIndividual(FISIndividual):
         # we have decided the don't care index will always be the last label
         self._dc_index = len(mf_label_names) - 1
 
+        # init the native evaluator
+        self._fiseval = NativeIndEvaluator(
+            ind_n=self._ind_len,
+            observations=self.dataset.X,
+            n_rules=self.n_rules,
+            max_vars_per_rule=self.n_max_var_per_rule,
+            n_labels=self.n_labels,
+            n_consequents=self.n_consequents,
+            default_rule_cons=self.default_rule,
+            vars_ranges=self.vars_range,
+            labels_weights=self.labels_weights
+        )
+
     def convert_to_fis(self, ind):
         n_consequents = len(self.default_rule)
         evo_mfs, evo_ants, evo_cons = \
@@ -153,15 +166,16 @@ class SimpleFISIndividual(FISIndividual):
         return SingletonFIS(rules=rules, default_rule=dr)
 
     def predict(self, ind):
-        predicted_outputs = NativeIFSUtils.predict_native(
-            ind=ind,
-            observations=self.dataset.X,
-            n_rules=self.n_rules,
-            max_vars_per_rule=self.n_max_var_per_rule,
-            n_labels=self.n_labels,
-            n_consequents=self.n_consequents,
-            default_rule_cons=self.default_rule,
-            vars_ranges=self.vars_range,
-            labels_weights=self.labels_weights,
-        )
-        return predicted_outputs
+        # res1 = IFSUtils.predict(
+        #     ind=ind,
+        #     observations=self.dataset.X,
+        #     n_rules=self.n_rules,
+        #     max_vars_per_rule=self.n_max_var_per_rule,
+        #     n_labels=self.n_labels,
+        #     n_consequents=self.n_consequents,
+        #     default_rule_cons=self.default_rule,
+        #     vars_ranges=self.vars_range,
+        #     labels_weights=self.labels_weights,
+        # )
+
+        return self._fiseval.predict_native(ind)

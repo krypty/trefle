@@ -7,8 +7,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
-from pyfuge.evo.helpers import NativeIFSUtils
 from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 from pyfuge.fs.view.fis_viewer import FISViewer
 
 
@@ -99,6 +99,7 @@ def run():
         labels_weights=labels_weights
     )
 
+    t0 = time()
     exp = SimpleEAExperiment(
         dataset=ds_train,
         fis_individual=fis_ind,
@@ -107,6 +108,8 @@ def run():
         N_GEN=100,
         HOF=3
     )
+    t1 = time() - t0
+    print("evo cancer {:.3f} ms".format(t1 * 1000))
 
     top_n = exp.get_top_n()
 
@@ -126,37 +129,40 @@ def run():
     # make sure the var_range is still set to training set. If not, we cheat
     var_range_train = IFSUtils.compute_vars_range(ds_train.X)
 
+    ind_evaluator_train = NativeIndEvaluator(
+        ind_n=len(ind),
+        observations=ds_train.X,
+        n_rules=n_rules,
+        max_vars_per_rule=n_max_vars_per_rule,
+        n_labels=len(mf_label_names),
+        n_consequents=len(default_rule_output),
+        default_rule_cons=np.array(default_rule_output),
+        vars_ranges=var_range_train,
+        labels_weights=labels_weights
+    )
+
+    ind_evaluator_test = NativeIndEvaluator(
+        ind_n=len(ind),
+        observations=ds_test.X,
+        n_rules=n_rules,
+        max_vars_per_rule=n_max_vars_per_rule,
+        n_labels=len(mf_label_names),
+        n_consequents=len(default_rule_output),
+        default_rule_cons=np.array(default_rule_output),
+        vars_ranges=var_range_train,
+        labels_weights=labels_weights
+    )
+
     for ind in top_n[:1]:
         # train
-        y_pred_train = NativeIFSUtils.predict_native(
-            ind,
-            observations=ds_train.X,
-            n_rules=n_rules,
-            max_vars_per_rule=n_max_vars_per_rule,
-            n_labels=len(mf_label_names),
-            n_consequents=len(default_rule_output),
-            default_rule_cons=np.array(default_rule_output),
-            vars_ranges=var_range_train,
-            labels_weights=labels_weights,
-        )
+        y_pred_train = ind_evaluator_train.predict_native(ind)
 
         acc = _compute_accuracy(ds_train.y, y_pred_train)
         print("acc train ", acc)
 
         # test
-        y_pred_test = NativeIFSUtils.predict_native(
-            ind,
-            observations=ds_test.X,
-            n_rules=n_rules,
-            max_vars_per_rule=n_max_vars_per_rule,
-            n_labels=len(mf_label_names),
-            n_consequents=len(default_rule_output),
-            default_rule_cons=np.array(default_rule_output),
-            vars_ranges=var_range_train,
-            labels_weights=labels_weights,
-        )
 
-        print(y_pred_test)
+        y_pred_test = ind_evaluator_test.predict_native(ind)
 
         acc = _compute_accuracy(ds_test.y, y_pred_test)
         print("acc test ", acc)
