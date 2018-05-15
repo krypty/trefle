@@ -186,7 +186,7 @@ class IFSUtils:
         # set DC row to 1. This will neutralize the effect of AND_min
         mf_values_eye[dc_idx] = 1
 
-        # TODO make sure -1 is correct index (dc_idx ?)
+        # remove the last column because we ignore the DC_IDX
         mf_values_eye = mf_values_eye[:, :-1]  # shape = (N_LABELS, N_LABELS-1)
 
         ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
