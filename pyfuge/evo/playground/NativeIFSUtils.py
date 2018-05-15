@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyfuge.evo.examples.evo_wine_classifier import load_wine_dataset
-from pyfuge.evo.helpers import ifs_utils
+from pyfuge.evo.helpers import ind_evaluator_utils
 from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 
 
@@ -88,7 +88,7 @@ def simple_predict():
 
     t0 = time()
     for _ in range(N):
-        py_predicted_outputs = ifs_utils.IFSUtils.predict(
+        py_predicted_outputs = ind_evaluator_utils.IndEvaluatorUtils.predict(
             ind=ind,
             observations=ds_test.X,
             n_rules=n_rules,

@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.evo.helpers.ind_evaluator_utils import IndEvaluatorUtils
 
 
 def test_unitfloat2idx_equal_weights():
@@ -38,7 +38,7 @@ def test_unitfloat2idx_different_weights_less_than_one():
 
 def _check_unitfloat2idx(float_li, expected_indices, weights):
     for i in range(len(float_li)):
-        idx = IFSUtils.unitfloat2idx(float_li[i], weights)
+        idx = IndEvaluatorUtils.unitfloat2idx(float_li[i], weights)
         print(float_li[i], idx)
         assert idx == expected_indices[i]
 
@@ -63,7 +63,7 @@ def test_evo_ants2ifs_ants():
     labels_names = ["L", "H", "DC"]
     labels_weights = np.ones(len(labels_names))
 
-    ifs_ants = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
+    ifs_ants = IndEvaluatorUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
 
     try:
         assert np.allclose(exp_arr, ifs_ants)
@@ -90,7 +90,7 @@ def test_evo_ants2ifs_ants_2():
     ])
 
     labels_weights = np.array([0.5, 0.5, 0.5, 2])
-    ifs_ants = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
+    ifs_ants = IndEvaluatorUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
 
     try:
         assert np.allclose(exp_arr, ifs_ants)

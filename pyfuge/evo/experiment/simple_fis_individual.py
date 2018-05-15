@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyfuge.evo.helpers.fis_individual import FISIndividual
-from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.evo.helpers.ind_evaluator_utils import IndEvaluatorUtils
 from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 from pyfuge.fs.core.fis.fis import MIN, AND_min
 from pyfuge.fs.core.fis.singleton_fis import SingletonFIS
@@ -118,12 +118,12 @@ class SimpleFISIndividual(FISIndividual):
     def convert_to_fis(self, ind):
         n_consequents = len(self.default_rule)
         evo_mfs, evo_ants, evo_cons = \
-            IFSUtils.extract_ind(ind, self.n_vars, self.n_labels,
-                                 self.n_rules, self.n_consequents)
+            IndEvaluatorUtils.extract_ind(ind, self.n_vars, self.n_labels,
+                                          self.n_rules, self.n_consequents)
 
         # CONVERT EVOLUTION MFS TO IFS MFS
-        ifs_ants_idx = IFSUtils.evo_ants2ifs_ants(evo_ants, self.labels_weights)
-        in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, self.vars_range)
+        ifs_ants_idx = IndEvaluatorUtils.evo_ants2ifs_ants(evo_ants, self.labels_weights)
+        in_values = IndEvaluatorUtils.evo_mfs2ifs_mfs(evo_mfs, self.vars_range)
 
         pretty_vars_names = self.dataset.X_names
         pretty_outputs_names = self.dataset.y_names
@@ -149,7 +149,7 @@ class SimpleFISIndividual(FISIndividual):
 
         labels = labels_str_dict[self.n_labels - 1]
 
-        ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
+        ifs_cons = IndEvaluatorUtils.evo_cons2ifs_cons(evo_cons)
 
         rules = []
         for i in range(len(ifs_ants_idx)):
@@ -166,7 +166,7 @@ class SimpleFISIndividual(FISIndividual):
         return SingletonFIS(rules=rules, default_rule=dr)
 
     def predict(self, ind):
-        # res1 = IFSUtils.predict(
+        # res1 = IndEvaluatorUtils.predict(
         #     ind=ind,
         #     observations=self.dataset.X,
         #     n_rules=self.n_rules,

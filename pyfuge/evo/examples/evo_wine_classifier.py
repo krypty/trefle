@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
-from pyfuge.evo.helpers.ifs_utils import IFSUtils
+from pyfuge.evo.helpers.ind_evaluator_utils import IndEvaluatorUtils
 from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 from pyfuge.fs.view.fis_viewer import FISViewer
 
@@ -141,7 +141,7 @@ def run_with_simple_evo():
     ##
 
     # make sure the var_range is still set to training set. If not, we cheat
-    var_range_train = IFSUtils.compute_vars_range(ds_train.X)
+    var_range_train = IndEvaluatorUtils.compute_vars_range(ds_train.X)
 
     fis_evaluator = NativeIndEvaluator(
         ind_n=len(ind),

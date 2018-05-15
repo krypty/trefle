@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class IFSUtils:
+class IndEvaluatorUtils:
     @staticmethod
     def unitfloat2idx(flt, weights):
         """
@@ -43,7 +43,7 @@ class IFSUtils:
         """
         ifs_ants = evo_ants.copy()
         for i in np.ndindex(ifs_ants.shape):
-            ifs_ants[i] = IFSUtils.unitfloat2idx(ifs_ants[i], weights)
+            ifs_ants[i] = IndEvaluatorUtils.unitfloat2idx(ifs_ants[i], weights)
 
         return ifs_ants.astype(np.int)
 
@@ -166,16 +166,16 @@ class IFSUtils:
         dc_idx = n_labels - 1
         n_obs, n_vars = observations.shape
 
-        evo_mfs, evo_ants, evo_cons = IFSUtils.extract_ind(ind, n_vars,
-                                                           n_labels,
-                                                           n_rules,
-                                                           n_consequents)
+        evo_mfs, evo_ants, evo_cons = IndEvaluatorUtils.extract_ind(ind, n_vars,
+                                                                    n_labels,
+                                                                    n_rules,
+                                                                    n_consequents)
 
         # CONVERT EVOLUTION ANTS TO IFS ANTS
-        ifs_ants_idx = IFSUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
+        ifs_ants_idx = IndEvaluatorUtils.evo_ants2ifs_ants(evo_ants, labels_weights)
 
         # CONVERT EVOLUTION MFS TO IFS MFS
-        in_values = IFSUtils.evo_mfs2ifs_mfs(evo_mfs, vars_ranges)
+        in_values = IndEvaluatorUtils.evo_mfs2ifs_mfs(evo_mfs, vars_ranges)
 
         # TODO remove me
         assert in_values.shape[1] == n_labels - 1  # drop DC label
@@ -189,7 +189,7 @@ class IFSUtils:
         # remove the last column because we ignore the DC_IDX
         mf_values_eye = mf_values_eye[:, :-1]  # shape = (N_LABELS, N_LABELS-1)
 
-        ifs_cons = IFSUtils.evo_cons2ifs_cons(evo_cons)
+        ifs_cons = IndEvaluatorUtils.evo_cons2ifs_cons(evo_cons)
         ifs_cons = np.append(ifs_cons, default_rule_cons[np.newaxis, :],
                              axis=0)
 
