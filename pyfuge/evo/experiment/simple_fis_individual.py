@@ -140,6 +140,8 @@ class SimpleFISIndividual(FISIndividual):
 
         rules = []
         for i in range(len(ifs_ants_idx)):
+            if (ifs_ants_idx[i] == self._dc_index).all():
+                continue
             r = _create_rule(ifs_ants_idx[i], ifs_cons[i], labels,
                              ling_vars, output_vars, self._dc_index)
             rules.append(r)
