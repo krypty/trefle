@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 
 
@@ -29,12 +30,19 @@ class PFDataset:
         :param y_names: name of the classes
         """
         self.X = X
-        self.y = y
+        # self.y = y
         self.X_names = X_names
         self.y_names = y_names
 
         self.N_OBS = X.shape[0]
         self.N_VARS = X.shape[1]
         self.N_CLASSES = np.unique(y).shape[0]
+
+        # print(y.shape[1])
+
+        if y.ndim == 1:
+            self.y = pd.get_dummies(y).values
+        else:
+            self.y = y
 
         # TODO make a Pandas DF ?

@@ -122,7 +122,8 @@ class SimpleFISIndividual(FISIndividual):
                                           self.n_rules, self.n_consequents)
 
         # CONVERT EVOLUTION MFS TO IFS MFS
-        ifs_ants_idx = IndEvaluatorUtils.evo_ants2ifs_ants(evo_ants, self.labels_weights)
+        ifs_ants_idx = IndEvaluatorUtils.evo_ants2ifs_ants(evo_ants,
+                                                           self.labels_weights)
         in_values = IndEvaluatorUtils.evo_mfs2ifs_mfs(evo_mfs, self.vars_range)
 
         pretty_vars_names = self.dataset.X_names
