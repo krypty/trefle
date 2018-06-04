@@ -106,7 +106,8 @@ def run():
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=400,
         N_GEN=100,
-        HOF=3
+        HOF=3,
+        verbose=True
     )
     t1 = time() - t0
     print("evo cancer {:.3f} ms".format(t1 * 1000))

@@ -23,8 +23,6 @@ class SimpleEAExperiment(Experiment):
 
         target_length = self._fis_individual.ind_length()
 
-        print("target len", target_length)
-
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMax)
 
@@ -48,12 +46,8 @@ class SimpleEAExperiment(Experiment):
                              math.log(target_length, 10)))),
         toolbox.register("select", tools.selTournament, tournsize=3)
 
-        stats = tools.Statistics(lambda ind: ind.fitness.values)
-        stats.register("avg", np.mean)
-        stats.register("std", np.std)
-        stats.register("min", np.min)
-        stats.register("max", np.max)
-        # stats.register("len", len)
+        verbose = kwargs.pop("verbose", False)
+        stats = self.setup_stats(verbose)
 
         N_POP = self._kwargs.get("N_POP") or 100
         population = toolbox.population(n=N_POP)
@@ -63,8 +57,21 @@ class SimpleEAExperiment(Experiment):
         hof = tools.HallOfFame(self._kwargs.get("HOF") or 5)
 
         algorithms.eaSimple(population, toolbox, cxpb=0.8, mutpb=0.3, ngen=NGEN,
-                            halloffame=hof, stats=stats)
+                            halloffame=hof, stats=stats, verbose=verbose)
         self._top_n = tools.selBest(population, k=3)
+
+    @staticmethod
+    def setup_stats(verbose):
+        if not verbose:
+            return None
+
+        stats = tools.Statistics(lambda ind: ind.fitness.values)
+        stats.register("avg", np.mean)
+        stats.register("std", np.std)
+        stats.register("min", np.min)
+        stats.register("max", np.max)
+        # stats.register("len", len)
+        return stats
 
     def get_top_n(self):
         return self._top_n
