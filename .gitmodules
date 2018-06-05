@@ -1,3 +1,6 @@
 [submodule "pyfuge/py_fiseval/pybind11"]
 	path = pyfuge/py_fiseval/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "pyfuge/py_fiseval/FISEval"]
+	path = pyfuge/py_fiseval/FISEval
+	url = git@github.com:krypty/FISEval.git
