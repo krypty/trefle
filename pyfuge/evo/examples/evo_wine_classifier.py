@@ -34,8 +34,8 @@ def load_fake_dataset(test_size=0.3):
     from sklearn.model_selection import train_test_split
     X, y = make_classification(n_samples=600, n_features=1000, n_informative=3,
                                n_redundant=0, n_classes=2,
-                               weights=[0.5, 0.5]
-                               )
+                               weights=[0.5, 0.5])
+
     y = y.reshape(-1, 1)
     print("X shape", X.shape)
     print("y shape", y.shape)
@@ -72,7 +72,7 @@ def load_wine_dataset(test_size=0.3):
 
 
 # @profile(sort="cumulative", filename="/tmp/pyfuge.profile")
-def run_with_simple_evo():
+def run():
     from time import time
     from pyfuge.evo.experiment.simple_fis_individual import \
         SimpleFISIndividual
@@ -121,7 +121,8 @@ def run_with_simple_evo():
         fis_individual=fis_ind,
         fitevaluator=PyFUGEFitnessEvaluator(),
         N_POP=200,
-        N_GEN=100
+        N_GEN=100,
+        verbose=True
     )
 
     tick()
@@ -135,6 +136,8 @@ def run_with_simple_evo():
         FISViewer(fis).show()
 
         fis_li.append(fis)
+
+    ind = top_n[0]
 
     ##
     ## VALIDATION PHASE
@@ -163,4 +166,4 @@ def run_with_simple_evo():
 
 
 if __name__ == '__main__':
-    run_with_simple_evo()
+    run()
