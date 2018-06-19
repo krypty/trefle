@@ -15,7 +15,6 @@ evo_cancer.run()
 
 * CMake version >= 3.1
 * Git
-* vcpkg
 * Python >= 3.4 (tested with 3.6.5)
 * To build sources on Windows you will need
   * VS Community with (you can choose which components to install using Visual Studio Installer)
@@ -27,29 +26,8 @@ Note: the following instructions assume a 64bits GNU/Linux machine or a 64bits W
 
 On Windows make sure to open an __admin cmd__ console.
 
-1. Download [vcpkg](https://github.com/Microsoft/vcpkg):
-  * git clone --recursive it somewhere. It does not matter where
-  * cd vcpkg
-  * execute bootstrap-vcpkg.{sh,bat}
-  * set `VCPKG_ROOT` environment variable
-    * Windows: `set VCPKG_ROOT=X:\path\to\vcpkg`
-    * Linux: `export VCPKG_ROOT=/path/to/vcpkg`
-2. Install vcpkg dependencies
-  * On Windows
-```
-cd %VCPKG_ROOT%
-.\vcpkg.exe install Eigen3:x64-windows
-.\vcpkg.exe install Catch2:x64-windows
-# .\vcpkg.exe install pybind11:x64-windows (don't work on Linux for now, use git submodule instead)
-```
- * On Linux
-```
-cd $VCPKG_ROOT
-./vcpkg install Eigen3
-./vcpkg install Catch2
-#./vcpkg install pybind11 (don't work on Linux for now)
-```
-
+1. `git clone --recursive <this_repo>`
+2. `cd <this_repo>`
 3. Create a virtualenv and activate it
   * On Windows
 ```
@@ -58,14 +36,7 @@ python -m venv myvenv
 ```
   * On Linux: __TODO__
 
-4. Clone this repository
-
-```
-git clone --recursive $this_repo$
-cd PyFUGE
-```
-
-
+4. If cmake is not installed you can install it with: `pip install cmake`
 5. Build the sources
   * On Windows or Linux
 ```
@@ -91,18 +62,17 @@ pip install wheel twine
 ## Run tests
 
 * activate the virtualenv
-* export the `VCPKG_ROOT` environment variable
 
 ```
 cd PyFUGE/pyfuge/py_fiseval/FISEval
 mkdir build
 cd build
-cmake "-DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Debug ..
+cmake -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ./run_tests --success
 ```
 
-_Note: at the moment tests are only compile on debug mode._
+_Note: at the moment tests are only compiled on debug mode._
 
 # Deploy to test.pypi.org
 
@@ -145,12 +115,11 @@ Steps to build a manylinux wheel:
 
 1. Get the project sources and follow the requirements above
 1. Make sure to install the vcpkg libs before going further. You must install the libs on the host machine, it will fail inside the container.
-1. Install Docker and run `docker run -it --rm -v /path/to/PyFUGE:/PyFUGE -v ${VCPKG_ROOT}:/vcpkg  quay.io/pypa/manylinux1_x86_64 /bin/bash`. _Note for an unknown reason it seems to fail on Arch Linux, had to use a Ubuntu 16.04 VM._
+1. Install Docker and run `docker run -it --rm -v /path/to/PyFUGE:/PyFUGE quay.io/pypa/manylinux1_x86_64 /bin/bash`. _Note for an unknown reason it seems to fail on Arch Linux, had to use a Ubuntu 16.04 VM._
 
 You will enter into a shell inside the container. The following commands are meant to be executed inside this container.
 _
 ```bash
-export VCPKG_ROOT=/vcpkg
 export PATH=/opt/python/cp36-cp36m/bin:$PATH
 cd /PyFUGE
 python install cmake twine
