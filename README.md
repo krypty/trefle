@@ -114,7 +114,6 @@ python setup.py sdist bdist_wheel
 Steps to build a manylinux wheel:
 
 1. Get the project sources and follow the requirements above
-1. Make sure to install the vcpkg libs before going further. You must install the libs on the host machine, it will fail inside the container.
 1. Install Docker and run `docker run -it --rm -v /path/to/PyFUGE:/PyFUGE quay.io/pypa/manylinux1_x86_64 /bin/bash`. _Note for an unknown reason it seems to fail on Arch Linux, had to use a Ubuntu 16.04 VM._
 
 You will enter into a shell inside the container. The following commands are meant to be executed inside this container.
