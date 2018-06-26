@@ -1,5 +1,5 @@
-from sklearn.datasets import load_breast_cancer, load_iris, load_boston
-from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.datasets import load_breast_cancer, load_iris
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 
