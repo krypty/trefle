@@ -1,4 +1,4 @@
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from pyfuge.evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
 
@@ -9,7 +9,7 @@ class PyFUGEFitnessEvaluator(FitnessEvaluator):
     def _compute_metric(y_pred, y_true):
         # return -((y_pred - y_true) ** 2).sum(axis=None)
 
-        return 1 - mean_absolute_error(y_true, y_pred)
+        return 1 - mean_squared_error(y_true, y_pred)
         # return 1.0 - np.mean(np.mean((y_true - y_pred) ** 2, axis=0))
 
         # y_pred_bin = np.where(y_pred >= 0.5, 1, 0)
