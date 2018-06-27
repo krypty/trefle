@@ -53,14 +53,14 @@ You will enter into a shell inside the container. The following commands are mea
 ```bash
 export PATH=/opt/python/cp36-cp36m/bin:$PATH
 cd /PyFUGE
-python install cmake twine wheel
+pip install cmake twine wheel
 python setup.py build
 python setup.py sdist bdist_wheel
 
 # then we must fix the wheel using auditwheel
-auditwheel repair dist/xxx-linux-x86_64.whl
-
-twine upload --repository-url https://test.pypi.org/legacy/ dist/wheelhouse/*
+cd dist
+auditwheel repair xxx-linux-x86_64.whl
+twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
 ```
 
 ## Test the uploaded binary wheel from `test.pypi.org`
