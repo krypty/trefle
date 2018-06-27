@@ -3,4 +3,4 @@
 	url = https://github.com/pybind/pybind11.git
 [submodule "pyfuge/py_fiseval/FISEval"]
 	path = pyfuge/py_fiseval/FISEval
-	url = git@github.com:krypty/FISEval.git
+	url = ../FISEval.git
