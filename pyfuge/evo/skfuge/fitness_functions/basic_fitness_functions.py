@@ -57,79 +57,104 @@ def weighted_binary_classif_metrics(
         # to generate all the fitness function possible given these arguments
         # we can use product() but before that we have to convert all
         # non-iterable arguments to iterable one (e.g. int to tuple conversion)
-        return (_build_weighted_binary_classif_metrics(**_kwargs) for _kwargs in
-                product_dict(**convert_non_iterable_args(kwargs)))
+        return list(
+            _build_weighted_binary_classif_metrics(**_kwargs) for _kwargs in
+            product_dict(**convert_non_iterable_args(kwargs))
+        )
 
 
 def _build_weighted_binary_classif_metrics(
         acc_w=0, sen_w=0, spe_w=0, f1_w=0, ppv_w=0,
         npv_w=0, fpr_w=0, fnr_w=0, fdr_w=0,
 ):
-    def _fitness(y_true, y_pred):
-        # source of formulae:
-        # https://en.wikipedia.org/wiki/Sensitivity_and_specificity
-        tot_w = 0
-        fit = 0
+    _, _, _, _kwargs = inspect.getargvalues(inspect.currentframe())
 
-        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        print(tn, fp, fn, tp)
+    class Fitness:
+        @staticmethod
+        def weights():
+            return _kwargs
 
-        # some metrics are clipped to their respecting range (mostly in [0,1]).
-        # we do this to avoid infinite numbers e.g. when dividing by 0.
-        with np.errstate(divide="ignore"):
-            # accuracy
-            # no need to clip, denominator is >0
-            acc = (tp + tn) / (tp + fp + fn + tn)
-            fit += acc_w * acc
-            tot_w += acc_w
+        def __repr__(self):
+            return str(self.weights())
 
-            # sensitivity
-            sen = np.clip(tp / (tp + fn), a_min=0, a_max=1)
-            fit += sen_w * sen
-            tot_w += sen_w
+        def __getitem__(self, item):
+            return _kwargs[item]
 
-            # specificity
-            spe = np.clip(tn / (tn + fp), a_min=0, a_max=1)
-            fit += spe_w * spe
-            tot_w += spe_w
+        def __call__(self, *args, **kwargs):
+            # y_true = kwargs["y_true"]
+            # y_pred = kwargs["y_pred"]
 
-            # f1score
-            f1 = f1_score(y_true, y_pred)
-            fit += f1_w * f1
-            tot_w += f1_w
+            # mimic fitness_function_signature
+            y_true = args[0]
+            y_pred = args[1]
 
-            # PPV
-            # if either tp or fp is 0, then the result should be 0 too.
-            ppv = np.clip(tp / (tp / fp), a_min=0, a_max=1)
-            fit += ppv_w * ppv
-            tot_w += ppv_w
+            return self._fitness(y_true, y_pred)
 
-            # NPV
-            npv = np.clip(tn / (tn + fn), a_min=0, a_max=1)
-            fit += npv_w * npv
-            tot_w += npv_w
+        @staticmethod
+        def _fitness(y_true, y_pred):
+            # source of formulae:
+            # https://en.wikipedia.org/wiki/Sensitivity_and_specificity
+            tot_w = 0
+            fit = 0
 
-            # FPR
-            fpr = 1 - spe
-            fit += fpr_w * fpr
-            tot_w += fpr_w
+            tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+            print(tn, fp, fn, tp)
 
-            # FNR
-            fnr = 1 - sen
-            fit += fnr_w * fnr
-            tot_w += fnr_w
+            # some metrics are clipped to their respecting range
+            # (mostly in [0,1]). we do this to avoid infinite numbers e.g.
+            # when dividing by 0.
+            with np.errstate(divide="ignore"):
+                # accuracy
+                # no need to clip, denominator is >0
+                acc = (tp + tn) / (tp + fp + fn + tn)
+                fit += acc_w * acc
+                tot_w += acc_w
 
-            # FDR
-            fdr = 1 - ppv
-            fit += fdr_w * fdr
-            tot_w += fdr_w
+                # sensitivity
+                sen = np.clip(tp / (tp + fn), a_min=0, a_max=1)
+                fit += sen_w * sen
+                tot_w += sen_w
 
-            fit = 2.4
+                # specificity
+                spe = np.clip(tn / (tn + fp), a_min=0, a_max=1)
+                fit += spe_w * spe
+                tot_w += spe_w
 
-        # handle zero-division
-        return 0 if abs(tot_w) < 1e-6 else fit / tot_w
+                # f1score
+                f1 = f1_score(y_true, y_pred)
+                fit += f1_w * f1
+                tot_w += f1_w
 
-    return _fitness
+                # PPV
+                # if either tp or fp is 0, then the result should be 0 too.
+                ppv = np.clip(tp / (tp / fp), a_min=0, a_max=1)
+                fit += ppv_w * ppv
+                tot_w += ppv_w
+
+                # NPV
+                npv = np.clip(tn / (tn + fn), a_min=0, a_max=1)
+                fit += npv_w * npv
+                tot_w += npv_w
+
+                # FPR
+                fpr = 1 - spe
+                fit += fpr_w * fpr
+                tot_w += fpr_w
+
+                # FNR
+                fnr = 1 - sen
+                fit += fnr_w * fnr
+                tot_w += fnr_w
+
+                # FDR
+                fdr = 1 - ppv
+                fit += fdr_w * fdr
+                tot_w += fdr_w
+
+            # handle zero-division
+            return 0 if abs(tot_w) < 1e-6 else fit / tot_w
+
+    return Fitness()
 
 
 if __name__ == '__main__':
@@ -139,11 +164,12 @@ if __name__ == '__main__':
     y_pred = np.array([0, 0, 0, 0, 1, 0, 1, 0, 1, 1])
 
     fit_functions = weighted_binary_classif_metrics(
-        acc_w=np.linspace(0, 1, 4),
+        # acc_w=np.linspace(0, 1, 2),
         spe_w=(0.2, 0.4),
-        f1_w=0.3
     )
+
     for f in fit_functions:
+        print("function weights", f)
         print(f(y_true, y_pred))
 
     print("single")
