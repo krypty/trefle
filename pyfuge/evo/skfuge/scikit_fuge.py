@@ -2,6 +2,7 @@ import inspect
 
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.metrics import mean_squared_error
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
@@ -21,10 +22,26 @@ labels_str_dict = {
 
 
 class FugeClassifier(BaseEstimator, ClassifierMixin):
+    _fitness_function_signature = "def fit(y_true, y_pred): return fitness"
 
     def __init__(self, n_rules=3, n_labels_per_mf=2, pop_size=80,
                  n_generations=100, halloffame=3, dont_care_prob=None,
-                 verbose=False):
+                 fitness_function=None, verbose=False):
+        """
+
+        :param n_rules:
+        :param n_labels_per_mf:
+        :param pop_size:
+        :param n_generations:
+        :param halloffame:
+        :param dont_care_prob:
+        :param fitness_function: a function like fitness(y_true, y_pred) that
+        returns a scalar value. The higher this value is the better the fitness.
+        Be careful to use classification metrics on a classification and vice
+        versa for regression problem unless you know what you do (e.g. use RMSE
+        on a classification problem)
+        :param verbose:
+        """
         # assign self.XXX = XXX for all args
         args, _, _, values = inspect.getargvalues(inspect.currentframe())
         values.pop("self")
@@ -40,6 +57,13 @@ class FugeClassifier(BaseEstimator, ClassifierMixin):
             self.dont_care_prob = 1.0 / (1 + self.n_labels_per_mf)
         elif not (0.0 < self.dont_care_prob < 1.0):
             raise ValueError("dont_care_prob must be between 0.0 and 1.0")
+
+        if self.fitness_function is None:
+            self.fitness_function = mean_squared_error
+        elif not hasattr(self.fitness_function, "__call__"):
+            raise ValueError(
+                "fitness function must be a callable like: {}".format(
+                    self._fitness_function_signature))
 
     def fit(self, X, y):
         self._setup()
