@@ -123,10 +123,7 @@ class FugeClassifier(BaseEstimator, ClassifierMixin):
 
         self._y_pred = ind_evaluator.predict_native(self._best_ind)
 
-        if self._y_pred.shape[0] > 1:
-            return np.argmax(self._y_pred, axis=1)
-        else:
-            return np.round(self._y_pred)
+        return self._compute_y_pred_bin(self._y_pred)
 
     def get_last_unthresholded_predictions(self):
         self._ensure_fit()
@@ -141,6 +138,15 @@ class FugeClassifier(BaseEstimator, ClassifierMixin):
     def _ensure_fit(self):
         if getattr(self, "_fis_ind") is None:
             raise ValueError("You must use fit() first")
+
+    @staticmethod
+    def _compute_y_pred_bin(y_pred):
+        if y_pred.shape[1] > 1:
+            # return the class with the highest output
+            return np.argmax(y_pred, axis=1)
+        else:
+            # output is binary
+            return np.round(y_pred)
 
     @staticmethod
     def compute_labels_weights(dont_care_prob, n_labels):
