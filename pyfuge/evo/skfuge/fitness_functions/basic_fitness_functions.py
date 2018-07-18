@@ -1,7 +1,9 @@
 import inspect
+import sys
 from itertools import product
 
 from sklearn.metrics import confusion_matrix, f1_score
+import numpy as np
 
 
 def weighted_binary_classif_metrics(
@@ -70,6 +72,12 @@ def _build_weighted_binary_classif_metrics(
     _, _, _, _kwargs = inspect.getargvalues(inspect.currentframe())
 
     class Fitness:
+        def __init__(self):
+            if sum(_kwargs.values()) <= 0:
+                print("warning: all metrics have a weight of 0 which"
+                      " will lead to a 0 fitness value",
+                      file=sys.stderr)
+
         @staticmethod
         def weights():
             return _kwargs
@@ -158,8 +166,6 @@ def _build_weighted_binary_classif_metrics(
 
 
 if __name__ == '__main__':
-    import numpy as np
-
     y_true = np.array([1, 0, 0, 0, 1, 0, 1, 0, 1, 1])
     y_pred = np.array([0, 0, 0, 0, 1, 0, 1, 0, 1, 1])
 
