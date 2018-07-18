@@ -1,6 +1,6 @@
+import numpy as np
 from sklearn.datasets import load_breast_cancer, load_iris
-from sklearn.metrics import accuracy_score, make_scorer, recall_score, \
-    classification_report
+from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -114,12 +114,48 @@ def run():
     print(classification_report(y_test, preds))
 
 
-def test_custom_fit_functions_with_gs():
-    import numpy as np
+def run2():
+    # Load dataset
+    data = load_breast_cancer()
 
+    # Organize our data
+    y_names = data['target_names']
+    y = data['target']
+    X_names = data['feature_names']
+    X = data['data']
+
+    # Split our data
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+
+    fit_func = basic_fitness_functions.weighted_binary_classif_metrics(
+        f1_w=1,
+        acc_w=1,
+        mse_w=0.1,
+    )
+    clf = FugeClassifier(n_rules=3, n_generations=100, pop_size=100,
+                         dont_care_prob=0.9,
+                         n_labels_per_mf=3,
+                         fitness_function=fit_func,
+                         verbose=True)
+
+    clf.fit(X_train, y_train)
+
+    y_pred = clf.predict(X_test)
+
+    from sklearn.metrics import f1_score
+    score = f1_score(y_true=y_test, y_pred=y_pred)
+    print("score", score)
+    score = accuracy_score(y_true=y_test, y_pred=y_pred)
+    print("score", score)
+
+    fis = clf.get_best_fuzzy_system()
+    FISViewer(fis).show()
+
+
+def test_custom_fit_functions_with_gs():
     fit_funcs = basic_fitness_functions.weighted_binary_classif_metrics(
-        sen_w=np.linspace(0, 1, 4),
-        spe_w=1,
+        sen_w=np.linspace(0, 1, 2),
+        spe_w=np.linspace(0, 1, 3),
     )
     print("n of fit funcs", len(fit_funcs))
     print(fit_funcs)
@@ -139,11 +175,13 @@ def test_custom_fit_functions_with_gs():
     tuned_params = {"fitness_function": fit_funcs}
 
     # do not use n_jobs > 1
+    from sklearn.metrics import make_scorer
+    from sklearn.metrics import f1_score
     gs = GridSearchCV(
-        FugeClassifier(n_rules=3, n_generations=100, pop_size=200,
-                       n_labels_per_mf=3, verbose=True),
+        FugeClassifier(n_rules=3, n_generations=50, pop_size=50,
+                       n_labels_per_mf=3, dont_care_prob=0.9, verbose=True),
         tuned_params,
-        scoring=make_scorer(recall_score))  # optional
+        scoring=make_scorer(f1_score))  # optional
 
     gs.fit(X_train, y_train)
 
@@ -151,12 +189,13 @@ def test_custom_fit_functions_with_gs():
     print(gs.best_params_)
     best_ff = gs.best_params_["fitness_function"]
     print(best_ff)
-    print(best_ff.weights()["sen_w"])
-    print(best_ff["sen_w"])
+    print("best sen_w", best_ff["sen_w"])
+    print("best spe_w", best_ff["spe_w"])
 
 
 if __name__ == '__main__':
     # gs()
     # run()
     # run_compare()
-    test_custom_fit_functions_with_gs()
+    # test_custom_fit_functions_with_gs()
+    run2()
