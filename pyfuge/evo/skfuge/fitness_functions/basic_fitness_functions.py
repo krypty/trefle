@@ -3,13 +3,14 @@ import sys
 from itertools import product
 from warnings import catch_warnings, filterwarnings
 
-from sklearn.metrics import confusion_matrix, f1_score
 import numpy as np
+from sklearn.exceptions import UndefinedMetricWarning
+from sklearn.metrics import confusion_matrix, f1_score, mean_squared_error
 
 
 def weighted_binary_classif_metrics(
         acc_w=None, sen_w=None, spe_w=None, f1_w=None, ppv_w=None,
-        npv_w=None, fpr_w=None, fnr_w=None, fdr_w=None,
+        npv_w=None, fpr_w=None, fnr_w=None, fdr_w=None, mse_w=None
 ):
     """
     Create a fitness function for **binary** classification problems that looks
@@ -30,7 +31,8 @@ def weighted_binary_classif_metrics(
     :param npv_w: 
     :param fpr_w: 
     :param fnr_w: 
-    :param fdr_w: 
+    :param fdr_w:
+    :param mse_w:
     :return:
     """
     args_name, _, _, kwargs = inspect.getargvalues(inspect.currentframe())
@@ -70,7 +72,7 @@ def weighted_binary_classif_metrics(
 
 def _build_weighted_binary_classif_metrics(
         acc_w=0, sen_w=0, spe_w=0, f1_w=0, ppv_w=0,
-        npv_w=0, fpr_w=0, fnr_w=0, fdr_w=0,
+        npv_w=0, fpr_w=0, fnr_w=0, fdr_w=0, mse_w=0
 ):
     _, _, _, _kwargs = inspect.getargvalues(inspect.currentframe())
 
@@ -184,6 +186,7 @@ if __name__ == '__main__':
     y_pred = np.array([0, 0, 0, 0, 1, 0, 1, 0, 1, 1])
 
     fit_functions = weighted_binary_classif_metrics(
+        acc_w=1.0,
         # acc_w=np.linspace(0, 1, 2),
         spe_w=(0.2, 0.4),
     )
