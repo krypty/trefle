@@ -1,6 +1,7 @@
 import inspect
 import sys
 from itertools import product
+from warnings import catch_warnings, filterwarnings
 
 from sklearn.metrics import confusion_matrix, f1_score
 import numpy as np
@@ -18,6 +19,8 @@ def weighted_binary_classif_metrics(
 
     Example: fit = (accuracy_w * acc + sensitivity_w * sensitivity)/
     (accuracy_w + sensitivity_w)
+
+    All weights are expected to be positive numbers.
 
     :param acc_w: 
     :param sen_w:
@@ -106,12 +109,13 @@ def _build_weighted_binary_classif_metrics(
             fit = 0
 
             tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-            print(tn, fp, fn, tp)
 
-            # some metrics are clipped to their respecting range
-            # (mostly in [0,1]). we do this to avoid infinite numbers e.g.
-            # when dividing by 0.
-            with np.errstate(divide="ignore"):
+            # some metrics are set to 0 (np.nan_to_num) because we want to
+            # avoid infinite numbers e.g. when dividing by 0. Oddly, we need
+            # to filter "invalid" too to handle division errors. Be careful,
+            # this only works if the metrics is a "the higher the
+            # better"-metric
+            with np.errstate(divide="ignore", invalid="ignore"):
                 # accuracy
                 # no need to clip, denominator is >0
                 acc = (tp + tn) / (tp + fp + fn + tn)
@@ -119,19 +123,21 @@ def _build_weighted_binary_classif_metrics(
                 tot_w += acc_w
 
                 # sensitivity
-                sen = np.clip(tp / (tp + fn), a_min=0, a_max=1)
+                sen = np.nan_to_num(tp / (tp + fn))
                 fit += sen_w * sen
                 tot_w += sen_w
 
                 # specificity
-                spe = np.clip(tn / (tn + fp), a_min=0, a_max=1)
+                spe = np.nan_to_num(tn / (tn + fp))
                 fit += spe_w * spe
                 tot_w += spe_w
 
-                # f1score
-                f1 = f1_score(y_true, y_pred)
-                fit += f1_w * f1
-                tot_w += f1_w
+                # f1score, ignore ill-defined value, it will be set to 0
+                with catch_warnings():
+                    filterwarnings("ignore", category=UndefinedMetricWarning)
+                    f1 = f1_score(y_true, y_pred)
+                    fit += f1_w * f1
+                    tot_w += f1_w
 
                 # PPV
                 # if either tp or fp is 0, then the result should be 0 too.
@@ -140,7 +146,10 @@ def _build_weighted_binary_classif_metrics(
                 tot_w += ppv_w
 
                 # NPV
-                npv = np.clip(tn / (tn + fn), a_min=0, a_max=1)
+                # if either tp or fp is 0, then the result should be 0 too.
+                # note: we don't reuse PPV value because it could have been set
+                # to 0 due to nan result.
+                npv = np.nan_to_num(tn / (tn + fn))
                 fit += npv_w * npv
                 tot_w += npv_w
 
@@ -158,6 +167,11 @@ def _build_weighted_binary_classif_metrics(
                 fdr = 1 - ppv
                 fit += fdr_w * fdr
                 tot_w += fdr_w
+
+                # MSE
+                mse = -mean_squared_error(y_true, y_pred)
+                fit += mse_w * mse
+                tot_w += mse_w
 
             # handle zero-division
             return 0 if abs(tot_w) < 1e-6 else fit / tot_w
