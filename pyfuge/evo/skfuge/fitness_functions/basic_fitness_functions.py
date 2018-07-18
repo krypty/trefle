@@ -127,7 +127,7 @@ def _build_weighted_binary_classif_metrics(
 
                 # PPV
                 # if either tp or fp is 0, then the result should be 0 too.
-                ppv = np.clip(tp / (tp / fp), a_min=0, a_max=1)
+                ppv = np.nan_to_num(tp / (tp + fp))
                 fit += ppv_w * ppv
                 tot_w += ppv_w
 
