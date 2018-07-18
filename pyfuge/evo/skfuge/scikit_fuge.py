@@ -7,8 +7,6 @@ from sklearn.metrics import mean_squared_error
 from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.experiment.base.simple_experiment import SimpleEAExperiment
 from pyfuge.evo.experiment.simple_fis_individual import SimpleFISIndividual
-from pyfuge.evo.fitness_evaluator.pyfuge_fitness_evaluator import \
-    PyFUGEFitnessEvaluator
 from pyfuge.evo.helpers.ind_evaluator_utils import IndEvaluatorUtils
 from pyfuge.evo.helpers.native_ind_evaluator import NativeIndEvaluator
 
@@ -23,6 +21,10 @@ labels_str_dict = {
 
 class FugeClassifier(BaseEstimator, ClassifierMixin):
     _fitness_function_signature = "def fit(y_true, y_pred): return fitness"
+
+    @staticmethod
+    def _default_fit_func(y_true, y_pred):
+        return -mean_squared_error(y_true, y_pred)
 
     def __init__(self, n_rules=3, n_labels_per_mf=2, pop_size=80,
                  n_generations=100, halloffame=3, dont_care_prob=None,
@@ -54,12 +56,12 @@ class FugeClassifier(BaseEstimator, ClassifierMixin):
             raise ValueError("n_labels_per_mf must be > 1")
 
         if self.dont_care_prob is None:
-            self.dont_care_prob = 1.0 / (1 + self.n_labels_per_mf)
+            self.dont_care_prob = 0.7  # TODO: find a better heuristic
         elif not (0.0 < self.dont_care_prob < 1.0):
             raise ValueError("dont_care_prob must be between 0.0 and 1.0")
 
         if self.fitness_function is None:
-            self.fitness_function = mean_squared_error
+            self.fitness_function = self._default_fit_func
         elif not hasattr(self.fitness_function, "__call__"):
             raise ValueError(
                 "fitness function must be a callable like: {}".format(
@@ -94,7 +96,7 @@ class FugeClassifier(BaseEstimator, ClassifierMixin):
         exp = SimpleEAExperiment(
             dataset=self._ds,
             fis_individual=self._fis_ind,
-            fitevaluator=PyFUGEFitnessEvaluator(),
+            fitness_func=self.fitness_function,
             N_POP=self.pop_size,
             N_GEN=self.n_generations,
             HOF=self.halloffame,

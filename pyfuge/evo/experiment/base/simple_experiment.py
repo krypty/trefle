@@ -1,12 +1,12 @@
 import math
 import random
+from typing import Callable
 
 import numpy as np
 from deap import creator, base, tools, algorithms
 
 from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.experiment.base.experiment import Experiment
-from pyfuge.evo.fitness_evaluator.fitness_evaluator import FitnessEvaluator
 from pyfuge.evo.helpers.fis_individual import FISIndividual
 
 
@@ -17,9 +17,9 @@ class SimpleEAExperiment(Experiment):
     """
 
     def __init__(self, dataset: PFDataset, fis_individual: FISIndividual,
-                 fitevaluator: FitnessEvaluator, **kwargs):
+                 fitness_func: Callable, **kwargs):
         super(SimpleEAExperiment, self).__init__(dataset, fis_individual,
-                                                 fitevaluator, **kwargs)
+                                                 fitness_func, **kwargs)
 
         target_length = self._fis_individual.ind_length()
 
@@ -35,9 +35,19 @@ class SimpleEAExperiment(Experiment):
                          toolbox.individual)
 
         def eval_ind(ind):
-            y_preds = self._fis_individual.predict(ind)
-            fitness = self._fiteval.eval(y_preds, self._dataset.y)
-            return [fitness]
+            y_pred_one_hot = self._fis_individual.predict(ind)
+            y_true = np.argmax(self._dataset.y, axis=1)
+
+            # TODO: do not threshold/binarize y_pred. Instead let the fitness
+            # handle that otherwise we regression metrics are useless (even in
+            # a classification problem)
+            if y_pred_one_hot.shape[0] > 1:
+                y_pred = np.argmax(y_pred_one_hot, axis=1)
+            else:
+                y_pred = np.round(y_pred_one_hot)
+
+            fitness = self._fitness_func(y_true, y_pred)
+            return fitness,  # DEAP expects a tuple for fitnesses
 
         toolbox.register("evaluate", eval_ind)
         toolbox.register("mate", tools.cxTwoPoint)
