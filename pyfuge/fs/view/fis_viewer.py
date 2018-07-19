@@ -151,9 +151,9 @@ class FISViewer:
                 mf_implicated = \
                     self.__fis.last_implicated_consequents[cons.lv_name.name][
                         rule_index]
-                MembershipFunctionViewer(mf_implicated, ax=ax,
-                                         label=label + " implicated",
-                                         color="orange")
+                mfv = MembershipFunctionViewer(mf_implicated, ax=ax,
+                                               label=label + " implicated")
+                mfv.fuzzify(mf_implicated.in_values[0])
 
     def _plot_rows_cols_labels(self, axarr, max_ants, max_cons):
         col_ants = ['Antecedent {}'.format(col + 1) for col in range(max_ants)]
@@ -185,14 +185,6 @@ class FISViewer:
         cons_labels = list(aggr_cons.keys())
         mf = list(aggr_cons.values())[cons_index]
         MembershipFunctionViewer(mf, ax=ax, color="orange")
-
-        # show last crisp inputs
-        crisp_values = self.__fis.last_crisp_values
-        # in_value = crisp_values[ant[0].name]
-        # fuzzified = mf.fuzzify(in_value)
-        #
-        # ax.plot([in_value], [fuzzified], 'ro')
-        # ax.plot([in_value, in_value], [0, fuzzified], 'r')
 
         defuzz = list(self.__fis.last_defuzzified_outputs.values())[cons_index]
         ax.plot([defuzz, defuzz], [0, 1])

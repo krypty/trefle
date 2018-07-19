@@ -4,6 +4,7 @@ from pyfuge.fs.core.mf.free_shape_mf import \
     FreeShapeMF
 from pyfuge.fs.core.mf.lin_piece_wise_mf import \
     LinPWMF
+from pyfuge.fs.core.mf.singleton_mf import SingletonMF
 from pyfuge.fs.view.viewer import Viewer
 
 
@@ -16,6 +17,12 @@ class MembershipFunctionViewer(Viewer):
         self._color = color
         self._alpha = alpha
         self._draw_not = draw_not
+
+        # draw SingletonMF horizontal line to be more visible
+        if isinstance(self._mf, SingletonMF):
+            in_val = self._mf.in_values[0]
+            mf_val = self._mf.mf_values[0]
+            self._ax.plot([in_val, in_val], [0, mf_val], 'r', c=self._color)
 
         self.get_plot(self._ax)
 
