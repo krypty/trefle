@@ -23,8 +23,12 @@ class SimpleEAExperiment(Experiment):
 
         target_length = self._fis_individual.ind_length()
 
-        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-        creator.create("Individual", list, fitness=creator.FitnessMax)
+        try:
+            # Don't recreate creator classes if they already exist. See issue 41
+            creator.FitnessMax
+        except AttributeError:
+            creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+            creator.create("Individual", list, fitness=creator.FitnessMax)
 
         toolbox = base.Toolbox()
 
