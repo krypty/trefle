@@ -87,22 +87,69 @@ private:
 
 class FISCocoEvalWrapper {
 public:
-  FISCocoEvalWrapper(int a, int b) {
-    cout << "hello from FISCocoEvalWrapper " << a << ", " << b << endl;
+  FISCocoEvalWrapper(const int n_bits_per_mf, const int n_true_labels,
+                     const int n_lv_per_ind)
+      : n_bits_per_mf(n_bits_per_mf), n_true_labels(n_true_labels),
+        n_lv_per_ind(n_lv_per_ind) {
+    cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
+         << n_true_labels << ", " << n_lv_per_ind << endl;
   }
-  py::array_t<double> predict_c(string ind_sp1, string ind_sp2) {
-    cout << "ind_sp1 " << ind_sp1 << endl;
-    cout << "ind_sp2 " << ind_sp2 << endl;
+  py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2) {
+    // double predict_c(const string &ind_sp1, const string &ind_sp2) {
+    cout << "ind_sp1 " << ind_sp1 << " (" << ind_sp1.length() << ")" << endl;
+    cout << "ind_sp2 " << ind_sp2 << " (" << ind_sp2.length() << ")" << endl;
 
-    auto arr = py::array_t<double>({4, 10});
+    // TODO: substr() is creating a new string each time, use c++17's
+    // stringview?
+    vector<vector<int>> vec_lv;
+    vec_lv.reserve(n_lv_per_ind);
+
+    const int n_bits_per_line = n_true_labels * n_bits_per_mf;
+
+    for (int lv_i = 0; lv_i < n_lv_per_ind; lv_i++) {
+      // cout << "lv_i " << lv_i << endl;
+      // vec_lv[lv_i].reserve(n_true_labels);
+      vector<int> vec_lv_i;
+
+      for (int mf_i = 0; mf_i < n_true_labels; mf_i++) {
+        // cout << "lv_i " << lv_i << endl;
+        const int offset = lv_i * n_bits_per_line + (mf_i * n_bits_per_mf);
+        // cout << "offset " << offset << endl;
+        const int v = stoi(ind_sp1.substr(offset, n_bits_per_mf), nullptr, 2);
+        cout << "v: " << v << endl;
+        vec_lv_i.push_back(v);
+      }
+
+      vec_lv.push_back(vec_lv_i);
+      cout << endl;
+    }
+
+    cout << "a" << endl;
+    for (const auto &row : vec_lv) {
+      for (const auto &col : row) {
+        cout << col << ", ";
+      }
+      cout << endl;
+    }
+
+    // TODO: remove me, return instead y_pred
+    auto arr = py::array_t<double>({n_lv_per_ind, n_true_labels});
     auto arr_raw = arr.mutable_unchecked<2>();
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 10; j++) {
-        arr_raw(i, j) = i + j / 10.0;
+
+    for (int i = 0; i < n_lv_per_ind; i++) {
+      for (int j = 0; j < n_true_labels; j++) {
+        //// normalize in [0,1]
+        // arr_raw(i, j) = vec_lv[i][j] / double(1 << n_bits_per_mf);
+        arr_raw(i, j) = vec_lv[i][j];
       }
     }
     return arr;
   }
+
+private:
+  const int n_bits_per_mf;
+  const int n_true_labels;
+  const int n_lv_per_ind;
 };
 
 PYBIND11_MODULE(pyfuge_c, m) {
@@ -116,7 +163,7 @@ PYBIND11_MODULE(pyfuge_c, m) {
 
   py::class_<FISCocoEvalWrapper>(m, "FISCocoEvalWrapper")
       // match the ctor of FISCocoEvalWrapper
-      .def(py::init<int, int>())
+      .def(py::init<const int, const int, const int>())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict");
 }
