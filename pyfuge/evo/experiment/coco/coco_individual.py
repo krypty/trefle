@@ -19,7 +19,7 @@ class MFShape(Enum):
     TRAP_MF = 1
 
 
-class CoCoIndividual(FISIndividual, Clonable):
+class CocoIndividual(FISIndividual, Clonable):
     """
     This class creates two individuals i.e. one to represent the membership
     functions and the other to represent the rules, called respectively

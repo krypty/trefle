@@ -12,7 +12,7 @@ from deap.algorithms import varAnd
 from deap.tools import HallOfFame
 
 from pyfuge.evo.experiment.base.experiment import Experiment
-from pyfuge.evo.experiment.coco.coco_individual import CoCoIndividual
+from pyfuge.evo.experiment.coco.coco_individual import CocoIndividual
 from pyfuge.evo.helpers import fis_individual
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -34,7 +34,7 @@ class CoCoExperiment(Experiment):
     algorithm with DEAP library.
     """
 
-    def __init__(self, coco_ind: CoCoIndividual, fitness_func: Callable):
+    def __init__(self, coco_ind: CocoIndividual, fitness_func: Callable):
         super().__init__(fitness_func)
         self._coco_ind = coco_ind
         self._post_init()
