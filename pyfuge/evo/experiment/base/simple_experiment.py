@@ -5,7 +5,6 @@ from typing import Callable
 import numpy as np
 from deap import creator, base, tools, algorithms
 
-from pyfuge.evo.dataset.pf_dataset import PFDataset
 from pyfuge.evo.experiment.base.experiment import Experiment
 from pyfuge.evo.helpers.fis_individual import FISIndividual
 
@@ -16,11 +15,20 @@ class SimpleEAExperiment(Experiment):
     algorithm) with DEAP library.
     """
 
-    def __init__(self, dataset: PFDataset, fis_individual: FISIndividual,
-                 fitness_func: Callable, **kwargs):
-        super(SimpleEAExperiment, self).__init__(dataset, fis_individual,
-                                                 fitness_func, **kwargs)
+    def run(self):
+        algorithms.eaSimple(
+            self._population, self._toolbox, cxpb=0.8,
+            mutpb=0.3, ngen=self._NGEN,
+            halloffame=self._hof, stats=self._stats,
+            verbose=self._verbose)
 
+        self._top_n = tools.selBest(self._population, k=3)
+
+    def __init__(self, fis_individual: FISIndividual,
+                 fitness_func: Callable, **kwargs):
+        super(SimpleEAExperiment, self).__init__(fitness_func, **kwargs)
+
+        self._fis_individual = fis_individual
         target_length = self._fis_individual.ind_length()
 
         try:
@@ -30,13 +38,14 @@ class SimpleEAExperiment(Experiment):
             creator.create("FitnessMax", base.Fitness, weights=(1.0,))
             creator.create("Individual", list, fitness=creator.FitnessMax)
 
-        toolbox = base.Toolbox()
+        self._toolbox = base.Toolbox()
 
-        toolbox.register("attr_bool", random.random)
-        toolbox.register("individual", tools.initRepeat, creator.Individual,
-                         toolbox.attr_bool, n=target_length)
-        toolbox.register("population", tools.initRepeat, list,
-                         toolbox.individual)
+        self._toolbox.register("attr_bool", random.random)
+        self._toolbox.register("individual", tools.initRepeat,
+                               creator.Individual,
+                               self._toolbox.attr_bool, n=target_length)
+        self._toolbox.register("population", tools.initRepeat, list,
+                               self._toolbox.individual)
 
         def eval_ind(ind):
             y_pred_one_hot = self._fis_individual.predict(ind)
@@ -53,26 +62,24 @@ class SimpleEAExperiment(Experiment):
             fitness = self._fitness_func(y_true, y_pred)
             return fitness,  # DEAP expects a tuple for fitnesses
 
-        toolbox.register("evaluate", eval_ind)
-        toolbox.register("mate", tools.cxTwoPoint)
-        toolbox.register("mutate", tools.mutShuffleIndexes,
-                         indpb=1.0 / (10.0 * math.ceil(
-                             math.log(target_length, 10)))),
-        toolbox.register("select", tools.selTournament, tournsize=3)
+        self._toolbox.register("evaluate", eval_ind)
+        self._toolbox.register("mate", tools.cxTwoPoint)
+        self._toolbox.register("mutate", tools.mutShuffleIndexes,
+                               indpb=1.0 / (10.0 * math.ceil(
+                                   math.log(target_length, 10)))),
+        self._toolbox.register("select", tools.selTournament, tournsize=3)
 
-        verbose = kwargs.pop("verbose", False)
-        stats = self.setup_stats(verbose)
+        self._verbose = kwargs.pop("verbose", False)
+        self._stats = self.setup_stats(self._verbose)
 
-        N_POP = self._kwargs.get("N_POP") or 100
-        population = toolbox.population(n=N_POP)
+        N_POP = self._kwargs.pop("N_POP", 100)
+        self._population = self._toolbox.population(n=N_POP)
 
-        NGEN = self._kwargs.get("N_GEN") or 10
+        self._NGEN = self._kwargs.pop("N_GEN", 10)
 
-        hof = tools.HallOfFame(self._kwargs.get("HOF") or 5)
+        self._hof = tools.HallOfFame(self._kwargs.pop("HOF", 5))
 
-        algorithms.eaSimple(population, toolbox, cxpb=0.8, mutpb=0.3, ngen=NGEN,
-                            halloffame=hof, stats=stats, verbose=verbose)
-        self._top_n = tools.selBest(population, k=3)
+        self._post_init()
 
     @staticmethod
     def setup_stats(verbose):
