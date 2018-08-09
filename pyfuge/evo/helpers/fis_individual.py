@@ -8,7 +8,7 @@ class FISIndividual(metaclass=ABCMeta):
     This latter will allow the use of the visualization tools from fuzzy_systems
     * predict(): using an individual (i.e. still the list of float) build a FIS
     (no matter how, e.g. using py_fiseval or (Singleton)FIS), execute this FIS
-    on all the dataset and return the y_preds
+    on all the dataset and return the y_pred
     """
 
     def __init__(self):
@@ -27,8 +27,23 @@ class FISIndividual(metaclass=ABCMeta):
 
     def predict(self, ind):
         """
-        Given an individual returns the y_preds for a given dataset.
+        Given an individual returns the y_pred for a given dataset.
         :param ind: an individual
-        :return: y_preds
+        :return: y_pred
         """
         raise NotImplementedError()
+
+
+class Clonable(metaclass=ABCMeta):
+    """
+    If the individuals of a FISIndividual subclass are not immutable then the
+    class must provide a way to deep copy/clone the individual
+    """
+    @staticmethod
+    def clone(ind):
+        """
+        for example:
+            ind_copy = ind.copy()
+            return ind_copy
+        """
+        pass
