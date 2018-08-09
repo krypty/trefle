@@ -118,14 +118,15 @@ setup(
     packages=find_packages(exclude=[
         "*playground*", "*.tests", "*.tests.*", "tests.*", "tests"
     ]),
-    python_requires=">3.4",
+    python_requires=">=3.5",
     install_requires=[
         "deap==1.2.2",
         "matplotlib==2.1.1",
-        "numpy==1.14.0",
         "pandas==0.22.0",
         "scikit-learn==0.19.1",
-        "scipy==1.0.0",
+        "scipy>=1.0.0",  # TODO see why must be install manually
+        "numpy==1.14.0",  # TODO see why must be install manually
+        "bitarray==0.8.3",
     ],
     setup_requires=['pytest-runner'],
     tests_require=["pytest==3.3.2"],

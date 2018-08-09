@@ -1,6 +1,8 @@
 #include "fis.h"
+#include <iostream>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+#include <string>
 
 namespace py = pybind11;
 
@@ -83,11 +85,38 @@ private:
   int n_consequents;
 };
 
+class FISCocoEvalWrapper {
+public:
+  FISCocoEvalWrapper(int a, int b) {
+    cout << "hello from FISCocoEvalWrapper " << a << ", " << b << endl;
+  }
+  py::array_t<double> predict_c(string ind_sp1, string ind_sp2) {
+    cout << "ind_sp1 " << ind_sp1 << endl;
+    cout << "ind_sp2 " << ind_sp2 << endl;
+
+    auto arr = py::array_t<double>({4, 10});
+    auto arr_raw = arr.mutable_unchecked<2>();
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 10; j++) {
+        arr_raw(i, j) = i + j / 10.0;
+      }
+    }
+    return arr;
+  }
+};
+
 PYBIND11_MODULE(pyfuge_c, m) {
-  py::class_<FISEvalWrapper>(m, "FISEvalWrapper")
-      // match the ctor of FISEvalWrapper
-      .def(py::init<int, py_array_d, const int, const int, const int, const int,
-                    py_array_i, py_array_d, py_array_d, const int>())
-      .def("bind_predict", &FISEvalWrapper::predict_c,
+  // py::class_<FISEvalWrapper>(m, "FISEvalWrapper")
+  //     // match the ctor of FISEvalWrapper
+  //     .def(py::init<int, py_array_d, const int, const int, const int, const
+  //     int,
+  //                   py_array_i, py_array_d, py_array_d, const int>())
+  //     .def("bind_predict", &FISEvalWrapper::predict_c,
+  //          "a function that use predict");
+
+  py::class_<FISCocoEvalWrapper>(m, "FISCocoEvalWrapper")
+      // match the ctor of FISCocoEvalWrapper
+      .def(py::init<int, int>())
+      .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict");
 }
