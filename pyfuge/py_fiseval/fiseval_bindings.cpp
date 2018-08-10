@@ -139,7 +139,7 @@ public:
     for (int i = 0; i < n_lv_per_ind; i++) {
       for (int j = 0; j < n_true_labels; j++) {
         //// normalize in [0,1]
-        // arr_raw(i, j) = vec_lv[i][j] / double(1 << n_bits_per_mf);
+        // arr_raw(i, j) = vec_lv[i][j] / double((1 << n_bits_per_mf)-1);
         arr_raw(i, j) = vec_lv[i][j];
       }
     }
