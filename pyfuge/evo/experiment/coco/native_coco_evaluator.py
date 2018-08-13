@@ -30,8 +30,8 @@ if __name__ == '__main__':
         ProblemType, MFShape
     import random
 
-    np.random.seed(1)
-    random.seed(1)
+    np.random.seed(2)
+    random.seed(2)
 
     X_train = np.array([
         [-2, 70, 1.33],
