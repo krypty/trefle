@@ -13,15 +13,11 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   /// Parse ind_sp2
   // TODO: parse ind_sp2
 
-  // const std::function<size_t(size_t, size_t, size_t)> dummy_func1 =
-  //     [](size_t v, size_t i, size_t j) { return -v; };
-  // const std::function<double(double, size_t, size_t)> dummy_func =
-  //     [](double v, size_t i, size_t j) { return -v; };
 
-  // const std::function<size_t(size_t, size_t, size_t)> dummy_func1 =
-  //     [](size_t v, size_t i, size_t j) { return v * 10; };
-  const auto dummy_size_t = [](size_t v, size_t i, size_t j) { return v * 10; };
-  const auto dummy_double = [](double v, size_t i, size_t j) {
+  const auto dummy_size_t = [](const size_t v, const size_t i, const size_t j) {
+    return v * 10;
+  };
+  const auto dummy_double = [](const double v, const size_t i, const size_t j) {
     return v * 10.0;
   };
   // TODO: post parsing func: modulo_trick(v, n_vars)
@@ -59,8 +55,6 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
       parse_bit_array<size_t>(r_labels_bits, n_rules, n_max_vars_per_rule,
                               n_bits_per_label, dummy_size_t);
 
-  // int n_cons = 1;          // TODO remove me
-  // int n_bits_per_cons = 1; // TODO remove me
   // TODO: post parsing func: scaling using cons_range + round/ceil/floor on
   // classification variables
   cout << "r cons" << endl;
@@ -68,7 +62,7 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   offset += n_bits_r_labels;
   string r_cons_bits = ind_sp2.substr(offset, n_bits_r_cons);
   auto r_cons = parse_bit_array<double>(r_cons_bits, n_rules, n_cons,
-                                        n_bits_per_cons, dummy_double);
+                                        n_bits_per_cons, toto);
 
   /// Combine ind_sp1 and ind_sp2 to create a FIS
   /*
@@ -86,21 +80,12 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
 
   return vec_lv;
 }
-// vector<vector<size_t>>
-// FISCocoEvalWrapper::parse_ind_sp2_sel_vars(const string &ind_sp2) {
-//   vector<vector<size_t>> sel_vars = parse_bit_array<size_t>(
-//       ind_sp2, n_rules, n_max_vars_per_rule, n_bits_per_ant);
-
-//   return sel_vars;
-// }
 
 template <typename T>
 vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
     const string &bitarray, const size_t rows, const size_t cols,
     const size_t n_bits_per_elm,
-    // const std::function<T>(T value, size_t i, size_t j) &) {
-    const std::function<T(T, size_t row, size_t col)> &func) {
-  // T (*func)(T, size_t, size_t)) {
+    const std::function<T(const T, const size_t row, const size_t col)> &func) {
   vector<vector<T>> matrix(rows, vector<T>(cols, 0));
 
   const size_t n_bits_per_line = cols * n_bits_per_elm;
@@ -125,7 +110,9 @@ py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
   // vector<vector<double>> vec_lv;
   // vec_lv.reserve(n_lv_per_ind);
 
-  const auto dummy_f = [](double v, size_t i, size_t j) { return v; };
+  const auto dummy_f = [](const double v, const size_t i, const size_t j) {
+    return v;
+  };
 
   vector<vector<double>> vec_lv = parse_bit_array<double>(
       ind_sp1, n_lv_per_ind, n_true_labels, n_bits_per_mf, dummy_f);

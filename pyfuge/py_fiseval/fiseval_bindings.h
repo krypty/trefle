@@ -37,17 +37,17 @@ public:
 
 private:
   py::array_t<double> parse_ind_sp1(const string &ind_sp1);
-  //   vector<vector<size_t>> parse_ind_sp2_sel_vars(const string &ind_sp2);
+
   template <typename T>
-  vector<vector<T>>
-  parse_bit_array(const string &bitarray, const size_t rows, const size_t cols,
-                  const size_t n_bits_per_elm,
-                  // const std::function<T>(T value, size_t i, size_t j) &);
-                  const std::function<T(T, size_t row, size_t col)> &);
-  // T (*func)(T, size_t, size_t));
+  vector<vector<T>> parse_bit_array(
+      const string &bitarray, const size_t rows, const size_t cols,
+      const size_t n_bits_per_elm,
+      const std::function<T(const T, const size_t row, const size_t col)> &);
 
   // TODO remove me
-  const double toto(double v, size_t i, size_t j) { return -v; };
+  static double toto(const double v, const size_t i, const size_t j) {
+    return v * 100.0;
+  };
 
 private:
   const int n_rules;
