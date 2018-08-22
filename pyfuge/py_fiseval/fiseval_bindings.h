@@ -20,16 +20,16 @@ typedef py::array_t<int, py::array::c_style | py::array::forcecast> py_array_i;
 
 class FISCocoEvalWrapper {
 public:
-  FISCocoEvalWrapper(const int n_rules, const int n_max_vars_per_rule,
-                     const int n_bits_per_mf, const int n_true_labels,
-                     const int n_lv_per_ind, const int n_bits_per_ant,
-                     const int n_cons, const int n_bits_per_cons,
-                     const int n_bits_per_label)
-      : n_rules(n_rules), n_max_vars_per_rule(n_max_vars_per_rule),
-        n_bits_per_mf(n_bits_per_mf), n_true_labels(n_true_labels),
-        n_lv_per_ind(n_lv_per_ind), n_bits_per_ant(n_bits_per_ant),
-        n_cons(n_cons), n_bits_per_cons(n_bits_per_cons),
-        n_bits_per_label(n_bits_per_label) {
+  FISCocoEvalWrapper(const int n_vars, const int n_rules,
+                     const int n_max_vars_per_rule, const int n_bits_per_mf,
+                     const int n_true_labels, const int n_lv_per_ind,
+                     const int n_bits_per_ant, const int n_cons,
+                     const int n_bits_per_cons, const int n_bits_per_label)
+      : n_vars(n_vars), n_rules(n_rules),
+        n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
+        n_true_labels(n_true_labels), n_lv_per_ind(n_lv_per_ind),
+        n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
+        n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label) {
     cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
          << n_true_labels << ", " << n_lv_per_ind << endl;
   }
@@ -49,7 +49,12 @@ private:
     return v * 100.0;
   };
 
+  inline size_t modulo_trick(const size_t value, const size_t divisor) {
+    return value % divisor;
+  }
+
 private:
+  const int n_vars;
   const int n_rules;
   const int n_max_vars_per_rule;
   const int n_bits_per_mf;
@@ -65,7 +70,7 @@ PYBIND11_MODULE(pyfuge_c, m) {
   py::class_<FISCocoEvalWrapper>(m, "FISCocoEvalWrapper")
       // match the ctor of FISCocoEvalWrapper
       .def(py::init<const int, const int, const int, const int, const int,
-                    const int, const int, const int, const int>())
+                    const int, const int, const int, const int, const int>())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict");
 }

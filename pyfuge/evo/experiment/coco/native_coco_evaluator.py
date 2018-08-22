@@ -4,6 +4,7 @@ import pyfuge_c
 class NativeCocoEvaluator:
     def __init__(
         self,
+        n_vars,
         n_rules,
         n_max_vars_per_rule,
         n_bits_per_mf,
@@ -15,6 +16,7 @@ class NativeCocoEvaluator:
         n_bits_per_label,
     ):
         self._fiseval = pyfuge_c.FISCocoEvalWrapper(
+            n_vars,
             n_rules,
             n_max_vars_per_rule,
             n_bits_per_mf,
@@ -58,7 +60,7 @@ if __name__ == "__main__":
         y_train=y_train,
         # problem_type=ProblemType.CLASSIFICATION,
         n_rules=3,
-        n_classes_per_cons=[2,3,0],
+        n_classes_per_cons=[2, 3, 0],
         n_max_vars_per_rule=4,
         n_labels_per_mf=2,
         p_positions_per_lv=32,  # 5 bits

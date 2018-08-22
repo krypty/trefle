@@ -13,7 +13,6 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   /// Parse ind_sp2
   // TODO: parse ind_sp2
 
-
   const auto dummy_size_t = [](const size_t v, const size_t i, const size_t j) {
     return v * 10;
   };
@@ -25,10 +24,14 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   const size_t n_bits_sel_vars = n_rules * n_max_vars_per_rule * n_bits_per_ant;
   cout << "c++ v: " << n_bits_sel_vars << endl;
   size_t offset = 0;
+  const auto val_to_var_idx = [&](const size_t v, const size_t i,
+                                  const size_t j) {
+    return modulo_trick(v, n_vars);
+  };
   string sel_vars_bits = ind_sp2.substr(offset, n_bits_sel_vars);
   auto sel_vars =
       parse_bit_array<size_t>(sel_vars_bits, n_rules, n_max_vars_per_rule,
-                              n_bits_per_ant, dummy_size_t);
+                              n_bits_per_ant, val_to_var_idx);
 
   cout << "r lv" << endl;
   const size_t n_bits_r_lv = n_rules * n_max_vars_per_rule * n_lv_per_ind;
@@ -38,8 +41,14 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   cout << "c++ v: " << n_bits_r_lv << endl;
   offset += n_bits_sel_vars;
   string r_lv_bits = ind_sp2.substr(offset, n_bits_r_lv);
+
+  // we can use the parsed values as is because n_lv_per_ind is a multiple of 2
+  // so there is no need to do anything in post processing.
+  const auto dummy_func = [](const size_t v, const size_t i, const size_t j) {
+    return v;
+  };
   auto r_lv = parse_bit_array<size_t>(r_lv_bits, n_rules, n_max_vars_per_rule,
-                                      n_lv_per_ind, dummy_size_t);
+                                      n_lv_per_ind, dummy_func);
 
   // todo add lambda function as paramter of parse bit array to directly convert
   // the parsed number to business logic
@@ -85,7 +94,7 @@ template <typename T>
 vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
     const string &bitarray, const size_t rows, const size_t cols,
     const size_t n_bits_per_elm,
-    const std::function<T(const T, const size_t row, const size_t col)> &func) {
+    const std::function<T(const T, const size_t row, const size_t col)> &post_func) {
   vector<vector<T>> matrix(rows, vector<T>(cols, 0));
 
   const size_t n_bits_per_line = cols * n_bits_per_elm;
@@ -93,7 +102,7 @@ vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
     for (size_t j = 0; j < cols; j++) {
       const size_t offset = i * n_bits_per_line + (j * n_bits_per_elm);
       T value = stoi(bitarray.substr(offset, n_bits_per_elm), nullptr, 2);
-      matrix[i][j] = func(value, i, j);
+      matrix[i][j] = post_func(value, i, j);
       // matrix[i][j] = value;
       cout << matrix[i][j] << ",";
     }
