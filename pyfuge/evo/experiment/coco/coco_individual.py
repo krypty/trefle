@@ -1,6 +1,7 @@
 from enum import Enum
 from math import ceil, log
 from random import randint
+from typing import List
 
 import numpy as np
 from bitarray import bitarray
@@ -158,26 +159,31 @@ class CocoIndividual(FISIndividual, Clonable):
 
     """
 
-    def __init__(self,
-                 X_train: np.array,
-                 y_train: np.array,
-                 problem_type: ProblemType,
-                 n_rules: int,
-                 n_max_vars_per_rule: int,
-                 n_labels_per_mf: int,
-                 p_positions_per_lv: int = 32,  # 5 bits
-                 dc_padding: int = 1,
-                 mfs_shape: MFShape = MFShape.TRI_MF,
-                 p_positions_per_cons: int = 32,  # 5 bits
-                 n_lv_per_ind_sp1: int = None
-                 ):
+    def __init__(
+        self,
+        X_train: np.array,
+        y_train: np.array,
+        # problem_type: ProblemType,
+        n_rules: int,
+        n_classes_per_cons: List[int],
+        n_max_vars_per_rule: int,
+        n_labels_per_mf: int,
+        n_labels_cons: int = 3,
+        p_positions_per_lv: int = 32,  # 5 bits
+        dc_padding: int = 1,
+        mfs_shape: MFShape = MFShape.TRI_MF,
+        # p_positions_per_cons: int = None,#32,  # 5 bits
+        n_lv_per_ind_sp1: int = None,
+    ):
         """
 
         :param X_train:
         :param y_train:
-        :param problem_type: either CLASSIFICATION or REGRESSION, cannot be
-        mixed
         :param n_rules:
+        :param n_classes_per_cons: [n_classes_cons0, n_classes_cons1, ...]
+        where n_class_consX is the number of classes for the X-th consequent.
+        If the consequent is a continuous variable (i.e. regression) set the
+        value to 0.
         :param n_max_vars_per_rule:
         :param n_labels_per_mf:
         :param p_positions_per_lv: Integer to represent the
@@ -190,7 +196,6 @@ class CocoIndividual(FISIndividual, Clonable):
         n_labels_per_mf=3 -> [0,1,2,3] where 3 is DONT_CARE, =2 -> [0,1,2,3,
         4] where 3 and 4 is DONT_CARE, ... TODO: improve this comment
         :param mfs_shape:
-        :param p_positions_per_cons:
         :param n_lv_per_ind_sp1: Integer to represent the number of MF encoded
         per individual of sp1. Must be >= n_max_vars_per_rule, ideally a
         multiple of 2. If not will be ceil-ed to the closest multiple of 2. If
@@ -200,16 +205,17 @@ class CocoIndividual(FISIndividual, Clonable):
 
         super().__init__()
         self._X, norm_args = minmax_norm(
-            X_train)  # TODO: norm_args are used to de-normalized X
+            X_train
+        )  # TODO: norm_args are used to de-normalized X
         self._y = y_train
-        self._problem_type = problem_type
         self._n_rules = n_rules
+        self._n_classes_per_cons = np.asarray(n_classes_per_cons)
         self._n_max_vars_per_rule = n_max_vars_per_rule
         self._n_true_labels = n_labels_per_mf
+        self._n_labels_cons = n_labels_cons
         self._p_positions_per_lv = p_positions_per_lv
         self._dc_padding = dc_padding
         self._mfs_shape = mfs_shape
-        self._p_positions_per_cons = p_positions_per_cons
 
         self._n_vars = self._X.shape[1]
 
@@ -226,37 +232,75 @@ class CocoIndividual(FISIndividual, Clonable):
         self._validate()
 
         self._n_bits_per_mf = ceil(log(self._p_positions_per_lv, 2))
+        self._n_bits_per_ant = ceil(log(self._n_vars, 2))
+        self._n_bits_per_cons = self._compute_n_bits_per_cons()
+        self._n_bits_per_label = ceil(log(self._n_true_labels + self._dc_padding, 2))
 
         self._n_bits_sp1 = self._compute_needed_bits_for_sp1()
         self._n_bits_sp2 = self._compute_needed_bits_for_sp2()
+
+        # contains True if i-th cons is a classification variable or False if regression
+        self._cons_type = [bool(c) for c in self._n_classes_per_cons]
+
+        self._cons_range = self._compute_cons_range()
 
         # self._nce = NativeCocoEvaluator(
         #
         # )
         self._nce = NativeCocoEvaluator(
+            n_rules=self._n_rules,
+            n_max_vars_per_rule=self._n_max_vars_per_rule,
             n_bits_per_mf=self._n_bits_per_mf,
             n_true_labels=self._n_true_labels,
-            n_mf_per_ind=self._n_lv_per_ind
+            n_lv_per_ind=self._n_lv_per_ind,
+            n_bits_per_ant=self._n_bits_per_ant,
+            n_cons=self._n_cons,
+            n_bits_per_cons=self._n_bits_per_cons,
+            n_bits_per_label=self._n_bits_per_label,
         )
 
     def _validate(self):
         assert self._dc_padding > 0, "negative padding does not make sense"
         assert log(self._p_positions_per_lv, 2) == ceil(
-            log(self._p_positions_per_lv, 2)), \
-            "p_positions_per_lv must be a multiple of 2"
+            log(self._p_positions_per_lv, 2)
+        ), "p_positions_per_lv must be a multiple of 2"
 
-        assert self._p_positions_per_lv >= self._n_true_labels, \
-            "You must have at least as many p_positions as the " \
-            "n_labels_per_mf you want to use "
+        assert (
+            self._p_positions_per_lv >= self._n_true_labels
+        ), "You must have at least as many p_positions as the " "n_labels_per_mf you want to use "
 
-        if self._problem_type == ProblemType.CLASSIFICATION:
-            msg = "You must have at least as many p_positions as the " \
-                  "n_classes you want to target "
-            max_n_classes = self._get_highest_n_classes_per_cons()
-            assert self._p_positions_per_cons >= max_n_classes, msg
+        # if self._problem_type == ProblemType.CLASSIFICATION:
+        #     msg = "You must have at least as many p_positions as the " \
+        #           "n_classes you want to target "
+        #     max_n_classes = self._get_highest_n_classes_per_cons()
+        #     self._p_positions_per_cons =
+        #     assert self._p_positions_per_cons >= max_n_classes, msg
+        # elif self._problem_type == ProblemType.REGRESSION:
 
-        assert self._n_lv_per_ind >= self._n_max_vars_per_rule, \
-            "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule"
+        # validate the number of classes per consequent
+        n_classes_per_cons_in_y = np.apply_along_axis(
+            lambda c: len(np.unique(c)), arr=self._y, axis=0
+        )
+
+        assert (
+            self._n_classes_per_cons.shape[0] == n_classes_per_cons_in_y.shape[0]
+        ), "the number of consequents indicated in n_class_per_cons does not" \
+           " match what was computed on the y_train"
+
+        assert all(
+            [c >= 0 for c in self._n_classes_per_cons]
+        ), "n_classes values must be positive in n_classes_per_cons"
+
+        mask = n_classes_per_cons_in_y == self._n_classes_per_cons
+        print("n cls per cons", self._n_classes_per_cons)
+        print("mask", mask)
+        assert all(
+            mask[self._n_classes_per_cons != 0]
+        ), "the n_classes per consequent does not match with what found on X_train"
+
+        assert (
+            self._n_lv_per_ind >= self._n_max_vars_per_rule
+        ), "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule"
 
     def convert_to_fis(self, pyf_file):
         pass
@@ -278,12 +322,13 @@ class CocoIndividual(FISIndividual, Clonable):
         """
         if X is not None:
             if not self._is_new_X_valid(X):
-                raise ValueError("X parameter is not valid. Please check if it "
-                                 "is similar to X_train i.e. the X np.array "
-                                 "that was used to build the model")
+                raise ValueError(
+                    "X parameter is not valid. Please check if it "
+                    "is similar to X_train i.e. the X np.array "
+                    "that was used to build the model"
+                )
             X_minmax_normed = minmax_norm(X)
-            y_pred = self._nce.predict(ind_sp1.to01(), ind_sp2.to01(),
-                                       X_minmax_normed)
+            y_pred = self._nce.predict(ind_sp1.to01(), ind_sp2.to01(), X_minmax_normed)
         ind_sp1, ind_sp2 = ind_tuple
         # pass ind_sp{1,2} in string format to make it easy to use it C++
         y_pred = self._nce.predict_native(ind_sp1.to01(), ind_sp2.to01())
@@ -301,20 +346,21 @@ class CocoIndividual(FISIndividual, Clonable):
         return bitarray(bin_str)
 
     def _compute_needed_bits_for_sp1(self):
-        return int(
-            self._n_bits_per_mf * self._n_true_labels * self._n_lv_per_ind)
+        return int(self._n_bits_per_mf * self._n_true_labels * self._n_lv_per_ind)
 
     def _compute_needed_bits_for_sp2(self):
         # bits for r_sel_vars
-        n_bits_per_ant = ceil(log(self._n_vars, 2))
-        n_bits_r_sel_vars = self._n_max_vars_per_rule * self._n_rules * n_bits_per_ant
+        n_bits_r_sel_vars = (
+            self._n_max_vars_per_rule * self._n_rules * self._n_bits_per_ant
+        )
 
         # bits for r_lv
         n_bits_r_lv = self._n_max_vars_per_rule * self._n_rules * self._n_lv_per_ind
 
         # bits for r_labels
-        n_bits_per_mf = ceil(log(self._n_true_labels + self._dc_padding, 2))
-        n_bits_r_labels = self._n_max_vars_per_rule * self._n_rules * n_bits_per_mf
+        n_bits_r_labels = (
+            self._n_max_vars_per_rule * self._n_rules * self._n_bits_per_label
+        )
 
         # # TODO depends if classif (scale to [0, n_class] ->
         # # ceil(log(n_class)) + modulo trick or regress (scale to [min(cons_i),
@@ -335,10 +381,13 @@ class CocoIndividual(FISIndividual, Clonable):
         # consequents in the individual's genome.
 
         # bits for r_cons
-        n_bits_per_cons = ceil(log(self._p_positions_per_cons, 2))
-        n_bits_r_cons = n_bits_per_cons * self._n_rules * self._n_cons
+        n_bits_r_cons = self._n_bits_per_cons * self._n_rules * self._n_cons
 
         n_total_bits = n_bits_r_sel_vars + n_bits_r_lv + n_bits_r_labels + n_bits_r_cons
+
+        for v in (n_bits_r_sel_vars, n_bits_r_lv, n_bits_r_labels, n_bits_r_cons):
+            print("v", v)
+
         print("n_total_bits", n_total_bits)
         return int(n_total_bits)
 
@@ -347,7 +396,26 @@ class CocoIndividual(FISIndividual, Clonable):
         super().clone(ind)
         return ind.copy()
 
-    def _get_highest_n_classes_per_cons(self):
-        n_classes_per_cons = np.apply_along_axis(lambda c: len(np.unique(c)),
-                                                 arr=self._X, axis=0)
-        return np.max(n_classes_per_cons)
+    # def _get_highest_n_classes_per_cons(self):
+    #     n_classes_per_cons = np.apply_along_axis(
+    #         lambda c: len(np.unique(c)), arr=self._X, axis=0
+    #     )
+    #     return np.max(n_classes_per_cons)
+
+    def _compute_n_bits_per_cons(self):
+        n_max_classes = max(self._n_classes_per_cons)
+
+        # if all consequents are continuous variables (i.e. regression
+        # i.e. value = 0) then we use a minimum of self._n_labels_per_cons)
+        n_max_classes = min(n_max_classes, self._n_labels_cons)
+        return ceil(log(n_max_classes, 2))
+
+    def _compute_cons_range(self):
+        """
+        :return: a numpy array like:
+            [[min_cons0, max_cons0],
+             [min_cons1, max_cons1],
+             [min_cons2, max_cons2],
+             [....]]
+        """
+        return np.vstack([self._y.min(axis=0), self._y.max(axis=0)]).T

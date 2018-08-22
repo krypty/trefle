@@ -10,10 +10,65 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   // const vector<LinguisticVariable> vec_lv = parse_ind_sp1(ind_sp1);
   auto vec_lv = parse_ind_sp1(ind_sp1);
 
-  return vec_lv;
-
   /// Parse ind_sp2
   // TODO: parse ind_sp2
+
+  // const std::function<size_t(size_t, size_t, size_t)> dummy_func1 =
+  //     [](size_t v, size_t i, size_t j) { return -v; };
+  // const std::function<double(double, size_t, size_t)> dummy_func =
+  //     [](double v, size_t i, size_t j) { return -v; };
+
+  // const std::function<size_t(size_t, size_t, size_t)> dummy_func1 =
+  //     [](size_t v, size_t i, size_t j) { return v * 10; };
+  const auto dummy_size_t = [](size_t v, size_t i, size_t j) { return v * 10; };
+  const auto dummy_double = [](double v, size_t i, size_t j) {
+    return v * 10.0;
+  };
+  // TODO: post parsing func: modulo_trick(v, n_vars)
+  cout << "sel vars" << endl;
+  const size_t n_bits_sel_vars = n_rules * n_max_vars_per_rule * n_bits_per_ant;
+  cout << "c++ v: " << n_bits_sel_vars << endl;
+  size_t offset = 0;
+  string sel_vars_bits = ind_sp2.substr(offset, n_bits_sel_vars);
+  auto sel_vars =
+      parse_bit_array<size_t>(sel_vars_bits, n_rules, n_max_vars_per_rule,
+                              n_bits_per_ant, dummy_size_t);
+
+  cout << "r lv" << endl;
+  const size_t n_bits_r_lv = n_rules * n_max_vars_per_rule * n_lv_per_ind;
+
+  // TODO: post parsing func:None, no modulo_trick needed since it is already a
+  // multiple of 2.
+  cout << "c++ v: " << n_bits_r_lv << endl;
+  offset += n_bits_sel_vars;
+  string r_lv_bits = ind_sp2.substr(offset, n_bits_r_lv);
+  auto r_lv = parse_bit_array<size_t>(r_lv_bits, n_rules, n_max_vars_per_rule,
+                                      n_lv_per_ind, dummy_size_t);
+
+  // todo add lambda function as paramter of parse bit array to directly convert
+  // the parsed number to business logic
+
+  // TODO: post parsing func: modulo_trick + dc_padding
+  cout << "r labels" << endl;
+  const size_t n_bits_r_labels =
+      n_rules * n_max_vars_per_rule * n_bits_per_label;
+  cout << "c++ v: " << n_bits_r_labels << endl;
+  offset += n_bits_r_lv;
+  string r_labels_bits = ind_sp2.substr(offset, n_bits_r_labels);
+  auto r_labels =
+      parse_bit_array<size_t>(r_labels_bits, n_rules, n_max_vars_per_rule,
+                              n_bits_per_label, dummy_size_t);
+
+  // int n_cons = 1;          // TODO remove me
+  // int n_bits_per_cons = 1; // TODO remove me
+  // TODO: post parsing func: scaling using cons_range + round/ceil/floor on
+  // classification variables
+  cout << "r cons" << endl;
+  const size_t n_bits_r_cons = n_rules * n_cons * n_bits_per_cons;
+  offset += n_bits_r_labels;
+  string r_cons_bits = ind_sp2.substr(offset, n_bits_r_cons);
+  auto r_cons = parse_bit_array<double>(r_cons_bits, n_rules, n_cons,
+                                        n_bits_per_cons, dummy_double);
 
   /// Combine ind_sp1 and ind_sp2 to create a FIS
   /*
@@ -26,39 +81,57 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
 
   /// Return the y_pred to the caller
   // return y_pred
+
+  cout << "predict done" << endl;
+
+  return vec_lv;
+}
+// vector<vector<size_t>>
+// FISCocoEvalWrapper::parse_ind_sp2_sel_vars(const string &ind_sp2) {
+//   vector<vector<size_t>> sel_vars = parse_bit_array<size_t>(
+//       ind_sp2, n_rules, n_max_vars_per_rule, n_bits_per_ant);
+
+//   return sel_vars;
+// }
+
+template <typename T>
+vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
+    const string &bitarray, const size_t rows, const size_t cols,
+    const size_t n_bits_per_elm,
+    // const std::function<T>(T value, size_t i, size_t j) &) {
+    const std::function<T(T, size_t row, size_t col)> &func) {
+  // T (*func)(T, size_t, size_t)) {
+  vector<vector<T>> matrix(rows, vector<T>(cols, 0));
+
+  const size_t n_bits_per_line = cols * n_bits_per_elm;
+  for (size_t i = 0; i < rows; i++) {
+    for (size_t j = 0; j < cols; j++) {
+      const size_t offset = i * n_bits_per_line + (j * n_bits_per_elm);
+      T value = stoi(bitarray.substr(offset, n_bits_per_elm), nullptr, 2);
+      matrix[i][j] = func(value, i, j);
+      // matrix[i][j] = value;
+      cout << matrix[i][j] << ",";
+    }
+    cout << endl;
+  }
+
+  return matrix;
 }
 
 py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
 
-  // TODO: substr() is creating a new string each time, use c++17's
-  // stringview?
-  vector<vector<double>> vec_lv;
-  vec_lv.reserve(n_lv_per_ind);
+  // // TODO: substr() is creating a new string each time, use c++17's
+  // // stringview?
+  // vector<vector<double>> vec_lv;
+  // vec_lv.reserve(n_lv_per_ind);
 
-  const int n_bits_per_line = n_true_labels * n_bits_per_mf;
+  const auto dummy_f = [](double v, size_t i, size_t j) { return v; };
 
-  for (int lv_i = 0; lv_i < n_lv_per_ind; lv_i++) {
-    // cout << "lv_i " << lv_i << endl;
-    // vec_lv[lv_i].reserve(n_true_labels);
-    vector<double> vec_lv_i;
-
-    for (int mf_i = 0; mf_i < n_true_labels; mf_i++) {
-      // cout << "lv_i " << lv_i << endl;
-      const int offset = lv_i * n_bits_per_line + (mf_i * n_bits_per_mf);
-      // cout << "offset " << offset << endl;
-      double v = stoi(ind_sp1.substr(offset, n_bits_per_mf), nullptr, 2);
-      // normalize v
-      v /= (1 << n_bits_per_mf) - 1;
-      cout << "v: " << v << endl;
-      vec_lv_i.push_back(v);
-    }
-
-    vec_lv.push_back(vec_lv_i);
-    cout << endl;
-  }
+  vector<vector<double>> vec_lv = parse_bit_array<double>(
+      ind_sp1, n_lv_per_ind, n_true_labels, n_bits_per_mf, dummy_f);
 
   cout << "a" << endl;
-  int mf_index = 1; // TODO remove me
+  size_t mf_index = 1; // TODO remove me
   for (auto &row : vec_lv) {
     // create each LV
     // MF's points must be increasing
@@ -76,8 +149,8 @@ py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
   auto arr = py::array_t<double>({n_lv_per_ind, n_true_labels});
   auto arr_raw = arr.mutable_unchecked<2>();
 
-  for (int i = 0; i < n_lv_per_ind; i++) {
-    for (int j = 0; j < n_true_labels; j++) {
+  for (size_t i = 0; i < n_lv_per_ind; i++) {
+    for (size_t j = 0; j < n_true_labels; j++) {
       //// normalize in [0,1]
       // arr_raw(i, j) = vec_lv[i][j] / double((1 << n_bits_per_mf)-1);
       arr_raw(i, j) = vec_lv[i][j];
