@@ -44,10 +44,11 @@ private:
       const size_t n_bits_per_elm,
       const std::function<T(const T, const size_t row, const size_t col)> &);
 
-  // TODO remove me
-  static double toto(const double v, const size_t i, const size_t j) {
-    return v * 100.0;
-  };
+  template <typename T>
+  static T dummy_post_func(const T v, const size_t i, const size_t j) {
+    // this function is used when there is no need to do any post processing
+    return v;
+  }
 
   inline size_t modulo_trick(const size_t value, const size_t divisor) {
     return value % divisor;
