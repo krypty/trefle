@@ -1,4 +1,5 @@
 import pyfuge_c
+import numpy as np
 
 
 class NativeCocoEvaluator:
@@ -15,6 +16,7 @@ class NativeCocoEvaluator:
         n_bits_per_cons: int,
         n_bits_per_label: int,
         dc_weight: int,
+        cons_n_labels: np.array,
     ):
         self._fiseval = pyfuge_c.FISCocoEvalWrapper(
             n_vars,
@@ -28,6 +30,7 @@ class NativeCocoEvaluator:
             n_bits_per_cons,
             n_bits_per_label,
             dc_weight,
+            cons_n_labels,
         )
 
     def predict_native(self, ind_sp1: str, ind_sp2: str):
@@ -61,7 +64,7 @@ if __name__ == "__main__":
         X_train=X_train,
         y_train=y_train,
         # problem_type=ProblemType.CLASSIFICATION,
-        n_rules=3,
+        n_rules=12,
         n_classes_per_cons=[2, 3, 0],
         n_max_vars_per_rule=4,
         n_labels_per_mf=2,

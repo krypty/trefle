@@ -109,15 +109,44 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   /// Extract consequents
   // TODO: post parsing func: scaling using cons_range + round/ceil/floor on
   // classification variables
-  const auto val_to_cons = [&](const size_t v, const size_t row,
-                               const size_t col) { return v; };
+  const auto val_to_cons = [&](const size_t v, const size_t rule_i,
+                               const size_t cons_j) {
+    //  cons_range is a matrix like:
+    // [
+    //  [min_cons0, max_cons0],
+    //  [min_cons1, max_cons1],
+    //  [min_cons2, max_cons2],
+    //  [....]
+    // ]
+    //
+    // const double min_v = cons_n_labels[cons_j][0];
+    // const double max_v = cons_n_labels[cons_j][1];
+
+    // return v;
+
+    // TODO fixe me !
+
+    // const size_t cons_min = 0;
+    const size_t cons_max = cons_n_labels[cons_j];
+    cout << "(" << cons_max << ")";
+    return v % cons_max;
+
+    // const size_t n_classes = (1 << n_bits_per_cons);
+
+    // const double scaled_v = scale0N(v, n_classes, min_v, max_v);
+    // // const size_t cons_idx = max(0, min(n_classes - 1, floor(scaled_v)));
+    // const size_t cons_idx =
+    //     max(0, min((int)(n_classes - 1), (int)floor(scaled_v)));
+    // // auto cons_idx = -1;
+    // return cons_idx;
+  };
 
   cout << "r cons" << endl;
   const size_t n_bits_r_cons = n_rules * n_cons * n_bits_per_cons;
   offset += n_bits_r_labels;
   string r_cons_bits = ind_sp2.substr(offset, n_bits_r_cons);
-  auto r_cons = parse_bit_array<double>(
-      r_cons_bits, n_rules, n_cons, n_bits_per_cons, dummy_post_func<double>);
+  auto r_cons = parse_bit_array<double>(r_cons_bits, n_rules, n_cons,
+                                        n_bits_per_cons, val_to_cons);
 
   /// Combine ind_sp1 and ind_sp2 to create a FIS
   /*

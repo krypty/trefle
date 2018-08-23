@@ -169,7 +169,7 @@ class CocoIndividual(FISIndividual, Clonable):
         n_classes_per_cons: List[int],
         n_max_vars_per_rule: int,
         n_labels_per_mf: int,
-        n_labels_cons: int = 3,
+        n_labels_cons: int = 9,
         p_positions_per_lv: int = 32,  # 5 bits
         dc_weight: int = 1,
         mfs_shape: MFShape = MFShape.TRI_MF,
@@ -235,6 +235,7 @@ class CocoIndividual(FISIndividual, Clonable):
         self._n_bits_per_mf = ceil(log(self._p_positions_per_lv, 2))
         self._n_bits_per_ant = ceil(log(self._n_vars, 2))
         self._n_bits_per_cons = self._compute_n_bits_per_cons()
+        print("bits per cons ", self._n_bits_per_cons)
         # chosen arbitrarily # ceil(log(self._n_true_labels + self._dc_padding, 2))
         self._n_bits_per_label = 5
 
@@ -245,6 +246,9 @@ class CocoIndividual(FISIndividual, Clonable):
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
 
         self._cons_range = self._compute_cons_range()
+        self._cons_n_labels = self._compute_cons_n_labels(self._n_classes_per_cons)
+        print("cons ra")
+        print(self._cons_range)
 
         # self._nce = NativeCocoEvaluator(
         #
@@ -260,7 +264,8 @@ class CocoIndividual(FISIndividual, Clonable):
             n_cons=self._n_cons,
             n_bits_per_cons=self._n_bits_per_cons,
             n_bits_per_label=self._n_bits_per_label,
-            dc_weight=dc_weight
+            dc_weight=dc_weight,
+            cons_n_labels=self._cons_n_labels,
         )
 
     def _validate(self):
@@ -406,11 +411,13 @@ class CocoIndividual(FISIndividual, Clonable):
     #     return np.max(n_classes_per_cons)
 
     def _compute_n_bits_per_cons(self):
+        print("n class er cons", self._n_classes_per_cons)
         n_max_classes = max(self._n_classes_per_cons)
 
         # if all consequents are continuous variables (i.e. regression
         # i.e. value = 0) then we use a minimum of self._n_labels_per_cons)
-        n_max_classes = min(n_max_classes, self._n_labels_cons)
+        print(self._n_labels_cons, "dkjhsakjdhakjh")
+        n_max_classes = max(n_max_classes, self._n_labels_cons)
         return ceil(log(n_max_classes, 2))
 
     def _compute_cons_range(self):
@@ -422,3 +429,8 @@ class CocoIndividual(FISIndividual, Clonable):
              [....]]
         """
         return np.vstack([self._y.min(axis=0), self._y.max(axis=0)]).T
+
+    def _compute_cons_n_labels(self, n_classes_per_cons):
+        cons_n_labels = n_classes_per_cons.copy().astype(np.int)
+        cons_n_labels[cons_n_labels == 0] = self._n_labels_cons
+        return cons_n_labels

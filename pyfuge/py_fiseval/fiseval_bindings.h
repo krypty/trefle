@@ -25,15 +25,22 @@ public:
                      const int n_true_labels, const int n_lv_per_ind,
                      const int n_bits_per_ant, const int n_cons,
                      const int n_bits_per_cons, const int n_bits_per_label,
-                     const int dc_weight)
+                     const int dc_weight, py_array_i np_cons_n_labels)
       : n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
         n_true_labels(n_true_labels), n_lv_per_ind(n_lv_per_ind),
         n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
         n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label),
-        dc_weight(dc_weight) {
+        dc_weight(dc_weight), cons_n_labels(n_cons, 0) {
     cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
          << n_true_labels << ", " << n_lv_per_ind << endl;
+    auto cons_n_labels_buf = np_cons_n_labels.request();
+    auto ptr_cons_n_labels = (int *)(cons_n_labels_buf.ptr);
+    cons_n_labels.assign(ptr_cons_n_labels, ptr_cons_n_labels + n_cons);
+
+    for (int i = 0; i < cons_n_labels.size(); i++) {
+      cout << "cons n labels " << cons_n_labels[i] << endl;
+    }
   }
   py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2);
 
@@ -57,6 +64,13 @@ private:
     return value % divisor;
   }
 
+  static inline double scale0N(const double v, const size_t n_classes,
+                               const double min_v, const double max_v) {
+    // This function scales v from [0]
+    // assumption v's minimum is 0
+    return ((max_v - min_v) / n_classes) * v + min_v;
+  }
+
 private:
   const int n_vars;
   const int n_rules;
@@ -69,6 +83,7 @@ private:
   const int n_bits_per_cons;
   const int n_bits_per_label;
   const int dc_weight;
+  vector<int> cons_n_labels;
 };
 
 PYBIND11_MODULE(pyfuge_c, m) {
@@ -76,7 +91,7 @@ PYBIND11_MODULE(pyfuge_c, m) {
       // match the ctor of FISCocoEvalWrapper
       .def(py::init<const int, const int, const int, const int, const int,
                     const int, const int, const int, const int, const int,
-                    const int>())
+                    const int, py_array_i>())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict");
 }
