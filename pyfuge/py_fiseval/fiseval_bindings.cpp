@@ -94,7 +94,9 @@ template <typename T>
 vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
     const string &bitarray, const size_t rows, const size_t cols,
     const size_t n_bits_per_elm,
-    const std::function<T(const T, const size_t row, const size_t col)> &post_func) {
+    const std::function<T(const T, const size_t row, const size_t col)>
+        &post_func) {
+
   vector<vector<T>> matrix(rows, vector<T>(cols, 0));
 
   const size_t n_bits_per_line = cols * n_bits_per_elm;
@@ -116,15 +118,16 @@ py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
 
   // // TODO: substr() is creating a new string each time, use c++17's
   // // stringview?
-  // vector<vector<double>> vec_lv;
-  // vec_lv.reserve(n_lv_per_ind);
 
-  const auto dummy_f = [](const double v, const size_t i, const size_t j) {
-    return v;
+  const auto mf_val_to_01 = [&](const double v, const size_t i,
+                                const size_t j) {
+    // scale the mf p points to [0, 1] because it has been decided that
+    // the observations (i.e. X_train) are MinMax normed.
+    return v / double((1 << n_bits_per_mf) - 1);
   };
 
   vector<vector<double>> vec_lv = parse_bit_array<double>(
-      ind_sp1, n_lv_per_ind, n_true_labels, n_bits_per_mf, dummy_f);
+      ind_sp1, n_lv_per_ind, n_true_labels, n_bits_per_mf, mf_val_to_01);
 
   cout << "a" << endl;
   size_t mf_index = 1; // TODO remove me
