@@ -24,12 +24,14 @@ public:
                      const int n_max_vars_per_rule, const int n_bits_per_mf,
                      const int n_true_labels, const int n_lv_per_ind,
                      const int n_bits_per_ant, const int n_cons,
-                     const int n_bits_per_cons, const int n_bits_per_label)
+                     const int n_bits_per_cons, const int n_bits_per_label,
+                     const int dc_weight)
       : n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
         n_true_labels(n_true_labels), n_lv_per_ind(n_lv_per_ind),
         n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
-        n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label) {
+        n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label),
+        dc_weight(dc_weight) {
     cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
          << n_true_labels << ", " << n_lv_per_ind << endl;
   }
@@ -65,13 +67,15 @@ private:
   const int n_cons;
   const int n_bits_per_cons;
   const int n_bits_per_label;
+  const int dc_weight;
 };
 
 PYBIND11_MODULE(pyfuge_c, m) {
   py::class_<FISCocoEvalWrapper>(m, "FISCocoEvalWrapper")
       // match the ctor of FISCocoEvalWrapper
       .def(py::init<const int, const int, const int, const int, const int,
-                    const int, const int, const int, const int, const int>())
+                    const int, const int, const int, const int, const int,
+                    const int>())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict");
 }

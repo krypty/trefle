@@ -4,16 +4,17 @@ import pyfuge_c
 class NativeCocoEvaluator:
     def __init__(
         self,
-        n_vars,
-        n_rules,
-        n_max_vars_per_rule,
-        n_bits_per_mf,
-        n_true_labels,
-        n_lv_per_ind,
-        n_bits_per_ant,
-        n_cons,
-        n_bits_per_cons,
-        n_bits_per_label,
+        n_vars: int,
+        n_rules: int,
+        n_max_vars_per_rule: int,
+        n_bits_per_mf: int,
+        n_true_labels: int,
+        n_lv_per_ind: int,
+        n_bits_per_ant: int,
+        n_cons: int,
+        n_bits_per_cons: int,
+        n_bits_per_label: int,
+        dc_weight: int,
     ):
         self._fiseval = pyfuge_c.FISCocoEvalWrapper(
             n_vars,
@@ -26,6 +27,7 @@ class NativeCocoEvaluator:
             n_cons,
             n_bits_per_cons,
             n_bits_per_label,
+            dc_weight,
         )
 
     def predict_native(self, ind_sp1: str, ind_sp2: str):
@@ -64,7 +66,7 @@ if __name__ == "__main__":
         n_max_vars_per_rule=4,
         n_labels_per_mf=2,
         p_positions_per_lv=32,  # 5 bits
-        dc_padding=1,
+        dc_weight=2,
         mfs_shape=MFShape.TRI_MF,
         n_lv_per_ind_sp1=None,
     )

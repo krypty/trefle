@@ -125,6 +125,7 @@ class CocoIndividual(FISIndividual, Clonable):
     2nd rule (r1) is "5th variable is MEDIUM". (5th because of "=6" and MEDIUM
     because of mf=2 with n_true_labels=4). A single element is in the interval
     [0, (n_true_labels + dc_weight)-1]. With dc_weight=1 all mf have the
+    TODO change dc_weight comment
     same probability to be chosen. To increase the probability to chose/select
     a DC, increase dc_weight.
 
@@ -170,7 +171,7 @@ class CocoIndividual(FISIndividual, Clonable):
         n_labels_per_mf: int,
         n_labels_cons: int = 3,
         p_positions_per_lv: int = 32,  # 5 bits
-        dc_padding: int = 1,
+        dc_weight: int = 1,
         mfs_shape: MFShape = MFShape.TRI_MF,
         # p_positions_per_cons: int = None,#32,  # 5 bits
         n_lv_per_ind_sp1: int = None,
@@ -192,7 +193,7 @@ class CocoIndividual(FISIndividual, Clonable):
         p_positions_per_lv=4, then a MF's inflexion points will be at 0%, 33%,
         66% 100% of the variable range. The linguistic variable will be cut in
         p_positions_per_lv. This value must be a multiple of 2.
-        :param dc_padding: integer. If =1 and
+        :param dc_weight: integer. If =1 and
         n_labels_per_mf=3 -> [0,1,2,3] where 3 is DONT_CARE, =2 -> [0,1,2,3,
         4] where 3 and 4 is DONT_CARE, ... TODO: improve this comment
         :param mfs_shape:
@@ -214,7 +215,7 @@ class CocoIndividual(FISIndividual, Clonable):
         self._n_true_labels = n_labels_per_mf
         self._n_labels_cons = n_labels_cons
         self._p_positions_per_lv = p_positions_per_lv
-        self._dc_padding = dc_padding
+        self._dc_weight = dc_weight
         self._mfs_shape = mfs_shape
 
         self._n_vars = self._X.shape[1]
@@ -234,7 +235,8 @@ class CocoIndividual(FISIndividual, Clonable):
         self._n_bits_per_mf = ceil(log(self._p_positions_per_lv, 2))
         self._n_bits_per_ant = ceil(log(self._n_vars, 2))
         self._n_bits_per_cons = self._compute_n_bits_per_cons()
-        self._n_bits_per_label = ceil(log(self._n_true_labels + self._dc_padding, 2))
+        # chosen arbitrarily # ceil(log(self._n_true_labels + self._dc_padding, 2))
+        self._n_bits_per_label = 5
 
         self._n_bits_sp1 = self._compute_needed_bits_for_sp1()
         self._n_bits_sp2 = self._compute_needed_bits_for_sp2()
@@ -258,10 +260,11 @@ class CocoIndividual(FISIndividual, Clonable):
             n_cons=self._n_cons,
             n_bits_per_cons=self._n_bits_per_cons,
             n_bits_per_label=self._n_bits_per_label,
+            dc_weight=dc_weight
         )
 
     def _validate(self):
-        assert self._dc_padding > 0, "negative padding does not make sense"
+        assert self._dc_weight >= 0, "negative padding does not make sense"
         assert log(self._p_positions_per_lv, 2) == ceil(
             log(self._p_positions_per_lv, 2)
         ), "p_positions_per_lv must be a multiple of 2"
@@ -285,8 +288,7 @@ class CocoIndividual(FISIndividual, Clonable):
 
         assert (
             self._n_classes_per_cons.shape[0] == n_classes_per_cons_in_y.shape[0]
-        ), "the number of consequents indicated in n_class_per_cons does not" \
-           " match what was computed on the y_train"
+        ), "the number of consequents indicated in n_class_per_cons does not" " match what was computed on the y_train"
 
         assert all(
             [c >= 0 for c in self._n_classes_per_cons]
