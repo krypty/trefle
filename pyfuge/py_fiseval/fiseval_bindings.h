@@ -44,10 +44,11 @@ private:
   vector<vector<T>> parse_bit_array(
       const string &bitarray, const size_t rows, const size_t cols,
       const size_t n_bits_per_elm,
-      const std::function<T(const T, const size_t row, const size_t col)> &);
+      const std::function<T(const size_t v, const size_t row, const size_t col)>
+          &post_func);
 
   template <typename T>
-  static T dummy_post_func(const T v, const size_t i, const size_t j) {
+  static T dummy_post_func(const size_t v, const size_t i, const size_t j) {
     // this function is used when there is no need to do any post processing
     return v;
   }

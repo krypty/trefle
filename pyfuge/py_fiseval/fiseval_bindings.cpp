@@ -42,13 +42,6 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
                                       n_lv_per_ind, dummy_post_func<size_t>);
 
   /// Extract antecedents labels
-  // TODO: post parsing func: modulo_trick + dc_padding
-  cout << "r labels" << endl;
-  const size_t n_bits_r_labels =
-      n_rules * n_max_vars_per_rule * n_bits_per_label;
-  cout << "c++ v: " << n_bits_r_labels << endl;
-  offset += n_bits_r_lv;
-
   const auto val_to_label = [&](const size_t v, const size_t row,
                                 const size_t col) {
     // This function scales the value v (which is in [0, n_bits_per_label-1])
@@ -81,7 +74,7 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
 
     // v is in [0, (2^n_bits_per_label)-1]
     float v_normed = v / float((1 << n_bits_per_label) - 1);
-    cout << "(" << v_normed <<", " << v << ")\t";
+    cout << "(" << v_normed << ", " << v << ")\t";
 
     // weights_normed is sth like [1,1,1,3] ≃ low, medium and high have a
     // weight of 1 and the last (i.e. don't care) have a weight of 3
@@ -102,6 +95,12 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
     return to_ret;
   };
 
+  cout << "r labels" << endl;
+  const size_t n_bits_r_labels =
+      n_rules * n_max_vars_per_rule * n_bits_per_label;
+  cout << "c++ v: " << n_bits_r_labels << endl;
+  offset += n_bits_r_lv;
+
   string r_labels_bits = ind_sp2.substr(offset, n_bits_r_labels);
   auto r_labels =
       parse_bit_array<size_t>(r_labels_bits, n_rules, n_max_vars_per_rule,
@@ -110,6 +109,9 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   /// Extract consequents
   // TODO: post parsing func: scaling using cons_range + round/ceil/floor on
   // classification variables
+  const auto val_to_cons = [&](const size_t v, const size_t row,
+                               const size_t col) { return v; };
+
   cout << "r cons" << endl;
   const size_t n_bits_r_cons = n_rules * n_cons * n_bits_per_cons;
   offset += n_bits_r_labels;
@@ -138,7 +140,7 @@ template <typename T>
 vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
     const string &bitarray, const size_t rows, const size_t cols,
     const size_t n_bits_per_elm,
-    const std::function<T(const T, const size_t row, const size_t col)>
+    const std::function<T(const size_t, const size_t, const size_t)>
         &post_func) {
 
   vector<vector<T>> matrix(rows, vector<T>(cols, 0));
@@ -147,7 +149,7 @@ vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
   for (size_t i = 0; i < rows; i++) {
     for (size_t j = 0; j < cols; j++) {
       const size_t offset = i * n_bits_per_line + (j * n_bits_per_elm);
-      T value = stoi(bitarray.substr(offset, n_bits_per_elm), nullptr, 2);
+      size_t value = stoi(bitarray.substr(offset, n_bits_per_elm), nullptr, 2);
       matrix[i][j] = post_func(value, i, j);
       // matrix[i][j] = value;
       cout << matrix[i][j] << ",";
