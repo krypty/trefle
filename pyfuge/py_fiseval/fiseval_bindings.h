@@ -7,6 +7,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <string>
+#include <unordered_map>
 
 namespace py = pybind11;
 
@@ -49,8 +50,7 @@ private:
 
   vector<vector<size_t>> extract_sel_vars(const string &ind_sp2,
                                           size_t &offset);
-  vector<vector<size_t>> extract_r_lv(const string &ind_sp2,
-                                                      size_t &offset);
+  vector<vector<size_t>> extract_r_lv(const string &ind_sp2, size_t &offset);
   vector<vector<size_t>> extract_r_labels(const string &ind_sp2,
                                           size_t &offset);
   vector<vector<double>> extract_r_cons(const string &ind_sp2, size_t &offset);

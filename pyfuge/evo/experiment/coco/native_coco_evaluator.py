@@ -64,7 +64,7 @@ if __name__ == "__main__":
         X_train=X_train,
         y_train=y_train,
         # problem_type=ProblemType.CLASSIFICATION,
-        n_rules=12,
+        n_rules=3,
         # n_classes_per_cons=[2],
         n_classes_per_cons=[2, 3, 0],
         n_max_vars_per_rule=4,
@@ -74,7 +74,11 @@ if __name__ == "__main__":
         mfs_shape=MFShape.TRI_MF,
         n_lv_per_ind_sp1=None,
         # default_cons=[1],
-        default_cons=[0, 1, 3.2],  # TODO: handle me !
+        default_cons=[
+            0,
+            1,
+            3.2,
+        ],  # TODO: handle me ! Do not forget to minmax normed and scale back. Here 3.2 should be an integer representing a cons label
     )
 
     ind_sp1 = coco_ind.generate_sp1()

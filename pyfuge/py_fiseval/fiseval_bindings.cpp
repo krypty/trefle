@@ -27,6 +27,24 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   auto r_cons = extract_r_cons(ind_sp2, offset);
 
   /// Combine ind_sp1 and ind_sp2 to create a FIS
+  unordered_map<size_t, size_t> vars_lv_lookup;
+  const size_t rows = sel_vars.size();
+  const size_t cols = sel_vars[0].size();
+  for (size_t i = 0; i < rows; i++) {
+    for (size_t j = 0; j < cols; j++) {
+      // key: a selected var, value: the matching lv
+      // To respect the interpretability criteria i.e. a variable must have the
+      // same definition (i.e. use the same lv) across all rules. This is done
+      // by only keeping the last definition for a given variable.
+      // We use the uniqueness feature of the map class to do that.
+      vars_lv_lookup[sel_vars[i][j]] = r_lv[i][j];
+    }
+  }
+
+  for (auto &t : vars_lv_lookup) {
+    cout << t.first << ": " << t.second << endl;
+  }
+
   /*
   auto rules = ...
   SingletonFIS fis(rules, default_rule)
@@ -111,7 +129,8 @@ py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
   return arr;
 }
 
-vector<vector<size_t>> FISCocoEvalWrapper::extract_sel_vars(const string &ind_sp2, size_t &offset) {
+vector<vector<size_t>>
+FISCocoEvalWrapper::extract_sel_vars(const string &ind_sp2, size_t &offset) {
   cout << "sel vars" << endl;
   const size_t n_bits_sel_vars = n_rules * n_max_vars_per_rule * n_bits_per_ant;
   cout << "c++ v: " << n_bits_sel_vars << endl;
@@ -127,7 +146,8 @@ vector<vector<size_t>> FISCocoEvalWrapper::extract_sel_vars(const string &ind_sp
                                  n_bits_per_ant, val_to_var_idx);
 }
 
-vector<vector<size_t>> FISCocoEvalWrapper::extract_r_lv(const string &ind_sp2, size_t &offset) {
+vector<vector<size_t>> FISCocoEvalWrapper::extract_r_lv(const string &ind_sp2,
+                                                        size_t &offset) {
   cout << "r lv" << endl;
   const size_t n_bits_r_lv = n_rules * n_max_vars_per_rule * n_lv_per_ind;
 
@@ -144,7 +164,8 @@ vector<vector<size_t>> FISCocoEvalWrapper::extract_r_lv(const string &ind_sp2, s
                                  n_lv_per_ind, dummy_post_func<size_t>);
 }
 
-vector<vector<size_t>> FISCocoEvalWrapper::extract_r_labels(const string &ind_sp2, size_t &offset) {
+vector<vector<size_t>>
+FISCocoEvalWrapper::extract_r_labels(const string &ind_sp2, size_t &offset) {
 
   const auto val_to_label = [&](const size_t v, const size_t row,
                                 const size_t col) {
@@ -213,7 +234,8 @@ vector<vector<size_t>> FISCocoEvalWrapper::extract_r_labels(const string &ind_sp
                                  n_bits_per_label, val_to_label);
 }
 
-vector<vector<double>> FISCocoEvalWrapper::extract_r_cons(const string &ind_sp2, size_t &offset) {
+vector<vector<double>> FISCocoEvalWrapper::extract_r_cons(const string &ind_sp2,
+                                                          size_t &offset) {
   const auto val_to_cons = [&](const size_t v, const size_t rule_i,
                                const size_t cons_j) {
     //  cons_range is an array containing that number of classes per consequents
