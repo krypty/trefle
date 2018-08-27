@@ -58,13 +58,14 @@ if __name__ == "__main__":
         ]
     )
 
-    # y_train = np.array([0, 1])
+    # y_train = np.array([0, 1, 1, 1, 0, 0, 0])
     y_train = np.array([[0, 2, 3.2], [1, 1, 4.4], [0, 0, 1.3]])
     coco_ind = CocoIndividual(
         X_train=X_train,
         y_train=y_train,
         # problem_type=ProblemType.CLASSIFICATION,
         n_rules=12,
+        # n_classes_per_cons=[2],
         n_classes_per_cons=[2, 3, 0],
         n_max_vars_per_rule=4,
         n_labels_per_mf=2,
@@ -72,6 +73,8 @@ if __name__ == "__main__":
         dc_weight=2,
         mfs_shape=MFShape.TRI_MF,
         n_lv_per_ind_sp1=None,
+        # default_cons=[1],
+        default_cons=[0, 1, 3.2],  # TODO: handle me !
     )
 
     ind_sp1 = coco_ind.generate_sp1()

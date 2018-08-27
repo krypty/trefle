@@ -167,6 +167,7 @@ class CocoIndividual(FISIndividual, Clonable):
         # problem_type: ProblemType,
         n_rules: int,
         n_classes_per_cons: List[int],
+        default_cons: np.array,
         n_max_vars_per_rule: int,
         n_labels_per_mf: int,
         n_labels_cons: int = 9,
@@ -211,6 +212,7 @@ class CocoIndividual(FISIndividual, Clonable):
         self._y = y_train
         self._n_rules = n_rules
         self._n_classes_per_cons = np.asarray(n_classes_per_cons)
+        self._default_cons = np.asarray(default_cons)
         self._n_max_vars_per_rule = n_max_vars_per_rule
         self._n_true_labels = n_labels_per_mf
         self._n_labels_cons = n_labels_cons
@@ -274,9 +276,10 @@ class CocoIndividual(FISIndividual, Clonable):
             log(self._p_positions_per_lv, 2)
         ), "p_positions_per_lv must be a multiple of 2"
 
-        assert (
-            self._p_positions_per_lv >= self._n_true_labels
-        ), "You must have at least as many p_positions as the n_labels_per_mf you want to use "
+        assert self._p_positions_per_lv >= self._n_true_labels, (
+            "You must have at least as many p_positions as the n_labels_per_mf "
+            "you want to use "
+        )
 
         # if self._problem_type == ProblemType.CLASSIFICATION:
         #     msg = "You must have at least as many p_positions as the " \
@@ -286,14 +289,27 @@ class CocoIndividual(FISIndividual, Clonable):
         #     assert self._p_positions_per_cons >= max_n_classes, msg
         # elif self._problem_type == ProblemType.REGRESSION:
 
-        # validate the number of classes per consequent
+        ## Validate the number of classes per consequent
         n_classes_per_cons_in_y = np.apply_along_axis(
             lambda c: len(np.unique(c)), arr=self._y, axis=0
-        )
+        ).reshape(-1)
+        # force to have an array with a shape
 
-        assert (
-            self._n_classes_per_cons.shape[0] == n_classes_per_cons_in_y.shape[0]
-        ), "the number of consequents indicated in n_class_per_cons does not match what was computed on the y_train"
+        msg = (
+            "the number of consequents indicated in n_class_per_cons does not "
+            "match what was computed on y_train. from user: {}, computed: {}"
+        )
+        print(self._n_classes_per_cons)
+        print(n_classes_per_cons_in_y)
+
+        assert len(self._n_classes_per_cons) == len(n_classes_per_cons_in_y)
+
+        n_cls_per_cons_zeroed = n_classes_per_cons_in_y.copy()
+        # we don't want to compare the number of classes for continuous vars
+        n_cls_per_cons_zeroed[self._n_classes_per_cons == 0] = 0
+        assert np.array_equal(
+            self._n_classes_per_cons.flatten(), n_cls_per_cons_zeroed.flatten()
+        ), msg.format(self._n_classes_per_cons, n_classes_per_cons_in_y)
 
         assert all(
             [c >= 0 for c in self._n_classes_per_cons]
@@ -309,6 +325,15 @@ class CocoIndividual(FISIndividual, Clonable):
         assert (
             self._n_lv_per_ind >= self._n_max_vars_per_rule
         ), "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule"
+
+        assert (
+            self._n_labels_cons >= 2
+        ), "n_labels_cons must be >= 2 (i.e. at least LOW and HIGH)"
+
+        assert self._default_cons.shape[0] == self._n_cons, (
+            "default_cons's shape doesn't match the number of "
+            "consequents retrieved using y_train"
+        )
 
     def convert_to_fis(self, pyf_file):
         pass
