@@ -228,7 +228,7 @@ class CocoIndividual(FISIndividual, Clonable):
         try:
             self._n_cons = self._y.shape[1]
         except IndexError:  # y is 1d so each element is an output
-            self._n_cons = self._y.shape[0]
+            self._n_cons = 1  # self._y.shape[0]
 
         self._validate()
 
