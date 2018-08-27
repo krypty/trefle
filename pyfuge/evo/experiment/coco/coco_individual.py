@@ -276,7 +276,7 @@ class CocoIndividual(FISIndividual, Clonable):
 
         assert (
             self._p_positions_per_lv >= self._n_true_labels
-        ), "You must have at least as many p_positions as the " "n_labels_per_mf you want to use "
+        ), "You must have at least as many p_positions as the n_labels_per_mf you want to use "
 
         # if self._problem_type == ProblemType.CLASSIFICATION:
         #     msg = "You must have at least as many p_positions as the " \
@@ -293,7 +293,7 @@ class CocoIndividual(FISIndividual, Clonable):
 
         assert (
             self._n_classes_per_cons.shape[0] == n_classes_per_cons_in_y.shape[0]
-        ), "the number of consequents indicated in n_class_per_cons does not" " match what was computed on the y_train"
+        ), "the number of consequents indicated in n_class_per_cons does not match what was computed on the y_train"
 
         assert all(
             [c >= 0 for c in self._n_classes_per_cons]
