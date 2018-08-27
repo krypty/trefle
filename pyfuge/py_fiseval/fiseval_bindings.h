@@ -47,6 +47,14 @@ public:
 private:
   py::array_t<double> parse_ind_sp1(const string &ind_sp1);
 
+  vector<vector<size_t>> extract_sel_vars(const string &ind_sp2,
+                                          size_t &offset);
+  vector<vector<size_t>> extract_r_lv(const string &ind_sp2,
+                                                      size_t &offset);
+  vector<vector<size_t>> extract_r_labels(const string &ind_sp2,
+                                          size_t &offset);
+  vector<vector<double>> extract_r_cons(const string &ind_sp2, size_t &offset);
+
   template <typename T>
   vector<vector<T>> parse_bit_array(
       const string &bitarray, const size_t rows, const size_t cols,
