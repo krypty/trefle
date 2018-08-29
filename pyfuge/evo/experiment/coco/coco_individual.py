@@ -232,6 +232,7 @@ class CocoIndividual(FISIndividual, Clonable):
         except IndexError:  # y is 1d so each element is an output
             self._n_cons = 1  # self._y.shape[0]
 
+        self._cons_n_labels = self._compute_cons_n_labels(self._n_classes_per_cons)
         self._validate()
 
         self._n_bits_per_mf = ceil(log(self._p_positions_per_lv, 2))
@@ -248,7 +249,6 @@ class CocoIndividual(FISIndividual, Clonable):
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
 
         self._cons_range = self._compute_cons_range()
-        self._cons_n_labels = self._compute_cons_n_labels(self._n_classes_per_cons)
         print("cons ra")
         print(self._cons_range)
 
@@ -333,6 +333,18 @@ class CocoIndividual(FISIndividual, Clonable):
         assert self._default_cons.shape[0] == self._n_cons, (
             "default_cons's shape doesn't match the number of "
             "consequents retrieved using y_train"
+        )
+
+        assert self._default_cons.dtype == np.int and (self._default_cons >= 0).all(), (
+            "The default rule must only contain classes or labels "
+            "i.e. integer numbers"
+        )
+
+        assert (self._default_cons - 1 <= self._cons_n_labels).all(), (
+            "Make sure that the default rule contains valid classes/labels \n"
+            "i.e. label is in [0, n_classes-1] or in case of regression in \n"
+            "[0, n_labels-1].\n"
+            "Expected: ({})-1 <= {}".format(self._default_cons, self._cons_n_labels)
         )
 
     def convert_to_fis(self, pyf_file):

@@ -74,11 +74,9 @@ if __name__ == "__main__":
         mfs_shape=MFShape.TRI_MF,
         n_lv_per_ind_sp1=None,
         # default_cons=[1],
-        default_cons=[
-            0,
-            1,
-            3.2,
-        ],  # TODO: handle me ! Do not forget to minmax normed and scale back. Here 3.2 should be an integer representing a cons label
+        # TODO: handle me ! Do not forget to minmax normed and scale back. Here 3.2 should be an integer representing a cons label
+        # default_cons=[0, 1, 3.2],
+        default_cons=[0, 1, 4],
     )
 
     ind_sp1 = coco_ind.generate_sp1()
