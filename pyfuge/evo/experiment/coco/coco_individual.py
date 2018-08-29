@@ -10,6 +10,13 @@ from pyfuge.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
 from pyfuge.evo.helpers.fis_individual import FISIndividual, Clonable
 
 
+"""
+Convention: a variable to represent the number of bits needed for a matrix
+must start with n_bits_XXX.
+It is defined like: n_bits_XXX = n_rows * n_cols * n_bits_per_element
+"""
+
+
 class ProblemType(Enum):
     CLASSIFICATION = 0
     REGRESSION = 1
@@ -398,15 +405,15 @@ class CocoIndividual(FISIndividual, Clonable):
     def _compute_needed_bits_for_sp2(self):
         # bits for r_sel_vars
         n_bits_r_sel_vars = (
-            self._n_max_vars_per_rule * self._n_rules * self._n_bits_per_ant
+            self._n_rules * self._n_max_vars_per_rule * self._n_bits_per_ant
         )
 
         # bits for r_lv
-        n_bits_r_lv = self._n_max_vars_per_rule * self._n_rules * self._n_bits_per_lv
+        n_bits_r_lv = self._n_rules * self._n_max_vars_per_rule * self._n_bits_per_lv
 
         # bits for r_labels
         n_bits_r_labels = (
-            self._n_max_vars_per_rule * self._n_rules * self._n_bits_per_label
+            self._n_rules * self._n_max_vars_per_rule * self._n_bits_per_label
         )
 
         # # TODO depends if classif (scale to [0, n_class] ->
@@ -428,7 +435,7 @@ class CocoIndividual(FISIndividual, Clonable):
         # consequents in the individual's genome.
 
         # bits for r_cons
-        n_bits_r_cons = self._n_bits_per_cons * self._n_rules * self._n_cons
+        n_bits_r_cons = self._n_rules * self._n_cons * self._n_bits_per_cons
 
         n_total_bits = n_bits_r_sel_vars + n_bits_r_lv + n_bits_r_labels + n_bits_r_cons
 
