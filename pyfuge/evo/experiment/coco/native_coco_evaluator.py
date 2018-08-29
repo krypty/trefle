@@ -10,7 +10,7 @@ class NativeCocoEvaluator:
         n_max_vars_per_rule: int,
         n_bits_per_mf: int,
         n_true_labels: int,
-        n_lv_per_ind: int,
+        n_bits_per_lv: int,
         n_bits_per_ant: int,
         n_cons: int,
         n_bits_per_cons: int,
@@ -24,7 +24,7 @@ class NativeCocoEvaluator:
             n_max_vars_per_rule,
             n_bits_per_mf,
             n_true_labels,
-            n_lv_per_ind,
+            n_bits_per_lv,
             n_bits_per_ant,
             n_cons,
             n_bits_per_cons,
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         p_positions_per_lv=32,  # 5 bits
         dc_weight=2,
         mfs_shape=MFShape.TRI_MF,
-        n_lv_per_ind_sp1=None,
+        n_lv_per_ind_sp1=5,
         # default_cons=[1],
         # TODO: handle me ! Do not forget to minmax normed and scale back. Here 3.2 should be an integer representing a cons label
         # default_cons=[0, 1, 3.2],

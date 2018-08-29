@@ -2,6 +2,8 @@
 #define FISEVAL_BINDINGS_H
 
 #include "fis.h"
+#include "fuzzy_rule.h"
+#include "linguisticvariable.h"
 #include "trilv.h"
 #include <iostream>
 #include <pybind11/numpy.h>
@@ -23,18 +25,19 @@ class FISCocoEvalWrapper {
 public:
   FISCocoEvalWrapper(const int n_vars, const int n_rules,
                      const int n_max_vars_per_rule, const int n_bits_per_mf,
-                     const int n_true_labels, const int n_lv_per_ind,
+                     const int n_true_labels, const int n_bits_per_lv,
                      const int n_bits_per_ant, const int n_cons,
                      const int n_bits_per_cons, const int n_bits_per_label,
                      const int dc_weight, py_array_i np_cons_n_labels)
       : n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
-        n_true_labels(n_true_labels), n_lv_per_ind(n_lv_per_ind),
+        n_true_labels(n_true_labels), dc_idx(n_true_labels),
+        n_bits_per_lv(n_bits_per_lv), n_lv_per_ind(1 << n_bits_per_lv),
         n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
         n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label),
         dc_weight(dc_weight), cons_n_labels(n_cons, 0) {
     cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
-         << n_true_labels << ", " << n_lv_per_ind << endl;
+         << n_true_labels << ", " << n_bits_per_lv << endl;
     auto cons_n_labels_buf = np_cons_n_labels.request();
     auto ptr_cons_n_labels = (int *)(cons_n_labels_buf.ptr);
     cons_n_labels.assign(ptr_cons_n_labels, ptr_cons_n_labels + n_cons);
@@ -46,7 +49,7 @@ public:
   py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2);
 
 private:
-  py::array_t<double> parse_ind_sp1(const string &ind_sp1);
+  vector<LinguisticVariable> parse_ind_sp1(const string &ind_sp1);
 
   vector<vector<size_t>> extract_sel_vars(const string &ind_sp2,
                                           size_t &offset);
@@ -79,12 +82,28 @@ private:
     return ((max_v - min_v) / n_classes) * v + min_v;
   }
 
+  bool are_all_labels_dc(const vector<size_t> labels_for_a_rule);
+
+  FuzzyRule
+  build_fuzzy_rule(const vector<size_t> &vars_rule_i,
+                   const unordered_map<size_t, size_t> &vars_lv_lookup,
+                   const vector<LinguisticVariable> &vec_lv,
+                   const vector<size_t> &r_labels_ri,
+                   const vector<double> cons_ri);
+
 private:
   const int n_vars;
   const int n_rules;
   const int n_max_vars_per_rule;
   const int n_bits_per_mf;
   const int n_true_labels;
+
+  // it has been decided that the dc_idx is the last index
+  // in [0, n_true_labels] i.e. [0, n_true_labels-1] for low, medium, ...
+  // and {n_true_label} for dc.
+  const size_t dc_idx;
+
+  const int n_bits_per_lv;
   const int n_lv_per_ind;
   const int n_bits_per_ant;
   const int n_cons;

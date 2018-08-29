@@ -225,7 +225,8 @@ class CocoIndividual(FISIndividual, Clonable):
         if n_lv_per_ind_sp1 is None:
             n_lv_per_ind_sp1 = self._n_max_vars_per_rule
 
-        self._n_lv_per_ind = int(2 ** log(ceil(n_lv_per_ind_sp1), 2))
+        self._n_bits_per_lv = ceil(log(n_lv_per_ind_sp1, 2))
+        print("n bits per lv", self._n_bits_per_lv)
 
         try:
             self._n_cons = self._y.shape[1]
@@ -261,7 +262,7 @@ class CocoIndividual(FISIndividual, Clonable):
             n_max_vars_per_rule=self._n_max_vars_per_rule,
             n_bits_per_mf=self._n_bits_per_mf,
             n_true_labels=self._n_true_labels,
-            n_lv_per_ind=self._n_lv_per_ind,
+            n_bits_per_lv=self._n_bits_per_lv,
             n_bits_per_ant=self._n_bits_per_ant,
             n_cons=self._n_cons,
             n_bits_per_cons=self._n_bits_per_cons,
@@ -323,7 +324,7 @@ class CocoIndividual(FISIndividual, Clonable):
         ), "the n_classes per consequent does not match with what found on X_train"
 
         assert (
-            self._n_lv_per_ind >= self._n_max_vars_per_rule
+            2 ** self._n_bits_per_lv >= self._n_max_vars_per_rule
         ), "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule"
 
         assert (
@@ -391,7 +392,8 @@ class CocoIndividual(FISIndividual, Clonable):
         return bitarray(bin_str)
 
     def _compute_needed_bits_for_sp1(self):
-        return int(self._n_bits_per_mf * self._n_true_labels * self._n_lv_per_ind)
+        n_lv_per_ind = 2 ** self._n_bits_per_lv
+        return int(n_lv_per_ind * self._n_true_labels * self._n_bits_per_mf)
 
     def _compute_needed_bits_for_sp2(self):
         # bits for r_sel_vars
@@ -400,7 +402,7 @@ class CocoIndividual(FISIndividual, Clonable):
         )
 
         # bits for r_lv
-        n_bits_r_lv = self._n_max_vars_per_rule * self._n_rules * self._n_lv_per_ind
+        n_bits_r_lv = self._n_max_vars_per_rule * self._n_rules * self._n_bits_per_lv
 
         # bits for r_labels
         n_bits_r_labels = (

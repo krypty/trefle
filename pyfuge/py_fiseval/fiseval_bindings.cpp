@@ -1,5 +1,4 @@
 #include "fiseval_bindings.h"
-
 py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
                                                   const string &ind_sp2) {
   // double predict_c(const string &ind_sp1, const string &ind_sp2) {
@@ -9,6 +8,7 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   /// Parse ind_sp1
   // const vector<LinguisticVariable> vec_lv = parse_ind_sp1(ind_sp1);
   auto vec_lv = parse_ind_sp1(ind_sp1);
+  cout << "vec_lv size " << vec_lv.size() << endl;
 
   /// Parse ind_sp2
   // TODO: parse ind_sp2
@@ -45,6 +45,25 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
     cout << t.first << ": " << t.second << endl;
   }
 
+  vector<FuzzyRule> fuzzy_rules;
+  for (size_t i = 0; i < n_rules; i++) {
+    // TODO: skip if r_labels[i].all() == DC
+    if (are_all_labels_dc(r_labels[i])) {
+      cout << "rule " << i << " has been ignored (all dc)" << endl;
+      continue;
+    }
+    auto fuzzy_rule = build_fuzzy_rule(sel_vars[i], vars_lv_lookup, vec_lv,
+                                       r_labels[i], r_cons[i]);
+    fuzzy_rules.push_back(fuzzy_rule);
+  }
+
+  cout << "Fuzzy rules: " << endl;
+  for (auto &fr : fuzzy_rules) {
+    cout << fr << endl;
+  }
+
+  // DefaultFuzzyRule dfr = build_default_fuzzy_rule();
+
   /*
   auto rules = ...
   SingletonFIS fis(rules, default_rule)
@@ -58,7 +77,20 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
 
   cout << "predict done" << endl;
 
-  return vec_lv;
+  // TODO: remove me, return instead y_pred
+  auto arr = py::array_t<double>({3, 6});
+  auto arr_raw = arr.mutable_unchecked<2>();
+
+  for (size_t i = 0; i < 3; i++) {
+    for (size_t j = 0; j < 6; j++) {
+      //// normalize in [0,1]
+      // arr_raw(i, j) = vec_lv[i][j] / double((1 << n_bits_per_mf)-1);
+      arr_raw(i, j) = i * 10 + j;
+    }
+  }
+  return arr;
+
+  /* return vec_lv; */
 }
 
 template <typename T>
@@ -85,10 +117,11 @@ vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
   return matrix;
 }
 
-py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
+vector<LinguisticVariable>
+FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
 
-  // // TODO: substr() is creating a new string each time, use c++17's
-  // // stringview?
+  // TODO: substr() is creating a new string each time, use c++17's
+  // stringview?
 
   const auto mf_val_to_01 = [&](const double v, const size_t i,
                                 const size_t j) {
@@ -97,12 +130,13 @@ py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
     return v / double((1 << n_bits_per_mf) - 1);
   };
 
-  vector<vector<double>> vec_lv = parse_bit_array<double>(
+  vector<vector<double>> r_mfs = parse_bit_array<double>(
       ind_sp1, n_lv_per_ind, n_true_labels, n_bits_per_mf, mf_val_to_01);
 
   cout << "a" << endl;
   size_t mf_index = 1; // TODO remove me
-  for (auto &row : vec_lv) {
+  vector<LinguisticVariable> vec_lv;
+  for (auto &row : r_mfs) {
     // create each LV
     // MF's points must be increasing
     sort(row.begin(), row.end());
@@ -112,21 +146,13 @@ py::array_t<double> FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
     for (const auto &col : row) {
       cout << col << ", ";
     }
+
+    vec_lv.push_back(lv);
     cout << endl;
   }
 
-  // TODO: remove me, return instead y_pred
-  auto arr = py::array_t<double>({n_lv_per_ind, n_true_labels});
-  auto arr_raw = arr.mutable_unchecked<2>();
-
-  for (size_t i = 0; i < n_lv_per_ind; i++) {
-    for (size_t j = 0; j < n_true_labels; j++) {
-      //// normalize in [0,1]
-      // arr_raw(i, j) = vec_lv[i][j] / double((1 << n_bits_per_mf)-1);
-      arr_raw(i, j) = vec_lv[i][j];
-    }
-  }
-  return arr;
+  return vec_lv;
+  // TODO: return vector<LinguisticVariable> vec_lv
 }
 
 vector<vector<size_t>>
@@ -149,7 +175,7 @@ FISCocoEvalWrapper::extract_sel_vars(const string &ind_sp2, size_t &offset) {
 vector<vector<size_t>> FISCocoEvalWrapper::extract_r_lv(const string &ind_sp2,
                                                         size_t &offset) {
   cout << "r lv" << endl;
-  const size_t n_bits_r_lv = n_rules * n_max_vars_per_rule * n_lv_per_ind;
+  const size_t n_bits_r_lv = n_rules * n_max_vars_per_rule * n_bits_per_lv;
 
   cout << "c++ v: " << n_bits_r_lv << endl;
   string r_lv_bits = ind_sp2.substr(offset, n_bits_r_lv);
@@ -158,10 +184,10 @@ vector<vector<size_t>> FISCocoEvalWrapper::extract_r_lv(const string &ind_sp2,
   offset += n_bits_r_lv;
 
   // we use the dummy_post_func because we can use the parsed values as is
-  // because n_lv_per_ind is a multiple of 2 so there is no need to do anything
-  // in post processing.
+  // because 2^n_bits_per_lv is a multiple of 2 so there is no need to do
+  // anything in post processing.
   return parse_bit_array<size_t>(r_lv_bits, n_rules, n_max_vars_per_rule,
-                                 n_lv_per_ind, dummy_post_func<size_t>);
+                                 n_bits_per_lv, dummy_post_func<size_t>);
 }
 
 vector<vector<size_t>>
@@ -257,4 +283,41 @@ vector<vector<double>> FISCocoEvalWrapper::extract_r_cons(const string &ind_sp2,
 
   return parse_bit_array<double>(r_cons_bits, n_rules, n_cons, n_bits_per_cons,
                                  val_to_cons);
+}
+
+bool FISCocoEvalWrapper::are_all_labels_dc(
+    const vector<size_t> labels_for_a_rule) {
+  for (size_t label : labels_for_a_rule) {
+    if (label != dc_idx) {
+      return false;
+    }
+  }
+  return true;
+}
+
+FuzzyRule FISCocoEvalWrapper::build_fuzzy_rule(
+    const vector<size_t> &vars_rule_i,
+    const unordered_map<size_t, size_t> &vars_lv_lookup,
+    const vector<LinguisticVariable> &vec_lv, const vector<size_t> &r_labels_ri,
+    const vector<double> cons_ri) {
+
+  vector<pair<size_t, Antecedent>> ants;
+  for (size_t j = 0, n = vars_rule_i.size(); j < n; j++) {
+    size_t var_idx = vars_rule_i[j];
+    size_t mf_idx = r_labels_ri[j];
+    cout << "dc idx " << dc_idx << endl;
+    cout << "var idx " << var_idx << ", " << mf_idx << endl;
+    if (mf_idx == dc_idx) {
+      // ignore antecedent that have a label at DC
+      cout << "ant " << j << " ignored " << endl;
+      continue;
+    }
+    cout << "lookup " << vars_lv_lookup.at(var_idx) << endl;
+    Antecedent ant(vec_lv[vars_lv_lookup.at(var_idx)], mf_idx);
+    // Antecedent ant(vec_lv[vars_lv_lookup.at(var_idx)], mf_idx);
+    cout << ant << endl;
+    ants.push_back(std::pair<size_t, Antecedent>(var_idx, ant));
+  }
+  cout << "fuzzy rule created !" << endl;
+  return FuzzyRule(ants, cons_ri);
 }
