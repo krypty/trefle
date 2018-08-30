@@ -348,11 +348,11 @@ class CocoIndividual(FISIndividual, Clonable):
             "i.e. integer numbers"
         )
 
-        assert (self._default_cons - 1 <= self._cons_n_labels).all(), (
+        assert (self._default_cons < self._cons_n_labels).all(), (
             "Make sure that the default rule contains valid classes/labels \n"
             "i.e. label is in [0, n_classes-1] or in case of regression in \n"
             "[0, n_labels-1].\n"
-            "Expected: ({})-1 <= {}".format(self._default_cons, self._cons_n_labels)
+            "Expected: ({}) < {}".format(self._default_cons, self._cons_n_labels)
         )
 
     def convert_to_fis(self, pyf_file):
