@@ -22,6 +22,9 @@ typedef py::array_t<float, py::array::c_style | py::array::forcecast>
     py_array_f;
 typedef py::array_t<int, py::array::c_style | py::array::forcecast> py_array_i;
 
+template <typename T>
+using py_array = py::array_t<T, py::array::c_style | py::array::forcecast>;
+
 class FISCocoEvalWrapper {
 public:
   FISCocoEvalWrapper(const int n_vars, const int n_rules,
@@ -40,18 +43,14 @@ public:
         dc_weight(dc_weight), cons_n_labels(n_cons, 0) {
     cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
          << n_true_labels << ", " << n_bits_per_lv << endl;
-    auto cons_n_labels_buf = np_cons_n_labels.request();
-    auto ptr_cons_n_labels = (int *)(cons_n_labels_buf.ptr);
-    cons_n_labels.assign(ptr_cons_n_labels, ptr_cons_n_labels + n_cons);
+
+    np_arr1d_to_vec(np_cons_n_labels, cons_n_labels, n_cons);
 
     for (int i = 0; i < cons_n_labels.size(); i++) {
       cout << "cons n labels " << cons_n_labels[i] << endl;
     }
 
-    // default cons np to vector
-    auto default_cons_buf = np_default_cons.request();
-    auto ptr_default_cons = (int *)(default_cons_buf.ptr);
-    default_cons.assign(ptr_default_cons, ptr_default_cons + n_cons);
+    np_arr1d_to_vec(np_default_cons, default_cons, n_cons);
   }
   py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2);
 
@@ -98,6 +97,13 @@ private:
                    const vector<LinguisticVariable> &vec_lv,
                    const vector<size_t> &r_labels_ri,
                    const vector<double> cons_ri);
+
+  template <typename T, typename U>
+  void np_arr1d_to_vec(py_array<T> np_arr, vector<U> &arr, size_t n) {
+    auto arr_buf = np_arr.request();
+    auto ptr_arr = (int *)(arr_buf.ptr);
+    arr.assign(ptr_arr, ptr_arr + n);
+  }
 
 private:
   const int n_vars;
