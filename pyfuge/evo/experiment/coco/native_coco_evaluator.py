@@ -5,6 +5,7 @@ import numpy as np
 class NativeCocoEvaluator:
     def __init__(
         self,
+        X_train: np.array,
         n_vars: int,
         n_rules: int,
         n_max_vars_per_rule: int,
@@ -17,9 +18,10 @@ class NativeCocoEvaluator:
         n_bits_per_label: int,
         dc_weight: int,
         cons_n_labels: np.array,
-        default_cons:np.array,
+        default_cons: np.array,
     ):
         self._fiseval = pyfuge_c.FISCocoEvalWrapper(
+            X_train,
             n_vars,
             n_rules,
             n_max_vars_per_rule,
@@ -36,6 +38,11 @@ class NativeCocoEvaluator:
         )
 
     def predict_native(self, ind_sp1: str, ind_sp2: str):
+        # yolo = np.array(
+        #     [[1, 2, 3, 4, 5], [10, 11, 12, 13, 14], [20, 21, 22, 23, 24]]
+        # ).astype(np.float)
+        # y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2, yolo)
+        #
         y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2)
 
         return y_pred

@@ -264,6 +264,7 @@ class CocoIndividual(FISIndividual, Clonable):
         #
         # )
         self._nce = NativeCocoEvaluator(
+            X_train=self._X,
             n_vars=self._n_vars,
             n_rules=self._n_rules,
             n_max_vars_per_rule=self._n_max_vars_per_rule,

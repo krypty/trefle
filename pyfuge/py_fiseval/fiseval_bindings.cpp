@@ -1,6 +1,37 @@
 #include "fiseval_bindings.h"
 py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
                                                   const string &ind_sp2) {
+  return predict(ind_sp1, ind_sp2, X_train);
+}
+py::array_t<double> FISCocoEvalWrapper::predict_c_other(const string &ind_sp1,
+                                                        const string &ind_sp2,
+                                                        py_array_d np_other_X) {
+  vector<vector<double>> other_X(np_other_X.shape(0));
+  np_arr2d_to_vec2d(np_other_X, other_X);
+
+  cout << "other_X: " << endl;
+  for (size_t i = 0; i < other_X.size(); i++) {
+    for (size_t j = 0; j < other_X[0].size(); j++) {
+      cout << other_X[i][j] << ", ";
+    }
+    cout << endl;
+  }
+
+  return predict(ind_sp1, ind_sp2, other_X);
+}
+
+py::array_t<double>
+FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
+                            const vector<vector<double>> &observations) {
+
+  cout << "obs in predict" << endl;
+  for (size_t i = 0; i < observations.size(); i++) {
+    for (size_t j = 0; j < observations[0].size(); j++) {
+      cout << observations[i][j] << ", ";
+    }
+    cout << endl;
+  }
+
   // double predict_c(const string &ind_sp1, const string &ind_sp2) {
   cout << "ind_sp1 " << ind_sp1 << " (" << ind_sp1.length() << ")" << endl;
   cout << "ind_sp2 " << ind_sp2 << " (" << ind_sp2.length() << ")" << endl;
@@ -70,6 +101,7 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
   /*
   auto rules = ...
   SingletonFIS fis(rules, default_rule)
+  fis.predict(<X_or_observations>
   */
 
   /// Use this FIS and predict the output given X_train/new_X

@@ -27,14 +27,14 @@ using py_array = py::array_t<T, py::array::c_style | py::array::forcecast>;
 
 class FISCocoEvalWrapper {
 public:
-  FISCocoEvalWrapper(const int n_vars, const int n_rules,
+  FISCocoEvalWrapper(py_array_d np_X_train, const int n_vars, const int n_rules,
                      const int n_max_vars_per_rule, const int n_bits_per_mf,
                      const int n_true_labels, const int n_bits_per_lv,
                      const int n_bits_per_ant, const int n_cons,
                      const int n_bits_per_cons, const int n_bits_per_label,
                      const int dc_weight, py_array_i np_cons_n_labels,
                      py_array_i np_default_cons)
-      : n_vars(n_vars), n_rules(n_rules),
+      : X_train(np_X_train.shape(0)), n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
         n_true_labels(n_true_labels), dc_idx(n_true_labels),
         n_bits_per_lv(n_bits_per_lv), n_lv_per_ind(1 << n_bits_per_lv),
@@ -50,9 +50,18 @@ public:
       cout << "cons n labels " << cons_n_labels[i] << endl;
     }
 
+    np_arr2d_to_vec2d(np_X_train, X_train);
+
     np_arr1d_to_vec(np_default_cons, default_cons, n_cons);
   }
   py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2);
+  py::array_t<double> predict_c_other(const string &ind_sp1,
+                                      const string &ind_sp2,
+                                      py_array_d other_X);
+
+private:
+  py::array_t<double> predict(const string &ind_sp1, const string &ind_sp2,
+                              const vector<vector<double>> &observations);
 
 private:
   vector<LinguisticVariable> parse_ind_sp1(const string &ind_sp1);
@@ -105,7 +114,23 @@ private:
     arr.assign(ptr_arr, ptr_arr + n);
   }
 
+  // caller must init `arr` with already n rows
+  template <typename T, typename U>
+  void np_arr2d_to_vec2d(py_array<T> np_arr, vector<vector<U>> &arr) {
+    size_t rows = np_arr.shape(0);
+    size_t cols = np_arr.shape(1);
+
+    auto arr_buf = np_arr.request();
+    auto ptr_arr = (double *)(arr_buf.ptr);
+
+    for (size_t i = 0; i < rows; i++) {
+      auto offset = ptr_arr + (i * cols);
+      arr[i].assign(offset, offset + cols);
+    }
+  }
+
 private:
+  vector<vector<double>> X_train;
   const int n_vars;
   const int n_rules;
   const int n_max_vars_per_rule;
@@ -131,10 +156,12 @@ private:
 PYBIND11_MODULE(pyfuge_c, m) {
   py::class_<FISCocoEvalWrapper>(m, "FISCocoEvalWrapper")
       // match the ctor of FISCocoEvalWrapper
-      .def(py::init<const int, const int, const int, const int, const int,
+      .def(py::init<py_array_d, const int, const int, const int, const int,
                     const int, const int, const int, const int, const int,
-                    const int, py_array_i, py_array_i>())
+                    const int, const int, py_array_i, py_array_i>())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
+           "a function that use predict")
+      .def("bind_predict", &FISCocoEvalWrapper::predict_c_other,
            "a function that use predict");
 }
 
