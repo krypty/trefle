@@ -73,7 +73,8 @@ private:
           &post_func);
 
   template <typename T>
-  static T dummy_post_func(const size_t v, const size_t i, const size_t j) {
+  inline static T dummy_post_func(const size_t v, const size_t i,
+                                  const size_t j) {
     // this function is used when there is no need to do any post processing
     return v;
   }
