@@ -62,6 +62,9 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
     cout << fr << endl;
   }
 
+  /* vector<double> cons{3, 4, 2}; */
+  DefaultFuzzyRule dfr(default_cons);
+  cout << "default rule " << dfr << endl;
   // DefaultFuzzyRule dfr = build_default_fuzzy_rule();
 
   /*

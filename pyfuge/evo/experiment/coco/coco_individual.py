@@ -276,6 +276,7 @@ class CocoIndividual(FISIndividual, Clonable):
             n_bits_per_label=self._n_bits_per_label,
             dc_weight=dc_weight,
             cons_n_labels=self._cons_n_labels,
+            default_cons=self._default_cons
         )
 
     def _validate(self):

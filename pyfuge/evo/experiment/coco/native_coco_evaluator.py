@@ -17,6 +17,7 @@ class NativeCocoEvaluator:
         n_bits_per_label: int,
         dc_weight: int,
         cons_n_labels: np.array,
+        default_cons:np.array,
     ):
         self._fiseval = pyfuge_c.FISCocoEvalWrapper(
             n_vars,
@@ -31,6 +32,7 @@ class NativeCocoEvaluator:
             n_bits_per_label,
             dc_weight,
             cons_n_labels,
+            default_cons,
         )
 
     def predict_native(self, ind_sp1: str, ind_sp2: str):
@@ -76,7 +78,7 @@ if __name__ == "__main__":
         # default_cons=[1],
         # TODO: handle me ! Do not forget to minmax normed and scale back. Here 3.2 should be an integer representing a cons label
         # default_cons=[0, 1, 3.2],
-        default_cons=[0, 1, 4],
+        default_cons=[0, 1, 8],
     )
 
     ind_sp1 = coco_ind.generate_sp1()

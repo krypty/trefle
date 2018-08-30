@@ -1,6 +1,7 @@
 #ifndef FISEVAL_BINDINGS_H
 #define FISEVAL_BINDINGS_H
 
+#include "default_fuzzy_rule.h"
 #include "fis.h"
 #include "fuzzy_rule.h"
 #include "linguisticvariable.h"
@@ -28,7 +29,8 @@ public:
                      const int n_true_labels, const int n_bits_per_lv,
                      const int n_bits_per_ant, const int n_cons,
                      const int n_bits_per_cons, const int n_bits_per_label,
-                     const int dc_weight, py_array_i np_cons_n_labels)
+                     const int dc_weight, py_array_i np_cons_n_labels,
+                     py_array_i np_default_cons)
       : n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
         n_true_labels(n_true_labels), dc_idx(n_true_labels),
@@ -45,6 +47,11 @@ public:
     for (int i = 0; i < cons_n_labels.size(); i++) {
       cout << "cons n labels " << cons_n_labels[i] << endl;
     }
+
+    // default cons np to vector
+    auto default_cons_buf = np_default_cons.request();
+    auto ptr_default_cons = (int *)(default_cons_buf.ptr);
+    default_cons.assign(ptr_default_cons, ptr_default_cons + n_cons);
   }
   py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2);
 
@@ -111,6 +118,7 @@ private:
   const int n_bits_per_label;
   const int dc_weight;
   vector<int> cons_n_labels;
+  vector<double> default_cons;
 };
 
 PYBIND11_MODULE(pyfuge_c, m) {
@@ -118,7 +126,7 @@ PYBIND11_MODULE(pyfuge_c, m) {
       // match the ctor of FISCocoEvalWrapper
       .def(py::init<const int, const int, const int, const int, const int,
                     const int, const int, const int, const int, const int,
-                    const int, py_array_i>())
+                    const int, py_array_i, py_array_i>())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict");
 }
