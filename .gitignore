@@ -24,3 +24,7 @@ wheels/
 .installed.cfg
 *.egg
 pyfuge*.so
+
+.pytest_cache/README.md
+.pytest_cache/v/cache/lastfailed
+.pytest_cache/v/cache/nodeids
