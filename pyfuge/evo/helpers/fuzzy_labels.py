@@ -16,6 +16,10 @@ class LabelEnum(Enum):
         obj._value_ = value
         return obj
 
+    @classmethod
+    def len(cls):
+        return len(cls) - 1
+
     def is_dc(self):
         return self.name == "DC"
 
@@ -150,3 +154,7 @@ if __name__ == "__main__":
     a = Label4.DC
     print("issss", a.is_dc())
     print("issss", a.value)
+
+    print(len(Label5))
+    print(len(a.__class__))
+    print(a.len())

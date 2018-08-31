@@ -1,6 +1,8 @@
 import pyfuge_c
 import numpy as np
 
+from pyfuge.evo.helpers.fuzzy_labels import Label4, Label3
+
 
 class NativeCocoEvaluator:
     def __init__(
@@ -85,7 +87,7 @@ if __name__ == "__main__":
         # default_cons=[1],
         # TODO: handle me ! Do not forget to minmax normed and scale back. Here 3.2 should be an integer representing a cons label
         # default_cons=[0, 1, 3.2],
-        default_cons=[0, 1, 8],
+        default_cons=[0, 1, Label3.MEDIUM],
     )
 
     ind_sp1 = coco_ind.generate_sp1()

@@ -8,7 +8,7 @@ from bitarray import bitarray
 
 from pyfuge.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
 from pyfuge.evo.helpers.fis_individual import FISIndividual, Clonable
-
+from pyfuge.evo.helpers.fuzzy_labels import LabelEnum, Label3
 
 """
 Convention: a variable to represent the number of bits needed for a matrix
@@ -177,7 +177,7 @@ class CocoIndividual(FISIndividual, Clonable):
         default_cons: np.array,
         n_max_vars_per_rule: int,
         n_labels_per_mf: int,
-        n_labels_cons: int = 9,
+        n_labels_per_cons: LabelEnum = Label3,
         p_positions_per_lv: int = 32,  # 5 bits
         dc_weight: int = 1,
         mfs_shape: MFShape = MFShape.TRI_MF,
@@ -222,7 +222,7 @@ class CocoIndividual(FISIndividual, Clonable):
         self._default_cons = np.asarray(default_cons)
         self._n_max_vars_per_rule = n_max_vars_per_rule
         self._n_true_labels = n_labels_per_mf
-        self._n_labels_cons = n_labels_cons
+        self._n_labels_cons = n_labels_per_cons
         self._p_positions_per_lv = p_positions_per_lv
         self._dc_weight = dc_weight
         self._mfs_shape = mfs_shape
@@ -277,7 +277,7 @@ class CocoIndividual(FISIndividual, Clonable):
             n_bits_per_label=self._n_bits_per_label,
             dc_weight=dc_weight,
             cons_n_labels=self._cons_n_labels,
-            default_cons=self._default_cons
+            default_cons=self._default_cons,
         )
 
     def _validate(self):
@@ -336,21 +336,64 @@ class CocoIndividual(FISIndividual, Clonable):
             2 ** self._n_bits_per_lv >= self._n_max_vars_per_rule
         ), "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule"
 
-        assert (
-            self._n_labels_cons >= 2
-        ), "n_labels_cons must be >= 2 (i.e. at least LOW and HIGH)"
+        # assert (
+        #     self._n_labels_cons >= 2
+        # ), "n_labels_cons must be >= 2 (i.e. at least LOW and HIGH)"
+
+        assert issubclass(
+            self._n_labels_cons, LabelEnum
+        ), "n_labels _cons must an instance of a subclass of LabelEnum"
 
         assert self._default_cons.shape[0] == self._n_cons, (
             "default_cons's shape doesn't match the number of "
             "consequents retrieved using y_train"
         )
 
-        assert self._default_cons.dtype == np.int and (self._default_cons >= 0).all(), (
-            "The default rule must only contain classes or labels "
-            "i.e. integer numbers"
+        # we check if a cons is either an int or the same class as
+        # self._n_labels_cons. For the latter we check like that instead of
+        # check issubclass because we do care that the label values of both
+        # n_labels_cons and default_cons are the same (e.g. if
+        # n_labels_cons's LOW = 0, then default_cons' LOW = 0 too)
+        are_all_labels_or_int = all(
+            [isinstance(c, (int, self._n_labels_cons)) for c in self._default_cons]
         )
 
-        assert (self._default_cons < self._cons_n_labels).all(), (
+        assert are_all_labels_or_int, (
+            "The default rule must only contain classes or labels"
+            " i.e. integer numbers. If a label is provide like LabelX.LOW"
+            " make sure that the X in LabelX is the same for both n_labels_cons"
+            " and default_cons"
+        )
+        #
+        # # validate that the n classes per cons matches len(LabelX) used
+        # # in the default rule cons. Valid example: n_classes_per_cons=3,
+        # # default_cons = [Label3.LOW]. Invalid example: n_classes_per_cons=3,
+        # # default_cons = [Label6.LOW] because 6!=3.
+        # default_cons_filtered = [c for c in self._default_cons if isinstance(c, LabelEnum)]
+        # assert [for (cons, n_labels) in zip(self._default_cons, self._cons_n_labels)]
+        #
+        #
+        # # def valid(cons, n_labels):
+        #
+        #
+        # convert LabelEnum to int
+        self._default_cons = [
+            x if isinstance(x, int) else x.value for x in self._default_cons
+        ]
+
+        def can_default_cons_fit_in_cons():
+            for a, b in zip(self._default_cons, self._cons_n_labels):
+                print("a ", a)
+                print("b ", b)
+                try:
+                    yield a.value < b
+                except AttributeError:
+                    yield a < b
+
+        print("lalalala", self._cons_n_labels)
+
+        # assert (self._default_cons < self._cons_n_labels).all(), (
+        assert all(can_default_cons_fit_in_cons()), (
             "Make sure that the default rule contains valid classes/labels \n"
             "i.e. label is in [0, n_classes-1] or in case of regression in \n"
             "[0, n_labels-1].\n"
@@ -464,8 +507,7 @@ class CocoIndividual(FISIndividual, Clonable):
 
         # if all consequents are continuous variables (i.e. regression
         # i.e. value = 0) then we use a minimum of self._n_labels_per_cons)
-        print(self._n_labels_cons, "dkjhsakjdhakjh")
-        n_max_classes = max(n_max_classes, self._n_labels_cons)
+        n_max_classes = max(n_max_classes, self._n_labels_cons.len())
         return ceil(log(n_max_classes, 2))
 
     def _compute_cons_range(self):
@@ -480,5 +522,5 @@ class CocoIndividual(FISIndividual, Clonable):
 
     def _compute_cons_n_labels(self, n_classes_per_cons):
         cons_n_labels = n_classes_per_cons.copy().astype(np.int)
-        cons_n_labels[cons_n_labels == 0] = self._n_labels_cons
+        cons_n_labels[cons_n_labels == 0] = self._n_labels_cons.len()
         return cons_n_labels
