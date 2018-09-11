@@ -1,7 +1,7 @@
 from enum import Enum
 from math import ceil, log
 from random import randint
-from typing import List
+from typing import List, Type
 
 import numpy as np
 from bitarray import bitarray
@@ -179,7 +179,7 @@ class CocoIndividual(FISIndividual, Clonable):
         default_cons: np.array,
         n_max_vars_per_rule: int,
         n_labels_per_mf: int,
-        n_labels_per_cons: LabelEnum = Label3,
+        n_labels_per_cons: Type[LabelEnum] = Label3,
         p_positions_per_lv: int = 32,  # 5 bits
         dc_weight: int = 1,
         mfs_shape: MFShape = MFShape.TRI_MF,
