@@ -5,6 +5,7 @@ from typing import List
 
 import numpy as np
 from bitarray import bitarray
+from sklearn.preprocessing import MinMaxScaler
 
 from pyfuge.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
 from pyfuge.evo.helpers.fis_individual import FISIndividual, Clonable
@@ -28,9 +29,10 @@ class MFShape(Enum):
 
 
 def minmax_norm(X_train):
+    scaler = MinMaxScaler()
     print("warning: please implement this!")
-    norm_args = "yolo"
-    return X_train, norm_args
+    X_train_scaled = scaler.fit_transform(X_train)
+    return X_train_scaled, scaler
 
 
 class CocoIndividual(FISIndividual, Clonable):
@@ -213,9 +215,7 @@ class CocoIndividual(FISIndividual, Clonable):
         """
 
         super().__init__()
-        self._X, norm_args = minmax_norm(
-            X_train
-        )  # TODO: norm_args are used to de-normalized X
+        self._X, self._X_scaler = minmax_norm(X_train)
         self._y = y_train
         self._n_rules = n_rules
         self._n_classes_per_cons = np.asarray(n_classes_per_cons)
@@ -361,8 +361,9 @@ class CocoIndividual(FISIndividual, Clonable):
         assert are_all_labels_or_int, (
             "The default rule must only contain classes or labels"
             " i.e. integer numbers. If a label is provide like LabelX.LOW"
-            " make sure that the X in LabelX is the same for both n_labels_cons"
-            " and default_cons"
+            " make sure that the X in LabelX is the same for both"
+            " n_labels_cons (currently set to {})"
+            " and default_cons".format(self._n_labels_cons.__name__)
         )
         #
         # # validate that the n classes per cons matches len(LabelX) used
@@ -409,28 +410,25 @@ class CocoIndividual(FISIndividual, Clonable):
     def get_y_true(self):
         return self._y
 
-    # def predict(self, ind):
-    #     pass
-    def predict(self, ind_tuple, X=None):
-        """
+    @staticmethod
+    def _extract_ind_tuple(ind_tuple):
+        # convert ind_sp{1,2} in string format to make it easy to use it C++
+        return ind_tuple[0].to01(), ind_tuple[1].to01()
 
-        :param ind_tuple:
-        :param X: if None will use self._X_train
-        :return:
-        """
-        if X is not None:
-            if not self._is_new_X_valid(X):
-                raise ValueError(
-                    "X parameter is not valid. Please check if it "
-                    "is similar to X_train i.e. the X np.array "
-                    "that was used to build the model"
-                )
-            X_minmax_normed = minmax_norm(X)
-            y_pred = self._nce.predict(ind_sp1.to01(), ind_sp2.to01(), X_minmax_normed)
-        ind_sp1, ind_sp2 = ind_tuple
-        # pass ind_sp{1,2} in string format to make it easy to use it C++
-        y_pred = self._nce.predict_native(ind_sp1.to01(), ind_sp2.to01())
-        return y_pred
+    def _post_predict(self, y_pred):
+        # TODO scale back using cons_range
+        return self._scale_back_y(y_pred)
+
+    def predict(self, ind_tuple, X=None):
+        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
+
+        if X is None:
+            y_pred = self._nce.predict_native(ind_sp1, ind_sp2)
+        else:
+            X_normed = self._X_scaler.transform(X)
+            y_pred = self._nce.predict_native(ind_sp1, ind_sp2, X_normed)
+
+        return self._post_predict(y_pred)
 
     def generate_sp1(self):
         return self._generate_ind(self._n_bits_sp1)
@@ -524,3 +522,9 @@ class CocoIndividual(FISIndividual, Clonable):
         cons_n_labels = n_classes_per_cons.copy().astype(np.int)
         cons_n_labels[cons_n_labels == 0] = self._n_labels_cons.len()
         return cons_n_labels
+
+    @staticmethod
+    def _scale_back_y(y):
+        # TODO implement me !
+        print(" _scale_back_y() IMPLEMENT ME !!!")
+        return y

@@ -1,7 +1,7 @@
 import pyfuge_c
 import numpy as np
 
-from pyfuge.evo.helpers.fuzzy_labels import Label4, Label3
+from pyfuge.evo.helpers.fuzzy_labels import Label4, Label3, Label9
 
 
 class NativeCocoEvaluator:
@@ -39,15 +39,21 @@ class NativeCocoEvaluator:
             default_cons,
         )
 
-    def predict_native(self, ind_sp1: str, ind_sp2: str):
+    def predict_native(self, ind_sp1: str, ind_sp2: str, other_X: np.array = None):
         # yolo = np.array(
         #     [[1, 2, 3, 4, 5], [10, 11, 12, 13, 14], [20, 21, 22, 23, 24]]
         # ).astype(np.float)
         # y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2, yolo)
         #
-        y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2)
-
+        if other_X is None:
+            y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2)
+        else:
+            y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2, other_X)
         return y_pred
+
+    # def predict_native(self, ind_sp1: str, ind_sp2: str):
+    #     y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2)
+    #     return y_pred
 
 
 if __name__ == "__main__":
@@ -84,10 +90,12 @@ if __name__ == "__main__":
         dc_weight=2,
         mfs_shape=MFShape.TRI_MF,
         n_lv_per_ind_sp1=5,
+        n_labels_per_cons=Label9,
         # default_cons=[1],
         # TODO: handle me ! Do not forget to minmax normed and scale back. Here 3.2 should be an integer representing a cons label
+        # FIXME: this is wrong. Should be a label not a real value! But y_pred should be scaled back!
         # default_cons=[0, 1, 3.2],
-        default_cons=[0, 1, Label3.MEDIUM],
+        default_cons=[0, 1, Label9.VERY_VERY_VERY_HIGH],
     )
 
     ind_sp1 = coco_ind.generate_sp1()
@@ -95,3 +103,9 @@ if __name__ == "__main__":
 
     res = coco_ind.predict((ind_sp1, ind_sp2))
     print(res)
+
+    # print("predict new X")
+    # res = coco_ind.predict(
+    #     (ind_sp1, ind_sp2), np.asarray([[0, 1, 3.444, 4, 5, 6, 7, 8, 88]])
+    # )
+    # print(res)
