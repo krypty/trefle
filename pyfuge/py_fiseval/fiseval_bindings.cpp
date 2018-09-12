@@ -1,4 +1,6 @@
 #include "fiseval_bindings.h"
+#include "singleton_fis.h"
+
 py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
                                                   const string &ind_sp2) {
   return predict(ind_sp1, ind_sp2, X_train);
@@ -103,6 +105,11 @@ FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
   SingletonFIS fis(rules, default_rule)
   fis.predict(<X_or_observations>
   */
+  SingletonFIS fis(fuzzy_rules, dfr);
+  auto y_pred = fis.predict(observations);
+
+  cout << "predict done" << endl;
+  return vec2d_to_np_vec2d(y_pred);
 
   /// Use this FIS and predict the output given X_train/new_X
   // TODO: create a predict_c(ind_sp1, ind_sp2, new_X) overriding method
@@ -110,20 +117,7 @@ FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
   /// Return the y_pred to the caller
   // return y_pred
 
-  cout << "predict done" << endl;
-
   // TODO: remove me, return instead y_pred
-  auto arr = py::array_t<double>({3, 6});
-  auto arr_raw = arr.mutable_unchecked<2>();
-
-  for (size_t i = 0; i < 3; i++) {
-    for (size_t j = 0; j < 6; j++) {
-      //// normalize in [0,1]
-      // arr_raw(i, j) = vec_lv[i][j] / double((1 << n_bits_per_mf)-1);
-      arr_raw(i, j) = i * 10 + j;
-    }
-  }
-  return arr;
 
   /* return vec_lv; */
 }
@@ -230,7 +224,7 @@ FISCocoEvalWrapper::extract_r_labels(const string &ind_sp2, size_t &offset) {
 
   const auto val_to_label = [&](const size_t v, const size_t row,
                                 const size_t col) {
-    // This function scales the value v (which is in [0, n_bits_per_label-1])
+    // This function scales the value v (which is in [0,(2^n_bits_per_label)-1])
     // to a label index (which is in [0,n_true_label] and where the last value
     // i.e. n_true_label represents a don't care label).
     //

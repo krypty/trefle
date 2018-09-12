@@ -5,6 +5,7 @@
 #include "fis.h"
 #include "fuzzy_rule.h"
 #include "linguisticvariable.h"
+#include "singleton_fis.h"
 #include "trilv.h"
 #include <iostream>
 #include <pybind11/numpy.h>
@@ -127,6 +128,22 @@ private:
       auto offset = ptr_arr + (i * cols);
       arr[i].assign(offset, offset + cols);
     }
+  }
+
+  template <typename T>
+  py_array<T> vec2d_to_np_vec2d(const vector<vector<T>> &arr) {
+    const size_t rows = arr.size(), cols = arr[0].size();
+    // auto np_arr = py::array_t<T>({rows, cols});
+    // FIXME replace double by T
+    auto np_arr = py_array<double>({rows, cols});
+    auto np_arr_raw = np_arr.mutable_unchecked<2>();
+
+    for (size_t i = 0; i < rows; i++) {
+      for (size_t j = 0; j < cols; j++) {
+        np_arr_raw(i, j) = arr[i][j];
+      }
+    }
+    return np_arr;
   }
 
 private:
