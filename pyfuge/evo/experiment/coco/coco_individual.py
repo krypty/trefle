@@ -256,9 +256,7 @@ class CocoIndividual(FISIndividual, Clonable):
         # contains True if i-th cons is a classification variable or False if regression
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
 
-        self._cons_range = self._compute_cons_range()
-        print("cons ra")
-        print(self._cons_range)
+        self._cons_scaler = self.create_cons_scaler()
 
         # self._nce = NativeCocoEvaluator(
         #
@@ -279,6 +277,16 @@ class CocoIndividual(FISIndividual, Clonable):
             cons_n_labels=self._cons_n_labels,
             default_cons=self._default_cons,
         )
+
+    def create_cons_scaler(self):
+        # y_pred returned by NativeCocoEvaluator are in range
+        # [0, n_class_per_cons-1] and it needs to be scaled back to
+        # [min_val_cons, max_val_cons] (which for binary and multiclass
+        # consequents do nothing but this is needed for continuous variables)
+
+        cons_scaler = MinMaxScaler()
+        cons_scaler.fit(self._y)
+        return cons_scaler
 
     def _validate(self):
         assert self._dc_weight >= 0, "negative padding does not make sense"
@@ -416,7 +424,6 @@ class CocoIndividual(FISIndividual, Clonable):
         return ind_tuple[0].to01(), ind_tuple[1].to01()
 
     def _post_predict(self, y_pred):
-        # TODO scale back using cons_range
         return self._scale_back_y(y_pred)
 
     def predict(self, ind_tuple, X=None):
@@ -508,23 +515,13 @@ class CocoIndividual(FISIndividual, Clonable):
         n_max_classes = max(n_max_classes, self._n_labels_cons.len())
         return ceil(log(n_max_classes, 2))
 
-    def _compute_cons_range(self):
-        """
-        :return: a numpy array like:
-            [[min_cons0, max_cons0],
-             [min_cons1, max_cons1],
-             [min_cons2, max_cons2],
-             [....]]
-        """
-        return np.vstack([self._y.min(axis=0), self._y.max(axis=0)]).T
-
     def _compute_cons_n_labels(self, n_classes_per_cons):
         cons_n_labels = n_classes_per_cons.copy().astype(np.int)
         cons_n_labels[cons_n_labels == 0] = self._n_labels_cons.len()
         return cons_n_labels
 
-    @staticmethod
-    def _scale_back_y(y):
-        # TODO implement me !
-        print(" _scale_back_y() IMPLEMENT ME !!!")
-        return y
+    # @staticmethod
+    def _scale_back_y(self, y):
+        # -1 because y is in [0, cons_n_labels-1]
+        y_ = y / (self._cons_n_labels - 1)
+        return self._cons_scaler.inverse_transform(y_)
