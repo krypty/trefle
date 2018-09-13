@@ -445,7 +445,7 @@ class CocoIndividual(FISIndividual, Clonable):
 
     @staticmethod
     def _generate_ind(n_bits):
-        bin_str = "".join([str(randint(0, 1)) for _ in range(n_bits)])
+        bin_str = format(randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits))
         return bitarray(bin_str)
 
     def _compute_needed_bits_for_sp1(self):
