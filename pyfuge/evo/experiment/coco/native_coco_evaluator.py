@@ -55,6 +55,9 @@ class NativeCocoEvaluator:
     #     y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2)
     #     return y_pred
 
+    def print_ind(self, ind_sp1: str, ind_sp2: str):
+        self._fiseval.print_ind(ind_sp1, ind_sp2)
+
 
 if __name__ == "__main__":
     import numpy as np
@@ -103,6 +106,8 @@ if __name__ == "__main__":
 
     res = coco_ind.predict((ind_sp1, ind_sp2))
     print(res)
+
+    coco_ind.print_ind((ind_sp1, ind_sp2))
 
     # print("predict new X")
     # res = coco_ind.predict(

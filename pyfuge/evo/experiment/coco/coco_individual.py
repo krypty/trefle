@@ -30,7 +30,6 @@ class MFShape(Enum):
 
 def minmax_norm(X_train):
     scaler = MinMaxScaler()
-    print("warning: please implement this!")
     X_train_scaled = scaler.fit_transform(X_train)
     return X_train_scaled, scaler
 
@@ -227,13 +226,16 @@ class CocoIndividual(FISIndividual, Clonable):
         self._dc_weight = dc_weight
         self._mfs_shape = mfs_shape
 
+        # print("X")
+        # print(self._X)
+
         self._n_vars = self._X.shape[1]
 
         if n_lv_per_ind_sp1 is None:
             n_lv_per_ind_sp1 = self._n_max_vars_per_rule
 
         self._n_bits_per_lv = ceil(log(n_lv_per_ind_sp1, 2))
-        print("n bits per lv", self._n_bits_per_lv)
+        # print("n bits per lv", self._n_bits_per_lv)
 
         try:
             self._n_cons = self._y.shape[1]
@@ -246,7 +248,8 @@ class CocoIndividual(FISIndividual, Clonable):
         self._n_bits_per_mf = ceil(log(self._p_positions_per_lv, 2))
         self._n_bits_per_ant = ceil(log(self._n_vars, 2))
         self._n_bits_per_cons = self._compute_n_bits_per_cons()
-        print("bits per cons ", self._n_bits_per_cons)
+        # print("bits per cons ", self._n_bits_per_cons)
+
         # chosen arbitrarily # ceil(log(self._n_true_labels + self._dc_padding, 2))
         self._n_bits_per_label = 5
 
@@ -258,9 +261,6 @@ class CocoIndividual(FISIndividual, Clonable):
 
         self._cons_scaler = self.create_cons_scaler()
 
-        # self._nce = NativeCocoEvaluator(
-        #
-        # )
         self._nce = NativeCocoEvaluator(
             X_train=self._X,
             n_vars=self._n_vars,
@@ -285,7 +285,7 @@ class CocoIndividual(FISIndividual, Clonable):
         # consequents do nothing but this is needed for continuous variables)
 
         cons_scaler = MinMaxScaler()
-        cons_scaler.fit(self._y)
+        cons_scaler.fit(self._y.astype(np.double))
         return cons_scaler
 
     def _validate(self):
@@ -317,8 +317,8 @@ class CocoIndividual(FISIndividual, Clonable):
             "the number of consequents indicated in n_class_per_cons does not "
             "match what was computed on y_train. from user: {}, computed: {}"
         )
-        print(self._n_classes_per_cons)
-        print(n_classes_per_cons_in_y)
+        # print(self._n_classes_per_cons)
+        # print(n_classes_per_cons_in_y)
 
         assert len(self._n_classes_per_cons) == len(n_classes_per_cons_in_y)
 
@@ -334,8 +334,8 @@ class CocoIndividual(FISIndividual, Clonable):
         ), "n_classes values must be positive in n_classes_per_cons"
 
         mask = n_classes_per_cons_in_y == self._n_classes_per_cons
-        print("n cls per cons", self._n_classes_per_cons)
-        print("mask", mask)
+        # print("n cls per cons", self._n_classes_per_cons)
+        # print("mask", mask)
         assert all(
             mask[self._n_classes_per_cons != 0]
         ), "the n_classes per consequent does not match with what found on X_train"
@@ -362,11 +362,12 @@ class CocoIndividual(FISIndividual, Clonable):
         # check issubclass because we do care that the label values of both
         # n_labels_cons and default_cons are the same (e.g. if
         # n_labels_cons's LOW = 0, then default_cons' LOW = 0 too)
-        are_all_labels_or_int = all(
-            [isinstance(c, (int, self._n_labels_cons)) for c in self._default_cons]
-        )
+        are_labels_or_int = [
+            isinstance(c, (int, np.int64, self._n_labels_cons))
+            for c in self._default_cons
+        ]
 
-        assert are_all_labels_or_int, (
+        assert all(are_labels_or_int), (
             "The default rule must only contain classes or labels"
             " i.e. integer numbers. If a label is provide like LabelX.LOW"
             " make sure that the X in LabelX is the same for both"
@@ -387,19 +388,19 @@ class CocoIndividual(FISIndividual, Clonable):
         #
         # convert LabelEnum to int
         self._default_cons = [
-            x if isinstance(x, int) else x.value for x in self._default_cons
+            x if isinstance(x, (int, np.int64)) else x.value for x in self._default_cons
         ]
 
         def can_default_cons_fit_in_cons():
             for a, b in zip(self._default_cons, self._cons_n_labels):
-                print("a ", a)
-                print("b ", b)
+                # print("a ", a)
+                # print("b ", b)
                 try:
                     yield a.value < b
                 except AttributeError:
                     yield a < b
 
-        print("lalalala", self._cons_n_labels)
+        # print("lalalala", self._cons_n_labels)
 
         # assert (self._default_cons < self._cons_n_labels).all(), (
         assert all(can_default_cons_fit_in_cons()), (
@@ -466,33 +467,22 @@ class CocoIndividual(FISIndividual, Clonable):
             self._n_rules * self._n_max_vars_per_rule * self._n_bits_per_label
         )
 
-        # # TODO depends if classif (scale to [0, n_class] ->
-        # # ceil(log(n_class)) + modulo trick or regress (scale to [min(cons_i),
-        # # max(cons_i)])
-        #
-        # # if classif:
-        # #     n_bits = ceil(log(n_classes, 2))  # + modulo trick
-        # # else:  # regression
-        # #     n_bits = ceil(log(n_bits_per_cons, 2))
-        #
-        # assert p_positions_per_cons >= n_classes or problem is not classif  # n_classes = np.unique(y)
-        # # this will return a BIG number for regression problem which will
-        # # pass the assertion. NOPE! this is the exact opposite!
-        # n_bits = ceil(log(p_positions_per_cons, 2))
-
         # TODO check if we need an other matrix to store the LV for cons. I
         # don't think so, because since n_cons << n_vars we can store all the
         # consequents in the individual's genome.
 
         # bits for r_cons
+        # print("n rules", self._n_rules)
+        # print("n cons", self._n_cons)
+        # print("n bits per cons", self._n_bits_per_cons)
         n_bits_r_cons = self._n_rules * self._n_cons * self._n_bits_per_cons
 
         n_total_bits = n_bits_r_sel_vars + n_bits_r_lv + n_bits_r_labels + n_bits_r_cons
 
-        for v in (n_bits_r_sel_vars, n_bits_r_lv, n_bits_r_labels, n_bits_r_cons):
-            print("v", v)
+        # for v in (n_bits_r_sel_vars, n_bits_r_lv, n_bits_r_labels, n_bits_r_cons):
+        #     print("v", v)
 
-        print("n_total_bits", n_total_bits)
+        # print("n_total_bits", n_total_bits)
         return int(n_total_bits)
 
     @staticmethod
@@ -507,7 +497,7 @@ class CocoIndividual(FISIndividual, Clonable):
     #     return np.max(n_classes_per_cons)
 
     def _compute_n_bits_per_cons(self):
-        print("n class er cons", self._n_classes_per_cons)
+        # print("n class er cons", self._n_classes_per_cons)
         n_max_classes = max(self._n_classes_per_cons)
 
         # if all consequents are continuous variables (i.e. regression
@@ -525,3 +515,7 @@ class CocoIndividual(FISIndividual, Clonable):
         # -1 because y is in [0, cons_n_labels-1]
         y_ = y / (self._cons_n_labels - 1)
         return self._cons_scaler.inverse_transform(y_)
+
+    def print_ind(self, ind_tuple):
+        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
+        self._nce.print_ind(ind_sp1, ind_sp2)

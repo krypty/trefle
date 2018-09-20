@@ -21,43 +21,51 @@ py::array_t<double> FISCocoEvalWrapper::predict_c_other(const string &ind_sp1,
 
   return predict(ind_sp1, ind_sp2, other_X);
 }
+void FISCocoEvalWrapper::print_ind(const string &ind_sp1,
+                                   const string &ind_sp2) {
+  auto fis = extract_fis(ind_sp1, ind_sp2);
+  cout << fis << endl;
+}
 
-py::array_t<double>
-FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
-                            const vector<vector<double>> &observations) {
+SingletonFIS FISCocoEvalWrapper::extract_fis(const string &ind_sp1,
+                                             const string &ind_sp2) {
 
-  cout << "obs in predict" << endl;
-  for (size_t i = 0; i < observations.size(); i++) {
-    for (size_t j = 0; j < observations[0].size(); j++) {
-      cout << observations[i][j] << ", ";
-    }
-    cout << endl;
-  }
+  // cout << "obs in predict" << endl;
+  // for (size_t i = 0; i < observations.size(); i++) {
+  //   for (size_t j = 0; j < observations[0].size(); j++) {
+  //     cout << observations[i][j] << ", ";
+  //   }
+  //   cout << endl;
+  // }
 
-  // double predict_c(const string &ind_sp1, const string &ind_sp2) {
-  cout << "ind_sp1 " << ind_sp1 << " (" << ind_sp1.length() << ")" << endl;
-  cout << "ind_sp2 " << ind_sp2 << " (" << ind_sp2.length() << ")" << endl;
+  // cout << "ind_sp1 " << ind_sp1 << " (" << ind_sp1.length() << ")" << endl;
+  // cout << "ind_sp2 " << ind_sp2 << " (" << ind_sp2.length() << ")" << endl;
 
   /// Parse ind_sp1
   // const vector<LinguisticVariable> vec_lv = parse_ind_sp1(ind_sp1);
   auto vec_lv = parse_ind_sp1(ind_sp1);
-  cout << "vec_lv size " << vec_lv.size() << endl;
+  // cout << "vec_lv size " << vec_lv.size() << endl;
 
   /// Parse ind_sp2
   // TODO: parse ind_sp2
 
   /// Extract selected variables
   size_t offset = 0;
+  // cout << "bef sel var" << endl;
   auto sel_vars = extract_sel_vars(ind_sp2, offset);
 
   /// Extract linguistic variables
+  // cout << "bef r lv" << endl;
   auto r_lv = extract_r_lv(ind_sp2, offset);
 
   /// Extract rules/antecedents labels
+  // cout << "bef r labels" << endl;
   auto r_labels = extract_r_labels(ind_sp2, offset);
 
   /// Extract consequents
+  // cout << "bef r cons" << offset << endl;
   auto r_cons = extract_r_cons(ind_sp2, offset);
+  // cout << "after r cons " << endl;
 
   /// Combine ind_sp1 and ind_sp2 to create a FIS
   unordered_map<size_t, size_t> vars_lv_lookup;
@@ -74,9 +82,9 @@ FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
     }
   }
 
-  for (auto &t : vars_lv_lookup) {
-    cout << t.first << ": " << t.second << endl;
-  }
+  // for (auto &t : vars_lv_lookup) {
+  //   cout << t.first << ": " << t.second << endl;
+  // }
 
   vector<FuzzyRule> fuzzy_rules;
   for (size_t i = 0; i < n_rules; i++) {
@@ -90,14 +98,14 @@ FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
     fuzzy_rules.push_back(fuzzy_rule);
   }
 
-  cout << "Fuzzy rules: " << endl;
-  for (auto &fr : fuzzy_rules) {
-    cout << fr << endl;
-  }
+  // cout << "Fuzzy rules: " << endl;
+  // for (auto &fr : fuzzy_rules) {
+  //   cout << fr << endl;
+  // }
 
   /* vector<double> cons{3, 4, 2}; */
   DefaultFuzzyRule dfr(default_cons);
-  cout << "default rule " << dfr << endl;
+  // cout << "default rule " << dfr << endl;
   // DefaultFuzzyRule dfr = build_default_fuzzy_rule();
 
   /*
@@ -106,9 +114,25 @@ FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
   fis.predict(<X_or_observations>
   */
   SingletonFIS fis(fuzzy_rules, dfr);
+  return fis;
+}
+
+py::array_t<double>
+FISCocoEvalWrapper::predict(const string &ind_sp1, const string &ind_sp2,
+                            const vector<vector<double>> &observations) {
+
+  auto fis = extract_fis(ind_sp1, ind_sp2);
   auto y_pred = fis.predict(observations);
 
-  cout << "predict done" << endl;
+  // for (auto &y_row : y_pred) {
+  //   for (auto &y : y_row) {
+  //     cout << y << ", ";
+  //   }
+  //   cout << endl;
+  // }
+
+  // cout << "predict done" << endl;
+  // return y_pred;
   return vec2d_to_np_vec2d(y_pred);
 
   /// Use this FIS and predict the output given X_train/new_X
@@ -138,9 +162,9 @@ vector<vector<T>> FISCocoEvalWrapper::parse_bit_array(
       size_t value = stoi(bitarray.substr(offset, n_bits_per_elm), nullptr, 2);
       matrix[i][j] = post_func(value, i, j);
       // matrix[i][j] = value;
-      cout << matrix[i][j] << ",";
+      // cout << matrix[i][j] << ",";
     }
-    cout << endl;
+    // cout << endl;
   }
 
   return matrix;
@@ -162,7 +186,6 @@ FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
   vector<vector<double>> r_mfs = parse_bit_array<double>(
       ind_sp1, n_lv_per_ind, n_true_labels, n_bits_per_mf, mf_val_to_01);
 
-  cout << "a" << endl;
   size_t mf_index = 1; // TODO remove me
   vector<LinguisticVariable> vec_lv;
   for (auto &row : r_mfs) {
@@ -170,25 +193,24 @@ FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
     // MF's points must be increasing
     sort(row.begin(), row.end());
     TriLV lv(row);
-    cout << "lv : " << lv << endl;
-    cout << "fuzzified to : " << lv.fuzzify(mf_index, 0.967742) << endl;
-    for (const auto &col : row) {
-      cout << col << ", ";
-    }
+    // cout << "lv : " << lv << endl;
+    // cout << "fuzzified to : " << lv.fuzzify(mf_index, 0.967742) << endl;
+    // for (const auto &col : row) {
+    //   cout << col << ", ";
+    // }
 
     vec_lv.push_back(lv);
-    cout << endl;
+    // cout << endl;
   }
 
   return vec_lv;
-  // TODO: return vector<LinguisticVariable> vec_lv
 }
 
 vector<vector<size_t>>
 FISCocoEvalWrapper::extract_sel_vars(const string &ind_sp2, size_t &offset) {
-  cout << "sel vars" << endl;
+  // cout << "sel vars" << endl;
   const size_t n_bits_sel_vars = n_rules * n_max_vars_per_rule * n_bits_per_ant;
-  cout << "c++ v: " << n_bits_sel_vars << endl;
+  // cout << "c++ v: " << n_bits_sel_vars << endl;
   const auto val_to_var_idx = [&](const size_t v, const size_t i,
                                   const size_t j) {
     return modulo_trick(v, n_vars);
@@ -203,10 +225,10 @@ FISCocoEvalWrapper::extract_sel_vars(const string &ind_sp2, size_t &offset) {
 
 vector<vector<size_t>> FISCocoEvalWrapper::extract_r_lv(const string &ind_sp2,
                                                         size_t &offset) {
-  cout << "r lv" << endl;
+  // cout << "r lv" << endl;
   const size_t n_bits_r_lv = n_rules * n_max_vars_per_rule * n_bits_per_lv;
 
-  cout << "c++ v: " << n_bits_r_lv << endl;
+  // cout << "c++ v: " << n_bits_r_lv << endl;
   string r_lv_bits = ind_sp2.substr(offset, n_bits_r_lv);
 
   // move forward offset
@@ -254,7 +276,7 @@ FISCocoEvalWrapper::extract_r_labels(const string &ind_sp2, size_t &offset) {
 
     // v is in [0, (2^n_bits_per_label)-1]
     float v_normed = v / float((1 << n_bits_per_label) - 1);
-    cout << "(" << v_normed << ", " << v << ")\t";
+    // cout << "(" << v_normed << ", " << v << ")\t";
 
     // weights_normed is sth like [1,1,1,3] ≃ low, medium and high have a
     // weight of 1 and the last (i.e. don't care) have a weight of 3
@@ -275,10 +297,10 @@ FISCocoEvalWrapper::extract_r_labels(const string &ind_sp2, size_t &offset) {
     return to_ret;
   };
 
-  cout << "r labels" << endl;
+  // cout << "r labels" << endl;
   const size_t n_bits_r_labels =
       n_rules * n_max_vars_per_rule * n_bits_per_label;
-  cout << "c++ v: " << n_bits_r_labels << endl;
+  // cout << "c++ v: " << n_bits_r_labels << endl;
 
   string r_labels_bits = ind_sp2.substr(offset, n_bits_r_labels);
 
@@ -299,11 +321,11 @@ vector<vector<double>> FISCocoEvalWrapper::extract_r_cons(const string &ind_sp2,
     // variables (i.e. like classes for a discrete variable)
 
     const size_t cons_max = cons_n_labels[cons_j];
-    cout << "(" << cons_max << ")";
+    // cout << "(" << cons_max << ")";
     return modulo_trick(v, cons_max);
   };
 
-  cout << "r cons" << endl;
+  // cout << "r cons" << endl;
   const size_t n_bits_r_cons = n_rules * n_cons * n_bits_per_cons;
   string r_cons_bits = ind_sp2.substr(offset, n_bits_r_cons);
 
@@ -334,19 +356,19 @@ FuzzyRule FISCocoEvalWrapper::build_fuzzy_rule(
   for (size_t j = 0, n = vars_rule_i.size(); j < n; j++) {
     size_t var_idx = vars_rule_i[j];
     size_t mf_idx = r_labels_ri[j];
-    cout << "dc idx " << dc_idx << endl;
-    cout << "var idx " << var_idx << ", " << mf_idx << endl;
+    // cout << "dc idx " << dc_idx << endl;
+    // cout << "var idx " << var_idx << ", " << mf_idx << endl;
     if (mf_idx == dc_idx) {
       // ignore antecedent that have a label at DC
-      cout << "ant " << j << " ignored " << endl;
+      // cout << "ant " << j << " ignored " << endl;
       continue;
     }
-    cout << "lookup " << vars_lv_lookup.at(var_idx) << endl;
+    // cout << "lookup " << vars_lv_lookup.at(var_idx) << endl;
     Antecedent ant(vec_lv[vars_lv_lookup.at(var_idx)], mf_idx);
     // Antecedent ant(vec_lv[vars_lv_lookup.at(var_idx)], mf_idx);
-    cout << ant << endl;
+    // cout << ant << endl;
     ants.push_back(std::pair<size_t, Antecedent>(var_idx, ant));
   }
-  cout << "fuzzy rule created !" << endl;
+  // cout << "fuzzy rule created !" << endl;
   return FuzzyRule(ants, cons_ri);
 }

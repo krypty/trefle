@@ -42,14 +42,14 @@ public:
         n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
         n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label),
         dc_weight(dc_weight), cons_n_labels(n_cons, 0) {
-    cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
-         << n_true_labels << ", " << n_bits_per_lv << endl;
+    // cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
+    // << n_true_labels << ", " << n_bits_per_lv << endl;
 
     np_arr1d_to_vec(np_cons_n_labels, cons_n_labels, n_cons);
 
-    for (int i = 0; i < cons_n_labels.size(); i++) {
-      cout << "cons n labels " << cons_n_labels[i] << endl;
-    }
+    // for (int i = 0; i < cons_n_labels.size(); i++) {
+    //   cout << "cons n labels " << cons_n_labels[i] << endl;
+    // }
 
     np_arr2d_to_vec2d(np_X_train, X_train);
 
@@ -59,8 +59,10 @@ public:
   py::array_t<double> predict_c_other(const string &ind_sp1,
                                       const string &ind_sp2,
                                       py_array_d other_X);
+  void print_ind(const string &ind_sp1, const string &ind_sp2);
 
 private:
+  SingletonFIS extract_fis(const string &ind_sp1, const string &ind_sp2);
   py::array_t<double> predict(const string &ind_sp1, const string &ind_sp2,
                               const vector<vector<double>> &observations);
 
@@ -133,10 +135,8 @@ private:
   template <typename T>
   py_array<T> vec2d_to_np_vec2d(const vector<vector<T>> &arr) {
     const size_t rows = arr.size(), cols = arr[0].size();
-    // auto np_arr = py::array_t<T>({rows, cols});
-    // FIXME replace double by T
-    auto np_arr = py_array<double>({rows, cols});
-    auto np_arr_raw = np_arr.mutable_unchecked<2>();
+    auto np_arr = py_array<T>({rows, cols});
+    auto np_arr_raw = np_arr.mutable_unchecked();
 
     for (size_t i = 0; i < rows; i++) {
       for (size_t j = 0; j < cols; j++) {
@@ -179,7 +179,9 @@ PYBIND11_MODULE(pyfuge_c, m) {
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict")
       .def("bind_predict", &FISCocoEvalWrapper::predict_c_other,
-           "a function that use predict");
+           "a function that use predict")
+      .def("print_ind", &FISCocoEvalWrapper::print_ind,
+           "pretty print an individual couple");
 }
 
 #endif // FISEVAL_BINDINGS_H

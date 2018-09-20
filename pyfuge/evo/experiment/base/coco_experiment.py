@@ -28,7 +28,7 @@ species_indices_dict = {
 }
 
 
-class CoCoExperiment(Experiment):
+class CocoExperiment(Experiment):
     """
     A class that performs an experiment using a cooperative-coevolution
     algorithm with DEAP library.
@@ -174,7 +174,8 @@ class CoCoExperiment(Experiment):
             #       .format(gen=g, fit=hof[0].fitness))
 
         couple = hof[0]
-        describe_individual(couple.sp1, couple.sp2, couple.fitness)
+        print("ind with fitness {.3f}".format(couple.fitness))
+        self._coco_ind.print_ind(couple.sp1, couple.sp2)
 
         # print("theoretical reference")
         # describe_individual(ind_speed=[MAX_SPEED, MAX_SPEED],
