@@ -1,7 +1,10 @@
 import pyfuge_c
-import numpy as np
 
-from pyfuge.evo.helpers.fuzzy_labels import Label4, Label3, Label9
+import numpy as np
+from sklearn.datasets import load_wine
+
+from pyfuge.evo.examples.evo_wine_classifier import load_wine_dataset
+from pyfuge.evo.helpers.fuzzy_labels import Label9
 
 
 class NativeCocoEvaluator:
@@ -64,22 +67,27 @@ if __name__ == "__main__":
     from pyfuge.evo.experiment.coco.coco_individual import CocoIndividual, MFShape
     import random
 
-    np.random.seed(2)
-    random.seed(2)
+    np.random.seed(7)
+    random.seed(7)
+
+    # X_train, y_train = load_wine(return_X_y=True)
+    # y_train = y_train.reshape(-1, 1)
+    # print(y_train)
 
     X_train = np.array(
         [
-            # [-2, 70, 3, 4],
-            # [144, 52, 5, -3],
-            # [2.4, 5, 5, 1.33],
-            [-2, 70, 3, 4, 144, 52, 5, -3, 1.33],
-            [10, 100, 2, 4, 6, 67, 2, -212, 9.33],
-            [-7, 60, -1.93, 1.11, 3.45, -1.3, 1.4, 0, 1.111],
+            [-2, 70, 3, 4],
+            [14, 52, 5, -3],
+            [2.4, 5, 5, 1.33],
+            [7.4, 15, 2, 9.33],
+            # [-2, 70, 3, 4, 144, 52, 5, -3, 1.33],
+            # [10, 100, 2, 4, 6, 67, 2, -212, 9.33],
+            # [-7, 60, -1.93, 1.11, 3.45, -1.3, 1.4, 0, 1.111],
         ]
     )
 
     # y_train = np.array([0, 1, 1, 1, 0, 0, 0])
-    y_train = np.array([[0, 2, 3.2], [1, 1, 4.4], [0, 0, 1.3]])
+    y_train = np.array([[0, 2, 3.2], [1, 1, -4.4], [0, 0, 1.3], [0, 1, 3.54]])
     coco_ind = CocoIndividual(
         X_train=X_train,
         y_train=y_train,
@@ -90,7 +98,7 @@ if __name__ == "__main__":
         n_max_vars_per_rule=4,
         n_labels_per_mf=2,
         p_positions_per_lv=32,  # 5 bits
-        dc_weight=2,
+        dc_weight=1,
         mfs_shape=MFShape.TRI_MF,
         n_lv_per_ind_sp1=5,
         n_labels_per_cons=Label9,
@@ -101,10 +109,20 @@ if __name__ == "__main__":
         default_cons=[0, 1, Label9.VERY_VERY_VERY_HIGH],
     )
 
-    ind_sp1 = coco_ind.generate_sp1()
-    ind_sp2 = coco_ind.generate_sp2()
+    # from time import time
+    #
+    # t0 = time()
+    ind_sp1 = coco_ind.get_ind_sp1_class()()
+    print("ind_sp1", ind_sp1.bits)
+    ind_sp2 = coco_ind.get_ind_sp2_class()()
+    print("ind_sp2", ind_sp2.bits, " ", len(ind_sp2.bits))
+    # t0 = time() - t0
+    # print("time", t0 * 1000, " ms")
 
+    # t0 = time()
     res = coco_ind.predict((ind_sp1, ind_sp2))
+    # t0 = time() - t0
+    # print("time", t0 * 1000, " ms")
     print(res)
 
     coco_ind.print_ind((ind_sp1, ind_sp2))

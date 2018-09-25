@@ -19,8 +19,10 @@ class Experiment(metaclass=ABCMeta):
         if len(self._kwargs) > 0:
             cls_name = Experiment.__name__
             unused_args = ", ".join(self._kwargs.keys())
-            print("[{}] warning: the following arguments have been "
-                  "ignored: {}".format(cls_name, unused_args))
+            print(
+                "[{}] warning: the following arguments have been "
+                "ignored: {}".format(cls_name, unused_args)
+            )
 
     @abstractmethod
     def run(self):

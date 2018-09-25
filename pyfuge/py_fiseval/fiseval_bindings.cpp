@@ -11,13 +11,13 @@ py::array_t<double> FISCocoEvalWrapper::predict_c_other(const string &ind_sp1,
   vector<vector<double>> other_X(np_other_X.shape(0));
   np_arr2d_to_vec2d(np_other_X, other_X);
 
-  cout << "other_X: " << endl;
-  for (size_t i = 0; i < other_X.size(); i++) {
-    for (size_t j = 0; j < other_X[0].size(); j++) {
-      cout << other_X[i][j] << ", ";
-    }
-    cout << endl;
-  }
+  // cout << "other_X: " << endl;
+  // for (size_t i = 0; i < other_X.size(); i++) {
+  //   for (size_t j = 0; j < other_X[0].size(); j++) {
+  //     cout << other_X[i][j] << ", ";
+  //   }
+  //   cout << endl;
+  // }
 
   return predict(ind_sp1, ind_sp2, other_X);
 }
@@ -40,6 +40,8 @@ SingletonFIS FISCocoEvalWrapper::extract_fis(const string &ind_sp1,
 
   // cout << "ind_sp1 " << ind_sp1 << " (" << ind_sp1.length() << ")" << endl;
   // cout << "ind_sp2 " << ind_sp2 << " (" << ind_sp2.length() << ")" << endl;
+  // cout << endl;
+  // cout << endl;
 
   /// Parse ind_sp1
   // const vector<LinguisticVariable> vec_lv = parse_ind_sp1(ind_sp1);
@@ -85,12 +87,14 @@ SingletonFIS FISCocoEvalWrapper::extract_fis(const string &ind_sp1,
   // for (auto &t : vars_lv_lookup) {
   //   cout << t.first << ": " << t.second << endl;
   // }
+  // cout << endl;
+  // cout << endl;
 
   vector<FuzzyRule> fuzzy_rules;
   for (size_t i = 0; i < n_rules; i++) {
     // TODO: skip if r_labels[i].all() == DC
     if (are_all_labels_dc(r_labels[i])) {
-      cout << "rule " << i << " has been ignored (all dc)" << endl;
+      // cout << "rule " << i << " has been ignored (all dc)" << endl;
       continue;
     }
     auto fuzzy_rule = build_fuzzy_rule(sel_vars[i], vars_lv_lookup, vec_lv,

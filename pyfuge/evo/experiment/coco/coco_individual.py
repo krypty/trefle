@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import Enum
 from math import ceil, log
 from random import randint
@@ -5,6 +6,7 @@ from typing import List, Type
 
 import numpy as np
 from bitarray import bitarray
+from deap import creator
 from sklearn.preprocessing import MinMaxScaler
 
 from pyfuge.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
@@ -16,11 +18,6 @@ Convention: a variable to represent the number of bits needed for a matrix
 must start with n_bits_XXX.
 It is defined like: n_bits_XXX = n_rows * n_cols * n_bits_per_element
 """
-
-
-class ProblemType(Enum):
-    CLASSIFICATION = 0
-    REGRESSION = 1
 
 
 class MFShape(Enum):
@@ -172,7 +169,6 @@ class CocoIndividual(FISIndividual, Clonable):
         self,
         X_train: np.array,
         y_train: np.array,
-        # problem_type: ProblemType,
         n_rules: int,
         n_classes_per_cons: List[int],
         default_cons: np.array,
@@ -231,6 +227,9 @@ class CocoIndividual(FISIndividual, Clonable):
 
         self._n_vars = self._X.shape[1]
 
+        if self._n_max_vars_per_rule is None:
+            self._n_max_vars_per_rule = self._n_vars
+
         if n_lv_per_ind_sp1 is None:
             n_lv_per_ind_sp1 = self._n_max_vars_per_rule
 
@@ -255,6 +254,8 @@ class CocoIndividual(FISIndividual, Clonable):
 
         self._n_bits_sp1 = self._compute_needed_bits_for_sp1()
         self._n_bits_sp2 = self._compute_needed_bits_for_sp2()
+        self._ind_sp1_class = self._create_ind_class2(self._n_bits_sp1)
+        self._ind_sp2_class = self._create_ind_class2(self._n_bits_sp2)
 
         # contains True if i-th cons is a classification variable or False if regression
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
@@ -289,6 +290,9 @@ class CocoIndividual(FISIndividual, Clonable):
         return cons_scaler
 
     def _validate(self):
+        assert self._n_max_vars_per_rule > 0, "max_vars_per_rule > 0"
+        assert self._n_max_vars_per_rule <= self._n_vars
+
         assert self._dc_weight >= 0, "negative padding does not make sense"
         assert log(self._p_positions_per_lv, 2) == ceil(
             log(self._p_positions_per_lv, 2)
@@ -422,7 +426,7 @@ class CocoIndividual(FISIndividual, Clonable):
     @staticmethod
     def _extract_ind_tuple(ind_tuple):
         # convert ind_sp{1,2} in string format to make it easy to use it C++
-        return ind_tuple[0].to01(), ind_tuple[1].to01()
+        return ind_tuple[0].bits.to01(), ind_tuple[1].bits.to01()
 
     def _post_predict(self, y_pred):
         return self._scale_back_y(y_pred)
@@ -438,11 +442,17 @@ class CocoIndividual(FISIndividual, Clonable):
 
         return self._post_predict(y_pred)
 
-    def generate_sp1(self):
-        return self._generate_ind(self._n_bits_sp1)
+    # def generate_sp1(self):
+    #     return self._generate_ind(self._n_bits_sp1)
+    #
+    # def generate_sp2(self):
+    #     return self._generate_ind(self._n_bits_sp2)
 
-    def generate_sp2(self):
-        return self._generate_ind(self._n_bits_sp2)
+    def get_ind_sp1_class(self):
+        return self._ind_sp1_class
+
+    def get_ind_sp2_class(self):
+        return self._ind_sp2_class
 
     @staticmethod
     def _generate_ind(n_bits):
@@ -487,8 +497,13 @@ class CocoIndividual(FISIndividual, Clonable):
 
     @staticmethod
     def clone(ind: bitarray):
-        super().clone(ind)
-        return ind.copy()
+        # print(type(ind))
+        # super().clone(ind)
+        # return ind.true_clone()
+
+        # return ind.copy()
+        # return ind.true_clone()
+        return ind.true_deep_copy()
 
     # def _get_highest_n_classes_per_cons(self):
     #     n_classes_per_cons = np.apply_along_axis(
@@ -519,3 +534,61 @@ class CocoIndividual(FISIndividual, Clonable):
     def print_ind(self, ind_tuple):
         ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
         self._nce.print_ind(ind_sp1, ind_sp2)
+
+    @staticmethod
+    def _create_ind_class(n_bits):
+        class FixedSizeBitArray(bitarray):
+            # we cannot override __init__ with bitarray because it is a C lib
+            # see: https://stackoverflow.com/questions/36950072/typeerror-object-init-takes-no-parameters?rq=1
+
+            def __new__(cls):
+                bin_str = format(randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits))
+                instance = super(FixedSizeBitArray, cls).__new__(cls, bin_str)
+                # setattr(instance, "fitness", creator.FitnessMax)
+                return instance
+
+            # def copy(self):
+            #     # d =  deepcopy(self)
+            #     # d.fitness = deepcopy(self.fitness)
+            #     # return d
+            #     other = super(FixedSizeBitArray, self).copy()
+            #     setattr(other, "fitness", self.fitness)
+            #     # other.fitness = self.fitness
+            #     # other.fitness = deepcopy(self.fitness)
+            #     # other.fitness.valid = False
+            #
+            #     return other
+
+            def true_clone(self):
+                other = super(FixedSizeBitArray, self).copy()
+                setattr(other, "fitness", self.fitness)
+                return other
+
+        return FixedSizeBitArray
+
+    @staticmethod
+    def _create_ind_class2(n_bits):
+        class FixedSizeBitArray2:
+            def __init__(self, bin_str=None):
+                if bin_str is None:
+                    bin_str = format(randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits))
+                self.bits = bitarray(bin_str)
+
+            def true_deep_copy(self):
+                other = self.__class__(self.bits.to01())
+                # other.bits = self.bits.copy()
+                return other
+
+            def __len__(self):
+                return self.bits.length()
+
+            def __setitem__(self, key, value):
+                # print(key, "    ", value)
+                self.bits.__setitem__(key, value.bits)
+
+            def __getitem__(self, item):
+                instance = FixedSizeBitArray2()
+                instance.bits = self.bits[item]
+                return instance
+
+        return FixedSizeBitArray2
