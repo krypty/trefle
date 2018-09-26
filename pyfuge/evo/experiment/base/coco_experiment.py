@@ -36,12 +36,22 @@ class CocoExperiment(Experiment):
         coco_ind: CocoIndividual,
         n_generations: int,
         pop_size: int,
+        n_representatives: int,
+        crossover_prob: float,
+        mutation_prob: float,
+        n_elite: int,
+        halloffame_size: int,
         fitness_func: Callable,
     ):
         super().__init__(fitness_func)
         self._coco_ind = coco_ind
         self._n_generations = n_generations
         self._pop_size = pop_size
+        self._n_representatives = n_representatives
+        self._crossover_prob = crossover_prob
+        self._mutation_prob = mutation_prob
+        self._n_elite = n_elite
+        self._halloffame_size = halloffame_size
         self._post_init()
 
     def run(self):
@@ -57,6 +67,10 @@ class CocoExperiment(Experiment):
         max_fit_sp1 = [v[1] for v in zip(*fit) if v[0] == "sp1"]
         max_fit_sp2 = [v[1] for v in zip(*fit) if v[0] == "sp2"]
 
+        avg_hof = self._logbook.select("avg_hof")
+        # drop half the points to have the same as the number of generations
+        avg_hof = [v for i, v in enumerate(avg_hof) if i % 2 == 0]
+
         fig, ax1 = plt.subplots()
         line1 = ax1.plot(gen, max_fit_sp1, "b-", label="Max fit sp1")
         ax1.set_xlabel("Generation")
@@ -65,7 +79,8 @@ class CocoExperiment(Experiment):
             tl.set_color("b")
 
         ax2 = ax1.twinx()
-        line2 = ax2.plot(gen, max_fit_sp2, "r-", label="Max fit sp2")
+
+        line2 = ax2.plot(gen, avg_hof, "r-", label="Max fit sp2")
         ax2.set_ylabel("Fitness sp2", color="r")
         for tl in ax2.get_yticklabels():
             tl.set_color("r")
@@ -80,18 +95,13 @@ class CocoExperiment(Experiment):
         verbose = True
 
         # Cooperative-Coevolution parameters
-        # INDIVIDUAL_LENGTH = 200
-        POP_SIZE = self._pop_size
         N_GEN = self._n_generations
-        N_REPRESENTATIVES = 2
-        CX_PROB = 0.5
-        MUT_PROB = 0.4
-        N_ELITE = 1
-        N_HOF = 8
-
-        # Problem specific parameters
-        # MIN_SPEED, MAX_SPEED = 0, 10
-        # MIN_ANGLE, MAX_ANGLE = 20, 180
+        POP_SIZE = self._pop_size
+        N_REPRESENTATIVES = self._n_representatives
+        CX_PROB = self._crossover_prob
+        MUT_PROB = self._mutation_prob
+        N_ELITE = self._n_elite
+        HOF_SIZE = self._halloffame_size
 
         # Setup logbook
         stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -101,7 +111,7 @@ class CocoExperiment(Experiment):
         stats.register("max", np.max)
 
         self._logbook = tools.Logbook()
-        self._logbook.header = "gen", "species", "std", "min", "avg", "max"
+        self._logbook.header = "gen", "species", "std", "min", "avg", "max", "avg_hof"
 
         # Setup individuals
 
@@ -125,14 +135,6 @@ class CocoExperiment(Experiment):
             fitness=creator.FitnessMax,
         )
         toolbox.register("species_sp2", tools.initRepeat, list, creator.IndividualSp2)
-
-        # ind1 = creator.IndividualSp1()
-        # ind2 = self._coco_ind.clone(ind1)
-        # print(ind1)
-        # print(ind2)
-        # ind1[0] = 1
-        # print(ind1)
-        # print(ind2)
 
         def eval_solution(species_indices, ind_tuple):
             ind_sp1 = ind_tuple[species_indices[0]]
@@ -198,10 +200,10 @@ class CocoExperiment(Experiment):
                     individual.bits[i : i + 1] = ~individual.bits[i : i + 1]
             return (individual,)
 
-        toolbox.register("mutate", tools.mutShuffleIndexes, indpb=1.0)
+        toolbox.register("mutate", tools.mutShuffleIndexes, indpb=MUT_PROB)
         # toolbox.register("mutate", flip_bit, indpb=0.3)
         toolbox.register("select_elite", tools.selBest)
-        toolbox.register("select", tools.selTournament, tournsize=2)
+        toolbox.register("select", tools.selTournament, tournsize=3)
         toolbox.register(
             "select_representatives", select_representatives, k=N_REPRESENTATIVES
         )
@@ -240,7 +242,7 @@ class CocoExperiment(Experiment):
         # Hall Of Fame (hof) contains the best couples/pairs seen across all
         # generations. They will be the ones that we will keep when N_GEN is
         # reached.
-        self._hof = HallOfFame(maxsize=N_HOF)
+        self._hof = HallOfFame(maxsize=HOF_SIZE)
 
         print("Generation 0")
         evaluate_species(
@@ -262,7 +264,9 @@ class CocoExperiment(Experiment):
                 N_ELITE,
                 self._hof,
             )
-            update_logbook(self._hof, all_species, "sp1", g, self._logbook, stats, verbose)
+            update_logbook(
+                self._hof, all_species, "sp1", g, self._logbook, stats, verbose
+            )
 
             representatives_sp2 = evolve_species(
                 all_species,
@@ -275,7 +279,9 @@ class CocoExperiment(Experiment):
                 N_ELITE,
                 self._hof,
             )
-            update_logbook(self._hof, all_species, "sp2", g, self._logbook, stats, verbose)
+            update_logbook(
+                self._hof, all_species, "sp2", g, self._logbook, stats, verbose
+            )
 
             # print("Best fitness generation {gen}: {fit}"
             #       .format(gen=g, fit=hof[0].fitness))
@@ -294,8 +300,9 @@ class CocoExperiment(Experiment):
 
 
 def update_logbook(hof, all_species, species_name, g, logbook, stats, verbose):
+    avg_hof = np.mean([pair.fitness for pair in hof.items])
     record = stats.compile(all_species[species_name])
-    logbook.record(gen=g, species=species_name, **record)
+    logbook.record(avg_hof=avg_hof, gen=g, species=species_name, **record)
 
     if verbose:
         print("--------", ([h for h in hof]))

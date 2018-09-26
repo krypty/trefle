@@ -1,11 +1,11 @@
 import numpy as np
-from pyfuge.evo.skfuge.trefle_classifier import TrefleClassifier
-from sklearn.datasets import load_breast_cancer, load_iris
-from sklearn.metrics import accuracy_score, classification_report, mean_squared_error
+from sklearn.datasets import load_breast_cancer, load_iris, make_classification
+from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.model_selection import train_test_split, GridSearchCV
 
 from pyfuge.evo.skfuge.fitness_functions import basic_fitness_functions
 from pyfuge.evo.skfuge.scikit_fuge import FugeClassifier
+from pyfuge.evo.skfuge.trefle_classifier import TrefleClassifier
 from pyfuge.fs.view.fis_viewer import FISViewer
 
 
@@ -83,8 +83,8 @@ def run():
     random.seed(6)
 
     # Load dataset
-    # data = load_breast_cancer()
-    data = load_iris()
+    data = load_breast_cancer()
+    # data = load_iris()
 
     # Organize our data
     y_names = data["target_names"]
@@ -95,6 +95,11 @@ def run():
 
     # FIXME support regression problems
     # X, y = load_boston(return_X_y=True)
+
+    X, y = make_classification(
+        n_samples=500, n_features=10, n_informative=4, n_redundant=2, n_classes=2
+    )
+    y = y.reshape(-1, 1)
 
     # Split our data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
@@ -116,24 +121,24 @@ def run():
     #     )
 
     def fit(y_true, y_pred):
-        y_pred_thresholded = round_to_cls(y_pred, n_classes=3)
+        y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
         fitness_val = accuracy_score(y_true, y_pred_thresholded)
         rmse = 1.0 - mean_squared_error(y_true, y_pred)
         return rmse + fitness_val
 
     # Initialize our classifier
     clf = TrefleClassifier(
-        n_rules=3,
-        n_classes_per_cons=[3],
-        default_cons=[2],
-        n_max_vars_per_rule=4,
-        n_generations=100,
-        pop_size=80,
+        n_rules=6,
+        n_classes_per_cons=[2],
+        default_cons=[1],
+        n_max_vars_per_rule=8,
+        n_generations=200,
+        pop_size=150,
         n_labels_per_mf=3,
         verbose=True,
         dc_weight=1,
-        p_positions_per_lv=512,
-        n_lv_per_ind_sp1=30,
+        p_positions_per_lv=16,
+        n_lv_per_ind_sp1=20,
         fitness_function=fit,
     )
 
@@ -153,7 +158,7 @@ def run():
     # Evaluate accuracy
     print("Simple run score: ")
 
-    y_pred_thresholded = round_to_cls(y_pred, n_classes=3)
+    y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
     print("acc", accuracy_score(y_test, y_pred_thresholded))
     # print(classification_report(y_test, y_pred))
 
