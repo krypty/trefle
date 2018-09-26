@@ -1,5 +1,5 @@
 import random
-from collections import namedtuple, Counter
+from collections import Counter
 from functools import partial
 from itertools import product
 from typing import Callable
@@ -12,6 +12,7 @@ from deap.algorithms import varAnd
 from deap.tools import HallOfFame
 
 from pyfuge.evo.experiment.base.experiment import Experiment
+from pyfuge.evo.experiment.coco.coco_couple import CocoCouple
 from pyfuge.evo.experiment.coco.coco_individual import CocoIndividual
 from pyfuge.evo.helpers import fis_individual
 
@@ -19,8 +20,6 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
-
-SpeciesTuple = namedtuple("SpeciesTuple", ["sp1", "sp2", "fitness"])
 
 species_indices_dict = {"sp1": [0, 1], "sp2": [1, 0]}
 
@@ -406,7 +405,7 @@ def update_hof(
         t_ind = (ind, best_representative)
         hof.update(
             (
-                SpeciesTuple(
+                CocoCouple(
                     sp1=t_ind[species_indices[0]],
                     sp2=t_ind[species_indices[1]],
                     fitness=fitness,
