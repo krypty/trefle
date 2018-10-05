@@ -395,7 +395,8 @@ def update_hof(
         )
 
         fitnesses_values = [f[0] for f in fitnesses[idx_start:idx_end]]
-        mean_fitness_ind = np.median(fitnesses_values)
+        # mean_fitness_ind = np.median(fitnesses_values)
+        mean_fitness_ind = max(fitnesses_values)
         # mean_fitness_ind = sum(fitnesses_values)/ (idx_end-idx_start)
 
         ind.fitness.values = (mean_fitness_ind,)
