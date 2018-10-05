@@ -61,6 +61,9 @@ class NativeCocoEvaluator:
     def print_ind(self, ind_sp1: str, ind_sp2: str):
         self._fiseval.print_ind(ind_sp1, ind_sp2)
 
+    def to_tff(self, ind_sp1:str, ind_sp2:str):
+        return self._fiseval.to_tff(ind_sp1, ind_sp2)
+
 
 if __name__ == "__main__":
     import numpy as np

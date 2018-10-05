@@ -82,9 +82,9 @@ def run():
     y_pred = clf.predict(X_test)
 
     # fis = clf.get_best_fuzzy_system()
-    clf.get_best_fuzzy_system()
-
-    # print(fis)
+    fis = clf.get_best_fuzzy_system()
+    print("best fis is ", end="")
+    print(fis)
 
     # FISViewer(fis).show()
 

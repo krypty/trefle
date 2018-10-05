@@ -4,6 +4,7 @@
 #include "default_fuzzy_rule.h"
 #include "fis.h"
 #include "fuzzy_rule.h"
+#include "json_fis_writer.h"
 #include "linguisticvariable.h"
 #include "singleton_fis.h"
 #include "trilv.h"
@@ -60,6 +61,8 @@ public:
                                       const string &ind_sp2,
                                       py_array_d other_X);
   void print_ind(const string &ind_sp1, const string &ind_sp2);
+
+  string to_tff(const string &ind_sp1, const string &ind_sp2);
 
 private:
   SingletonFIS extract_fis(const string &ind_sp1, const string &ind_sp2);
@@ -181,7 +184,10 @@ PYBIND11_MODULE(pyfuge_c, m) {
       .def("bind_predict", &FISCocoEvalWrapper::predict_c_other,
            "a function that use predict")
       .def("print_ind", &FISCocoEvalWrapper::print_ind,
-           "pretty print an individual couple");
+           "pretty print an individual couple")
+      .def("to_tff", &FISCocoEvalWrapper::to_tff,
+           "a function that returns a tff string from a given individual "
+           "couple");
 }
 
 #endif // FISEVAL_BINDINGS_H

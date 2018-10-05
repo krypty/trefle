@@ -27,6 +27,16 @@ void FISCocoEvalWrapper::print_ind(const string &ind_sp1,
   cout << fis << endl;
 }
 
+string FISCocoEvalWrapper::to_tff(const string &ind_sp1,
+                                  const string &ind_sp2) {
+  auto fis = extract_fis(ind_sp1, ind_sp2);
+
+  string json_output;
+  JsonFISWriter writer(fis, json_output);
+  writer.write();
+  return json_output;
+}
+
 SingletonFIS FISCocoEvalWrapper::extract_fis(const string &ind_sp1,
                                              const string &ind_sp2) {
 
