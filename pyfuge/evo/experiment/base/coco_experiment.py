@@ -378,13 +378,22 @@ def evaluate_species(
 
 def update_hof(
     hof,
-    invalid_ind,
+    individuals,
     n_representatives,
     fitnesses,
     other_species_representatives,
     species_indices,
 ):
-    for i, ind in enumerate(invalid_ind):
+    """
+    Compute the resulting fitness of all individuals given their fitnesses
+    with all the other species representatives. This is done using the max()
+    function.
+
+    Then the best representative, i.e. the one that gave the maximum fitness
+    is retrieved and the couple ind_spX-representative_spY is saved in the hall
+    of fame.
+    """
+    for i, ind in enumerate(individuals):
         idx_start = n_representatives * i
         idx_end = idx_start + n_representatives
 
@@ -394,12 +403,7 @@ def update_hof(
             enumerate(fitnesses[idx_start:idx_end]), key=lambda x: x[1]
         )
 
-        fitnesses_values = [f[0] for f in fitnesses[idx_start:idx_end]]
-        # mean_fitness_ind = np.median(fitnesses_values)
-        mean_fitness_ind = max(fitnesses_values)
-        # mean_fitness_ind = sum(fitnesses_values)/ (idx_end-idx_start)
-
-        ind.fitness.values = (mean_fitness_ind,)
+        ind.fitness.values = fitness
 
         best_representative = other_species_representatives[idx_representative]
 
