@@ -327,12 +327,12 @@ def evolve_species(
     # (2) Select
     offspring = toolbox.select(species, POP_SIZE - N_ELITE)
 
-    # add elite to offspring
-    offspring.extend(elite)
-
     # (3) Crossover and Mutate offspring
     offspring = varAnd(offspring, toolbox, CX_PROB, MUT_PROB)
-    # offspring = varAnd(offspring, toolbox, cxpb=0, mutpb=0.4)
+    # offspring = varAnd(offspring, toolbox, CX_PROB, mutpb=1)
+
+    # add elite to offspring
+    offspring.extend(elite)
 
     # (4) Evaluate the entire population
     evaluate_species(
