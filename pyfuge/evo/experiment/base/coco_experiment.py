@@ -199,8 +199,8 @@ class CocoExperiment(Experiment):
                     individual.bits[i : i + 1] = ~individual.bits[i : i + 1]
             return (individual,)
 
-        toolbox.register("mutate", tools.mutShuffleIndexes, indpb=MUT_PROB)
-        # toolbox.register("mutate", flip_bit, indpb=0.3)
+        # toolbox.register("mutate", tools.mutShuffleIndexes, indpb=MUT_PROB)
+        toolbox.register("mutate", flip_bit, indpb=MUT_PROB)
         toolbox.register("select_elite", tools.selBest)
         toolbox.register("select", tools.selTournament, tournsize=3)
         toolbox.register(
