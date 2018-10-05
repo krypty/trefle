@@ -202,7 +202,7 @@ class CocoExperiment(Experiment):
         # toolbox.register("mutate", tools.mutShuffleIndexes, indpb=MUT_PROB)
         toolbox.register("mutate", flip_bit, indpb=MUT_PROB)
         toolbox.register("select_elite", tools.selBest)
-        toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("select", tools.selRoulette)
         toolbox.register(
             "select_representatives", select_representatives, k=N_REPRESENTATIVES
         )
