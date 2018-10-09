@@ -35,14 +35,15 @@ public:
                      const int n_bits_per_ant, const int n_cons,
                      const int n_bits_per_cons, const int n_bits_per_label,
                      const int dc_weight, py_array_i np_cons_n_labels,
-                     py_array_i np_default_cons)
+                     py_array_i np_default_cons, py_array_d np_vars_range)
       : X_train(np_X_train.shape(0)), n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
         n_true_labels(n_true_labels), dc_idx(n_true_labels),
         n_bits_per_lv(n_bits_per_lv), n_lv_per_ind(1 << n_bits_per_lv),
         n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
         n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label),
-        dc_weight(dc_weight), cons_n_labels(n_cons, 0) {
+        dc_weight(dc_weight), cons_n_labels(n_cons, 0),
+        vars_range(np_vars_range.shape(0)) {
     // cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
     // << n_true_labels << ", " << n_bits_per_lv << endl;
 
@@ -55,6 +56,8 @@ public:
     np_arr2d_to_vec2d(np_X_train, X_train);
 
     np_arr1d_to_vec(np_default_cons, default_cons, n_cons);
+
+    np_arr2d_to_vec2d(np_vars_range, vars_range);
   }
   py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2);
   py::array_t<double> predict_c_other(const string &ind_sp1,
@@ -159,7 +162,7 @@ private:
 
   // it has been decided that the dc_idx is the last index
   // in [0, n_true_labels] i.e. [0, n_true_labels-1] for low, medium, ...
-  // and {n_true_label} for dc.
+  // and {n_true_labels} for dc.
   const size_t dc_idx;
 
   const int n_bits_per_lv;
@@ -169,16 +172,30 @@ private:
   const int n_bits_per_cons;
   const int n_bits_per_label;
   const int dc_weight;
-  vector<int> cons_n_labels;
+  vector<size_t> cons_n_labels;
   vector<double> default_cons;
+  vector<vector<double>> vars_range;
 };
 
 PYBIND11_MODULE(pyfuge_c, m) {
   py::class_<FISCocoEvalWrapper>(m, "FISCocoEvalWrapper")
       // match the ctor of FISCocoEvalWrapper
-      .def(py::init<py_array_d, const int, const int, const int, const int,
-                    const int, const int, const int, const int, const int,
-                    const int, const int, py_array_i, py_array_i>())
+      .def(py::init<py_array_d, // X_train
+                    const int,  // n_vars
+                    const int,  // n_rules
+                    const int,  // n_max_vars_per_rule
+                    const int,  // n_bits_per_mf
+                    const int,  // n_true_labels
+                    const int,  // n_bits_per_lv
+                    const int,  // n_bits_per_ant
+                    const int,  // n_cons
+                    const int,  // n_bits_per_cons
+                    const int,  // n_bits_per_label
+                    const int,  // dc_weight
+                    py_array_i, // cons_n_labels
+                    py_array_i, // default_cons
+                    py_array_d  // vars_range
+                    >())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict")
       .def("bind_predict", &FISCocoEvalWrapper::predict_c_other,

@@ -260,7 +260,8 @@ class CocoIndividual(FISIndividual, Clonable):
         # contains True if i-th cons is a classification variable or False if regression
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
 
-        self._cons_scaler = self.create_cons_scaler()
+        self._cons_scaler = self._create_cons_scaler()
+        self._vars_range = self._create_vars_range(self._X_scaler)
 
         self._nce = NativeCocoEvaluator(
             X_train=self._X,
@@ -277,9 +278,10 @@ class CocoIndividual(FISIndividual, Clonable):
             dc_weight=dc_weight,
             cons_n_labels=self._cons_n_labels,
             default_cons=self._default_cons,
+            vars_range=self._vars_range,
         )
 
-    def create_cons_scaler(self):
+    def _create_cons_scaler(self):
         # y_pred returned by NativeCocoEvaluator are in range
         # [0, n_class_per_cons-1] and it needs to be scaled back to
         # [min_val_cons, max_val_cons] (which for binary and multiclass
@@ -592,3 +594,8 @@ class CocoIndividual(FISIndividual, Clonable):
                 return instance
 
         return FixedSizeBitArray2
+
+    @staticmethod
+    def _create_vars_range(scaler):
+        vars_range = np.vstack((scaler.data_min_, scaler.data_max_)).T.astype(np.double)
+        return vars_range

@@ -24,6 +24,7 @@ class NativeCocoEvaluator:
         dc_weight: int,
         cons_n_labels: np.array,
         default_cons: np.array,
+        vars_range: np.array,
     ):
         self._fiseval = pyfuge_c.FISCocoEvalWrapper(
             X_train,
@@ -40,6 +41,7 @@ class NativeCocoEvaluator:
             dc_weight,
             cons_n_labels,
             default_cons,
+            vars_range,
         )
 
     def predict_native(self, ind_sp1: str, ind_sp2: str, other_X: np.array = None):
