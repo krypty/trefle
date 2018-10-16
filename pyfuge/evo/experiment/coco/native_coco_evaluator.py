@@ -23,6 +23,7 @@ class NativeCocoEvaluator:
         n_bits_per_label: int,
         dc_weight: int,
         cons_n_labels: np.array,
+        n_classes_per_cons: np.array,
         default_cons: np.array,
         vars_range: np.array,
     ):
@@ -40,6 +41,7 @@ class NativeCocoEvaluator:
             n_bits_per_label,
             dc_weight,
             cons_n_labels,
+            n_classes_per_cons,
             default_cons,
             vars_range,
         )

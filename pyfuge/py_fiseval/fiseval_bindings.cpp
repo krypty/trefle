@@ -32,8 +32,8 @@ string FISCocoEvalWrapper::to_tff(const string &ind_sp1,
   auto fis = extract_fis(ind_sp1, ind_sp2);
 
   string json_output;
-  JsonFISWriter writer(fis, n_true_labels, cons_n_labels, vars_range,
-                       json_output);
+  JsonFISWriter writer(fis, n_true_labels, cons_n_labels, n_classes_per_cons,
+                       vars_range, json_output);
   writer.write();
   return json_output;
 }

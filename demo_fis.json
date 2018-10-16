@@ -1,7 +1,8 @@
 {
   "version": 1,
   "n_labels": 3,
-  "n_labels_per_cons": [0, 1, 2],
+  "n_labels_per_cons": [4, 1, 2],
+  "n_classes_per_cons": [0, 1, 2],
   "vars_range": {
     "v1": [500, 3500],
     "v6": [100, 4000],

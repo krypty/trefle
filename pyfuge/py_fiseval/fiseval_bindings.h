@@ -35,6 +35,7 @@ public:
                      const int n_bits_per_ant, const int n_cons,
                      const int n_bits_per_cons, const int n_bits_per_label,
                      const int dc_weight, py_array_i np_cons_n_labels,
+                     py_array_i np_n_classes_per_cons,
                      py_array_i np_default_cons, py_array_d np_vars_range)
       : X_train(np_X_train.shape(0)), n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
@@ -42,12 +43,13 @@ public:
         n_bits_per_lv(n_bits_per_lv), n_lv_per_ind(1 << n_bits_per_lv),
         n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
         n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label),
-        dc_weight(dc_weight), cons_n_labels(n_cons, 0),
-        vars_range(np_vars_range.shape(0)) {
+        dc_weight(dc_weight), n_classes_per_cons(n_cons, 0),
+        cons_n_labels(n_cons, 0), vars_range(np_vars_range.shape(0)) {
     // cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
     // << n_true_labels << ", " << n_bits_per_lv << endl;
 
     np_arr1d_to_vec(np_cons_n_labels, cons_n_labels, n_cons);
+    np_arr1d_to_vec(np_n_classes_per_cons, n_classes_per_cons, n_cons);
 
     // for (int i = 0; i < cons_n_labels.size(); i++) {
     //   cout << "cons n labels " << cons_n_labels[i] << endl;
@@ -173,6 +175,7 @@ private:
   const int n_bits_per_label;
   const int dc_weight;
   vector<size_t> cons_n_labels;
+  vector<size_t> n_classes_per_cons;
   vector<double> default_cons;
   vector<vector<double>> vars_range;
 };
@@ -192,6 +195,7 @@ PYBIND11_MODULE(pyfuge_c, m) {
                     const int,  // n_bits_per_cons
                     const int,  // n_bits_per_label
                     const int,  // dc_weight
+                    py_array_i, // n_classes_per_cons
                     py_array_i, // cons_n_labels
                     py_array_i, // default_cons
                     py_array_d  // vars_range

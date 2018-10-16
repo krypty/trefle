@@ -1,7 +1,8 @@
 from sklearn.datasets import load_breast_cancer
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.model_selection import train_test_split
 
+from pyfuge.evo.helpers.fuzzy_labels import Label3
 from pyfuge.evo.skfuge.trefle_classifier import TrefleClassifier
 
 
@@ -32,11 +33,17 @@ def run():
     # )
     # y = y.reshape(-1, 1)
 
+    multi_class_y_col = np.random.randint(0, 4, size=y.shape)
+    regr_y_col = np.random.random(size=y.shape) * 100 + 20
+    y = np.hstack((y, multi_class_y_col, regr_y_col))
+    # print(y)
+
     # Split our data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
     # X_train = X_train[:3]
     # y_train = y_train[:3]
+
 
     def round_to_cls(arr, n_classes):
         bins = np.linspace(0, n_classes - 1, n_classes + 1)
@@ -53,21 +60,21 @@ def run():
 
     def fit(y_true, y_pred):
         y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
-        fitness_val = accuracy_score(y_true, y_pred_thresholded)
-        # rmse = - mean_squared_error(y_true, y_pred)
-        # return rmse
+        # fitness_val = accuracy_score(y_true, y_pred_thresholded)
+        rmse = - mean_squared_error(y_true, y_pred)
+        return rmse
         # return rmse + fitness_val
         return fitness_val
 
     # Initialize our classifier
     clf = TrefleClassifier(
         n_rules=5,
-        n_classes_per_cons=[2],
-        default_cons=[1],
+        n_classes_per_cons=[2, 4, 0],
+        default_cons=[1, 2, Label3.MEDIUM],
         n_max_vars_per_rule=3,
-        n_generations=100,
-        pop_size=60,
-        n_labels_per_mf=2,
+        n_generations=2,
+        pop_size=100,
+        n_labels_per_mf=4,
         verbose=True,
         dc_weight=1,
         # p_positions_per_lv=16,
@@ -91,9 +98,10 @@ def run():
     # Evaluate accuracy
     print("Simple run score: ")
 
-    y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
-    print("acc", accuracy_score(y_test, y_pred_thresholded))
+    # y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
+    # print("acc", accuracy_score(y_test, y_pred_thresholded))
     # print(classification_report(y_test, y_pred))
+    print(mean_squared_error(y_test, y_pred, multioutput="raw_values"))
 
 
 if __name__ == "__main__":

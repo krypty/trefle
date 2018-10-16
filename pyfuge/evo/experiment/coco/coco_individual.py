@@ -277,6 +277,7 @@ class CocoIndividual(FISIndividual, Clonable):
             n_bits_per_label=self._n_bits_per_label,
             dc_weight=dc_weight,
             cons_n_labels=self._cons_n_labels,
+            n_classes_per_cons=self._n_classes_per_cons,
             default_cons=self._default_cons,
             vars_range=self._vars_range,
         )
