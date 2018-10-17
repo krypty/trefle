@@ -8,6 +8,7 @@
 #include "linguisticvariable.h"
 #include "singleton_fis.h"
 #include "trilv.h"
+#include <fstream>
 #include <iostream>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -17,6 +18,74 @@
 namespace py = pybind11;
 
 using namespace std;
+
+class TffFISWriter {
+public:
+  TffFISWriter(const SingletonFIS &fis, size_t n_true_labels,
+               const vector<size_t> &n_cons_per_labels,
+               const vector<size_t> &n_classes_per_cons,
+               const vector<vector<double>> vars_range,
+               const vector<vector<double>> cons_range, const string &filepath)
+      : fis{fis}, n_true_labels{n_true_labels},
+        n_classes_per_cons{n_classes_per_cons},
+        n_cons_per_labels{n_cons_per_labels}, vars_range{vars_range},
+        cons_range{cons_range}, filepath{filepath} {};
+
+  virtual void write() {
+    JsonFISWriter writer(fis, n_true_labels, n_cons_per_labels,
+                         n_classes_per_cons, vars_range, cons_range,
+                         json_output);
+    writer.write();
+    std::ofstream fout(filepath);
+    if (fout) {
+      fout << json_output;
+    } else {
+      cerr << "cannot write in " << filepath << endl;
+    }
+  }
+
+private:
+  SingletonFIS fis;
+  const size_t n_true_labels;
+  const vector<size_t> n_cons_per_labels;
+  const vector<size_t> n_classes_per_cons;
+  const vector<vector<double>> vars_range;
+  const vector<vector<double>> cons_range;
+  const string &filepath;
+  string json_output = "hello";
+};
+
+class TrefleFIS {
+public:
+  TrefleFIS(int a) : a(a){}; // TODO respect rule of 3/5/7
+  // private:
+  //   TrefleFIS(const SingletonFIS &fis) : fis(fis){};
+
+public:
+  static TrefleFIS from_tff(const string &tff_str) {
+    cout << "read from_tff" << endl;
+    return TrefleFIS(10);
+  }
+  static TrefleFIS from_tff_file(const string &tff_file) {
+    cout << "read from_tff_file" << endl;
+    return TrefleFIS(20);
+  }
+
+  void predict() {
+    // auto rules = vector<FuzzyRule>{{0.0, 1.0}};
+    // auto default_rule = vector<DefaultFuzzyRule>{{0.0, 1.0}};
+    // SingletonFIS fis(rules, default_rule);
+    // string filepath = "/tmp/yolo.tff";
+    // TffFISWriter writer(fis, filepath);
+    // writer.write();
+
+    cout << "predict !" << a << endl;
+  }
+  // auto predict() { return fis.predict(); }
+
+private:
+  int a;
+};
 
 typedef py::array_t<double, py::array::c_style | py::array::forcecast>
     py_array_d;
@@ -36,7 +105,8 @@ public:
                      const int n_bits_per_cons, const int n_bits_per_label,
                      const int dc_weight, py_array_i np_cons_n_labels,
                      py_array_i np_n_classes_per_cons,
-                     py_array_i np_default_cons, py_array_d np_vars_range)
+                     py_array_i np_default_cons, py_array_d np_vars_range,
+                     py_array_d np_cons_range)
       : X_train(np_X_train.shape(0)), n_vars(n_vars), n_rules(n_rules),
         n_max_vars_per_rule(n_max_vars_per_rule), n_bits_per_mf(n_bits_per_mf),
         n_true_labels(n_true_labels), dc_idx(n_true_labels),
@@ -44,7 +114,8 @@ public:
         n_bits_per_ant(n_bits_per_ant), n_cons(n_cons),
         n_bits_per_cons(n_bits_per_cons), n_bits_per_label(n_bits_per_label),
         dc_weight(dc_weight), n_classes_per_cons(n_cons, 0),
-        cons_n_labels(n_cons, 0), vars_range(np_vars_range.shape(0)) {
+        cons_n_labels(n_cons, 0), vars_range(np_vars_range.shape(0)),
+        cons_range(np_cons_range.shape(0)) {
     // cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
     // << n_true_labels << ", " << n_bits_per_lv << endl;
 
@@ -60,6 +131,7 @@ public:
     np_arr1d_to_vec(np_default_cons, default_cons, n_cons);
 
     np_arr2d_to_vec2d(np_vars_range, vars_range);
+    np_arr2d_to_vec2d(np_cons_range, cons_range);
   }
   py::array_t<double> predict_c(const string &ind_sp1, const string &ind_sp2);
   py::array_t<double> predict_c_other(const string &ind_sp1,
@@ -178,6 +250,7 @@ private:
   vector<size_t> n_classes_per_cons;
   vector<double> default_cons;
   vector<vector<double>> vars_range;
+  vector<vector<double>> cons_range;
 };
 
 PYBIND11_MODULE(pyfuge_c, m) {
@@ -198,7 +271,8 @@ PYBIND11_MODULE(pyfuge_c, m) {
                     py_array_i, // n_classes_per_cons
                     py_array_i, // cons_n_labels
                     py_array_i, // default_cons
-                    py_array_d  // vars_range
+                    py_array_d, // vars_range
+                    py_array_d  // cons_range
                     >())
       .def("bind_predict", &FISCocoEvalWrapper::predict_c,
            "a function that use predict")
@@ -209,6 +283,14 @@ PYBIND11_MODULE(pyfuge_c, m) {
       .def("to_tff", &FISCocoEvalWrapper::to_tff,
            "a function that returns a tff string from a given individual "
            "couple");
+
+  py::class_<TrefleFIS>(m, "TrefleFIS")
+      .def(py::init<int>())
+      .def("predict", &TrefleFIS::predict, "predict one or more observations")
+      .def("from_tff", &TrefleFIS::from_tff,
+           "get a TrefleFIS instance from a tff str")
+      .def("from_tff_file", &TrefleFIS::from_tff_file,
+           "get a TrefleFIS instance from a tff file");
 }
 
 #endif // FISEVAL_BINDINGS_H

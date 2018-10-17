@@ -1,4 +1,3 @@
-from copy import deepcopy
 from enum import Enum
 from math import ceil, log
 from random import randint
@@ -6,7 +5,6 @@ from typing import List, Type
 
 import numpy as np
 from bitarray import bitarray
-from deap import creator
 from sklearn.preprocessing import MinMaxScaler
 
 from pyfuge.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
@@ -261,6 +259,13 @@ class CocoIndividual(FISIndividual, Clonable):
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
 
         self._cons_scaler = self._create_cons_scaler()
+
+        self._cons_range = np.vstack(
+            (self._cons_scaler.data_min_, self._cons_scaler.data_max_)
+        ).T.astype(np.double)
+        print("cons range")
+        print(self._cons_range)
+
         self._vars_range = self._create_vars_range(self._X_scaler)
 
         self._nce = NativeCocoEvaluator(
@@ -280,6 +285,7 @@ class CocoIndividual(FISIndividual, Clonable):
             n_classes_per_cons=self._n_classes_per_cons,
             default_cons=self._default_cons,
             vars_range=self._vars_range,
+            cons_range=self._cons_range,
         )
 
     def _create_cons_scaler(self):
@@ -420,8 +426,9 @@ class CocoIndividual(FISIndividual, Clonable):
     def convert_to_fis(self, pyf_file):
         pass
 
-    # def convert_to_fis(self, ind):
-    #     pass
+    def to_tff(self, ind_tuple):
+        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
+        return self._nce.to_tff(ind_sp1, ind_sp2)
 
     def get_y_true(self):
         return self._y
@@ -574,7 +581,9 @@ class CocoIndividual(FISIndividual, Clonable):
         class FixedSizeBitArray2:
             def __init__(self, bin_str=None):
                 if bin_str is None:
-                    bin_str = format(randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits))
+                    bin_str = format(
+                        randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits)
+                    )
                 self.bits = bitarray(bin_str)
 
             def true_deep_copy(self):

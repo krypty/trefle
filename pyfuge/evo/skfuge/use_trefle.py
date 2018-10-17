@@ -1,5 +1,5 @@
 from sklearn.datasets import load_breast_cancer
-from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
 from pyfuge.evo.helpers.fuzzy_labels import Label3
@@ -44,7 +44,6 @@ def run():
     # X_train = X_train[:3]
     # y_train = y_train[:3]
 
-
     def round_to_cls(arr, n_classes):
         bins = np.linspace(0, n_classes - 1, n_classes + 1)
         # print(bins)
@@ -61,7 +60,7 @@ def run():
     def fit(y_true, y_pred):
         y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
         # fitness_val = accuracy_score(y_true, y_pred_thresholded)
-        rmse = - mean_squared_error(y_true, y_pred)
+        rmse = -mean_squared_error(y_true, y_pred)
         return rmse
         # return rmse + fitness_val
         return fitness_val

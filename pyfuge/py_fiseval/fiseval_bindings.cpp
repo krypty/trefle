@@ -33,7 +33,7 @@ string FISCocoEvalWrapper::to_tff(const string &ind_sp1,
 
   string json_output;
   JsonFISWriter writer(fis, n_true_labels, cons_n_labels, n_classes_per_cons,
-                       vars_range, json_output);
+                       vars_range, cons_range, json_output);
   writer.write();
   return json_output;
 }
@@ -129,6 +129,10 @@ SingletonFIS FISCocoEvalWrapper::extract_fis(const string &ind_sp1,
   fis.predict(<X_or_observations>
   */
   SingletonFIS fis(fuzzy_rules, dfr);
+
+  // string filepath = "/tmp/yolo.tff";
+  // TffFISWriter writer(fis, filepath);
+  // writer.write();
   return fis;
 }
 

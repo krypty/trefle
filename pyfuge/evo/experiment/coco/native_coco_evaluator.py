@@ -1,9 +1,7 @@
 import pyfuge_c
 
 import numpy as np
-from sklearn.datasets import load_wine
 
-from pyfuge.evo.examples.evo_wine_classifier import load_wine_dataset
 from pyfuge.evo.helpers.fuzzy_labels import Label9
 
 
@@ -26,6 +24,7 @@ class NativeCocoEvaluator:
         n_classes_per_cons: np.array,
         default_cons: np.array,
         vars_range: np.array,
+        cons_range: np.array,
     ):
         self._fiseval = pyfuge_c.FISCocoEvalWrapper(
             X_train,
@@ -44,6 +43,7 @@ class NativeCocoEvaluator:
             n_classes_per_cons,
             default_cons,
             vars_range,
+            cons_range,
         )
 
     def predict_native(self, ind_sp1: str, ind_sp2: str, other_X: np.array = None):
@@ -65,7 +65,7 @@ class NativeCocoEvaluator:
     def print_ind(self, ind_sp1: str, ind_sp2: str):
         self._fiseval.print_ind(ind_sp1, ind_sp2)
 
-    def to_tff(self, ind_sp1:str, ind_sp2:str):
+    def to_tff(self, ind_sp1: str, ind_sp2: str):
         return self._fiseval.to_tff(ind_sp1, ind_sp2)
 
 
