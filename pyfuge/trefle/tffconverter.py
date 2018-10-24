@@ -11,7 +11,6 @@ from pyfuge.fs.core.mf.singleton_mf import SingletonMF
 from pyfuge.fs.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule_element import Antecedent, Consequent
-from pyfuge.fs.view.fis_viewer import FISViewer
 
 
 class TffJsonToSingletonFIS:
@@ -35,37 +34,17 @@ class TffJsonToSingletonFIS:
             else:
                 cons_labels.append(list(range(n_labels)))
 
-        # cons_labels = [
-        #     generate_labels(n) for n, k in zip(self._jfis["n_labels_per_cons"], self._jfis["n_classes_per_cons"] ) if k == 0 else range(n)
-        # ]
-
         lvs = self._parse_lvs()
 
-        # TODO scale/scale back cons
         cons_lvs = self._parse_cons_lvs()
 
         rules = self._parse_rules(lvs, labels, cons_lvs, cons_labels)
 
-        # for r in rules:
-        #     print(r)
-
         default_rule = self._parse_default_rule(cons_lvs, cons_labels)
 
-        # for lv in cons_lvs:
-        #     LinguisticVariableViewer(lv).show()
-
-        # fr = FuzzyRule()
-        # rules = []
-        # default_rule = []
-        #
         fis = SingletonFIS(rules, default_rule)
-        fis.describe()
-        FISViewer(fis).show()
-        # print(jfis)
 
         return fis
-
-        # TODO return SingletonFIS
 
     def _ensure_version(self):
         if self._jfis["version"] != self.SUPPORTED_VERSION:

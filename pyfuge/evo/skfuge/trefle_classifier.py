@@ -179,10 +179,8 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
         self._fis_ind.print_ind(ind_tuple)
 
         tff_fis = self._fis_ind.to_tff(ind_tuple)
-        # TODO: here convert to SingletonFIS or TrefleFIS using
-        # TffConverter
-        # TffConverter.to_fis(tff_fis)
-        return tff_fis
+        fis = TffConverter.to_fis(tff_fis)
+        return fis
 
     def _ensure_fit(self):
         if getattr(self, "_fis_ind") is None:
