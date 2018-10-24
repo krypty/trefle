@@ -25,5 +25,9 @@ class Experiment(metaclass=ABCMeta):
             )
 
     @abstractmethod
+    def get_logbook(self):
+        raise NotImplementedError()
+
+    @abstractmethod
     def run(self):
-        pass
+        raise NotImplementedError()

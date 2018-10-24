@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error
 
 from pyfuge.evo.experiment.base.coco_experiment import CocoExperiment
 from pyfuge.evo.experiment.coco.coco_individual import CocoIndividual
+from pyfuge.evo.experiment.view.coco_evolution_viewer import CocoEvolutionViewer
 from pyfuge.evo.helpers.fuzzy_labels import LabelEnum, Label3
 from pyfuge.trefle.tffconverter import TffConverter
 
@@ -134,6 +135,9 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
             fitness_func=self.fitness_function,
         )
         exp.run()
+
+        logbook = exp.get_logbook()
+        CocoEvolutionViewer.plot_fitness(logbook)
 
         self._best_ind = exp.get_top_n()[0]
         return self

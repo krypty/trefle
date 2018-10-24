@@ -30,6 +30,9 @@ class CocoExperiment(Experiment):
     algorithm with DEAP library.
     """
 
+    def get_logbook(self):
+        return self._logbook
+
     def __init__(
         self,
         coco_ind: CocoIndividual,
@@ -55,40 +58,6 @@ class CocoExperiment(Experiment):
 
     def run(self):
         self.coop()
-        self.plot_fitness()
-
-    def plot_fitness(self):
-        import matplotlib.pyplot as plt
-
-        gen = self._logbook.select("gen")
-        gen = list(set(gen))
-        fit = self._logbook.select("species", "max")
-        max_fit_sp1 = [v[1] for v in zip(*fit) if v[0] == "sp1"]
-        max_fit_sp2 = [v[1] for v in zip(*fit) if v[0] == "sp2"]
-
-        avg_hof = self._logbook.select("avg_hof")
-        # drop half the points to have the same as the number of generations
-        avg_hof = [v for i, v in enumerate(avg_hof) if i % 2 == 0]
-
-        fig, ax1 = plt.subplots()
-        line1 = ax1.plot(gen, max_fit_sp1, "b-", label="Max fit sp1")
-        ax1.set_xlabel("Generation")
-        ax1.set_ylabel("Fitness", color="b")
-        for tl in ax1.get_yticklabels():
-            tl.set_color("b")
-
-        ax2 = ax1.twinx()
-
-        line2 = ax2.plot(gen, avg_hof, "r-", label="Max fit sp2")
-        ax2.set_ylabel("Fitness sp2", color="r")
-        for tl in ax2.get_yticklabels():
-            tl.set_color("r")
-
-        lns = line1 + line2
-        labs = [l.get_label() for l in lns]
-        ax1.legend(lns, labs, loc="center right")
-
-        plt.show()
 
     def coop(self):
         verbose = True
@@ -304,7 +273,6 @@ def update_logbook(hof, all_species, species_name, g, logbook, stats, verbose):
     logbook.record(avg_hof=avg_hof, gen=g, species=species_name, **record)
 
     if verbose:
-        print("--------", ([h for h in hof]))
         print(logbook.stream)
 
 
