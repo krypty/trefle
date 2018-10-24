@@ -136,8 +136,9 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
         )
         exp.run()
 
-        logbook = exp.get_logbook()
-        CocoEvolutionViewer.plot_fitness(logbook)
+        if self.verbose:
+            logbook = exp.get_logbook()
+            CocoEvolutionViewer.plot_fitness(logbook)
 
         self._best_ind = exp.get_top_n()[0]
         return self
