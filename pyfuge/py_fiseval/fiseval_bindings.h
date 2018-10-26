@@ -106,59 +106,34 @@ class ObservationsScaler {
   using map_ranges = unordered_map<size_t, vector<double>>;
 
 public:
-  ObservationsScaler(const map_ranges &ranges) : ranges{ranges} {}
+  ObservationsScaler(const map_ranges &vars_range) : vars_range{vars_range} {}
 
-  vector2d scale(const vector2d &data) {
-    const size_t rows = data.size();
-    const size_t cols = data[0].size();
+  vector2d scale(const vector2d &observations) {
+    const size_t n_obs = observations.size();
+    const size_t n_vars = observations[0].size();
 
-    vector2d scaled_data(rows, vector<double>(cols, 0));
+    vector2d scaled_observations(n_obs, vector<double>(n_vars, 0));
 
-    for (size_t i = 0; i < rows; i++) {
-      for (size_t j = 0; j < cols; j++) {
-        auto search = ranges.find(j);
-        // if ranges don't specify min and max for this variable
-        if (search == ranges.end()) {
-          scaled_data[i][j] = data[i][j];
+    for (size_t i = 0; i < n_obs; i++) {
+      for (size_t j = 0; j < n_vars; j++) {
+        auto search = vars_range.find(j);
+        // if we have not a range for this variable (i.e. it is not used by
+        // the fuzzy system) then we don't apply any normalization.
+        if (search == vars_range.end()) {
+          scaled_observations[i][j] = observations[i][j];
         } else {
-          auto var_min = ranges[j][0];
-          auto var_max = ranges[j][1];
-          scaled_data[i][j] = (data[i][j] - var_min) / (var_max - var_min);
+          auto var_min = vars_range[j][0];
+          auto var_max = vars_range[j][1];
+          scaled_observations[i][j] =
+              (observations[i][j] - var_min) / (var_max - var_min);
         }
       }
     }
-    return scaled_data;
+    return scaled_observations;
   }
 
-  // vector2d inverse_scale(const vector2d &scaled_data) {
-  //   cout << "lala1" << endl;
-  //   const size_t rows = scaled_data.size();
-  //   const size_t cols = scaled_data[0].size();
-  //
-  //   cout << "lala2" << endl;
-  //   vector2d data(rows, vector<T>(cols, 0));
-  //
-  //   for (size_t i = 0; i < rows; i++) {
-  //     for (size_t j = 0; j < cols; j++) {
-  //       cout << "lala3" << endl;
-  //       auto search = ranges.find(j);
-  //       // if ranges don't specify min and max for this variable
-  //       if (search == ranges.end()) {
-  //         data[i][j] = scaled_data[i][j];
-  //       } else {
-  //         auto var_min = ranges[i][0];
-  //         auto var_max = ranges[i][1];
-  //         cout << "lala4" << endl;
-  //         data[i][j] = (var_max - var_min) * scaled_data[i][j] + var_min;
-  //         cout << "lala5" << endl;
-  //       }
-  //     }
-  //   }
-  //   return data;
-  // }
-
 private:
-  map_ranges ranges;
+  map_ranges vars_range;
 };
 
 class PredictionsScaler {
@@ -169,45 +144,23 @@ public:
                     const vector<size_t> &n_labels_per_cons)
       : cons_range{cons_range}, n_labels_per_cons{n_labels_per_cons} {}
 
-  // vector2d scale(const vector2d &predictions) const {
-  //   const size_t rows = predictions.size();
-  //   const size_t cols = predictions[0].size();
-  //
-  //   vector2d predictions_scaled(rows, vector<T>(cols, 0));
-  //
-  //   for (size_t i = 0; i < rows; i++) {
-  //     for (size_t j = 0; j < cols; j++) {
-  //       auto var_min = ranges[j][0];
-  //       auto var_max = ranges[j][1];
-  //       predictions_scaled[i][j] =
-  //           (predictions[i][j] / (n_labels_per_cons[j] - 1) - var_min) /
-  //           (var_max - var_min);
-  //     }
-  //   }
-  //   return predictions_scaled;
-  // }
+  vector2d scale(const vector2d &scaled_predictions) const {
+    const size_t n_predictions = scaled_predictions.size();
+    const size_t n_cons = scaled_predictions[0].size();
 
-  vector2d scale(const vector2d &scaled_data) const {
-    cout << "lala" << endl;
-    const size_t rows = scaled_data.size();
-    const size_t cols = scaled_data[0].size();
-    cout << "rows " << rows << endl;
-    cout << "cols " << cols << endl;
+    vector2d predictions(n_predictions, vector<double>(n_cons, 0));
 
-    vector2d data(rows, vector<double>(cols, 0));
-    cout << "lala1" << endl;
-
-    for (size_t i = 0; i < rows; i++) {
-      for (size_t j = 0; j < cols; j++) {
-        cout << "lala2" << endl;
+    for (size_t i = 0; i < n_predictions; i++) {
+      for (size_t j = 0; j < n_cons; j++) {
         auto var_min = cons_range[j][0];
         auto var_max = cons_range[j][1];
-        cout << "lala3" << endl;
-        data[i][j] = scaled_data[i][j] / (n_labels_per_cons[j] - 1);
-        data[i][j] = (var_max - var_min) * data[i][j] + var_min;
+        auto n_labels = n_labels_per_cons[j] - 1;
+
+        predictions[i][j] = scaled_predictions[i][j] / n_labels;
+        predictions[i][j] = (var_max - var_min) * predictions[i][j] + var_min;
       }
     }
-    return data;
+    return predictions;
   }
 
 private:
@@ -218,10 +171,10 @@ private:
 class TrefleFIS {
 public:
   static TrefleFIS from_tff(const string &tff_str) {
-    cout << "read from_tff" << endl;
     JsonFISReader fis_reader(tff_str);
 
     auto fis = fis_reader.read();
+
     auto vars_range = fis_reader.get_vars_range();
     auto cons_range = fis_reader.get_cons_range();
     auto n_labels_per_cons = fis_reader.get_n_labels_per_cons();
@@ -240,26 +193,14 @@ public:
   }
 
   py_array_d predict(py_array_d &np_observations) {
-    cout << "predict !" << endl;
-
     vector<vector<double>> observations(np_observations.shape(0));
     np_arr2d_to_vec2d(np_observations, observations);
-
-    // cout << "observations in C++" << endl;
-    // for (size_t i = 0; i < observations.size(); i++) {
-    //   for (size_t j = 0; j < observations[0].size(); j++) {
-    //     cout << observations[i][j] << ",";
-    //   }
-    //   cout << endl;
-    // }
 
     observations = observations_scaler.scale(observations);
 
     auto y_pred = fis.predict(observations);
-    cout << "toto4" << endl;
 
     y_pred = predictions_scaler.scale(y_pred);
-    cout << "toto5" << endl;
     return vec2d_to_np_vec2d(y_pred);
   }
 
