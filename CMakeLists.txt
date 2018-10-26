@@ -4,6 +4,11 @@ set(SOURCE_DIR pyfuge/py_fiseval)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Enable C+14 features
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 find_package(OpenMP)
 if(OPENMP_FOUND)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
