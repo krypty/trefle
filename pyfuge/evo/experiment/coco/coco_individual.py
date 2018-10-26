@@ -263,8 +263,6 @@ class CocoIndividual(FISIndividual, Clonable):
         self._cons_range = np.vstack(
             (self._cons_scaler.data_min_, self._cons_scaler.data_max_)
         ).T.astype(np.double)
-        print("cons range")
-        print(self._cons_range)
 
         self._vars_range = self._create_vars_range(self._X_scaler)
 

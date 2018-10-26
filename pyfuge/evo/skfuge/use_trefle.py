@@ -1,5 +1,5 @@
-from sklearn.datasets import load_breast_cancer
-from sklearn.metrics import mean_squared_error
+from sklearn.datasets import load_breast_cancer, load_iris
+from sklearn.metrics import mean_squared_error, accuracy_score
 from sklearn.model_selection import train_test_split
 
 from pyfuge.evo.helpers.fuzzy_labels import Label3
@@ -20,9 +20,11 @@ def run():
 
     # Organize our data
     y_names = data["target_names"]
+    print("target names", y_names)
     y = data["target"]
     y = y.reshape(-1, 1)
     X_names = data["feature_names"]
+    print("features names", X_names)
     X = data["data"]
 
     # FIXME support regression problems
@@ -58,24 +60,24 @@ def run():
     #     )
 
     def fit(y_true, y_pred):
-        y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
+        # y_pred_thresholded = round_to_cls(y_pred, n_classes=3)
         # fitness_val = accuracy_score(y_true, y_pred_thresholded)
         rmse = -mean_squared_error(y_true, y_pred)
         return rmse
         # return rmse + fitness_val
-        return fitness_val
+        # return fitness_val
 
     # Initialize our classifier
     clf = TrefleClassifier(
-        n_rules=5,
+        n_rules=3,
         n_classes_per_cons=[2, 4, 0],
-        default_cons=[1, 2, Label3.MEDIUM],
-        n_max_vars_per_rule=3,
-        n_generations=2,
+        default_cons=[1,2,Label3.MEDIUM],
+        n_max_vars_per_rule=4,
+        n_generations=10,
         pop_size=100,
-        n_labels_per_mf=4,
+        n_labels_per_mf=3,
         verbose=True,
-        dc_weight=1,
+        dc_weight=2,
         # p_positions_per_lv=16,
         n_lv_per_ind_sp1=40,
         fitness_function=fit,
@@ -85,19 +87,34 @@ def run():
     model = clf.fit(X_train, y_train)
 
     # Make predictions
+    np.save("/tmp/X_test", X_test)
     y_pred = clf.predict(X_test)
+    np.save("/tmp/y_pred", y_pred)
 
     # fis = clf.get_best_fuzzy_system()
     fis = clf.get_best_fuzzy_system()
     print("best fis is ", end="")
     print(fis)
 
+    # y_pred_legacy = []
+    # for crisp_values in X_test:
+    #     crisp_values = {str(i): v for i, v in enumerate(crisp_values)}
+    #     y_pred_legacy.append(fis.predict(crisp_values)["out0"])
+    # y_pred_legacy = np.asarray(y_pred_legacy).reshape(-1, 1)
+    #
+    # # np.set_printoptions(suppress=True, precision=6)
+    # print("y_pred vs y_pred_legacy")
+    # print(y_pred.shape, y_pred_legacy.shape)
+    # print(y_pred_legacy - y_pred)
+    # print(np.isclose(y_pred, y_pred_legacy).all())
+
+
     # FISViewer(fis).show()
 
     # Evaluate accuracy
     print("Simple run score: ")
 
-    # y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
+    # y_pred_thresholded = round_to_cls(y_pred, n_classes=3)
     # print("acc", accuracy_score(y_test, y_pred_thresholded))
     # print(classification_report(y_test, y_pred))
     print(mean_squared_error(y_test, y_pred, multioutput="raw_values"))

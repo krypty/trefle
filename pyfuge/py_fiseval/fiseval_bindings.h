@@ -4,6 +4,7 @@
 #include "default_fuzzy_rule.h"
 #include "fis.h"
 #include "fuzzy_rule.h"
+#include "json_fis_reader.h"
 #include "json_fis_writer.h"
 #include "linguisticvariable.h"
 #include "singleton_fis.h"
@@ -18,6 +19,51 @@
 namespace py = pybind11;
 
 using namespace std;
+
+typedef py::array_t<double, py::array::c_style | py::array::forcecast>
+    py_array_d;
+typedef py::array_t<float, py::array::c_style | py::array::forcecast>
+    py_array_f;
+typedef py::array_t<int, py::array::c_style | py::array::forcecast> py_array_i;
+
+template <typename T>
+using py_array = py::array_t<T, py::array::c_style | py::array::forcecast>;
+
+template <typename T, typename U>
+void np_arr1d_to_vec(py_array<T> np_arr, vector<U> &arr, size_t n) {
+  auto arr_buf = np_arr.request();
+  auto ptr_arr = (int *)(arr_buf.ptr);
+  arr.assign(ptr_arr, ptr_arr + n);
+}
+
+// caller must init `arr` with already n rows
+template <typename T, typename U>
+void np_arr2d_to_vec2d(py_array<T> np_arr, vector<vector<U>> &arr) {
+  size_t rows = np_arr.shape(0);
+  size_t cols = np_arr.shape(1);
+
+  auto arr_buf = np_arr.request();
+  auto ptr_arr = (double *)(arr_buf.ptr);
+
+  for (size_t i = 0; i < rows; i++) {
+    auto offset = ptr_arr + (i * cols);
+    arr[i].assign(offset, offset + cols);
+  }
+}
+
+template <typename T>
+py_array<T> vec2d_to_np_vec2d(const vector<vector<T>> &arr) {
+  const size_t rows = arr.size(), cols = arr[0].size();
+  auto np_arr = py_array<T>({rows, cols});
+  auto np_arr_raw = np_arr.mutable_unchecked();
+
+  for (size_t i = 0; i < rows; i++) {
+    for (size_t j = 0; j < cols; j++) {
+      np_arr_raw(i, j) = arr[i][j];
+    }
+  }
+  return np_arr;
+}
 
 class TffFISWriter {
 public:
@@ -45,56 +91,190 @@ public:
   }
 
 private:
-  SingletonFIS fis;
+  const SingletonFIS fis;
   const size_t n_true_labels;
   const vector<size_t> n_cons_per_labels;
   const vector<size_t> n_classes_per_cons;
   const vector<vector<double>> vars_range;
   const vector<vector<double>> cons_range;
   const string &filepath;
-  string json_output = "hello";
+  string json_output;
+};
+
+class ObservationsScaler {
+  using vector2d = vector<vector<double>>;
+  using map_ranges = unordered_map<size_t, vector<double>>;
+
+public:
+  ObservationsScaler(const map_ranges &ranges) : ranges{ranges} {}
+
+  vector2d scale(const vector2d &data) {
+    const size_t rows = data.size();
+    const size_t cols = data[0].size();
+
+    vector2d scaled_data(rows, vector<double>(cols, 0));
+
+    for (size_t i = 0; i < rows; i++) {
+      for (size_t j = 0; j < cols; j++) {
+        auto search = ranges.find(j);
+        // if ranges don't specify min and max for this variable
+        if (search == ranges.end()) {
+          scaled_data[i][j] = data[i][j];
+        } else {
+          auto var_min = ranges[j][0];
+          auto var_max = ranges[j][1];
+          scaled_data[i][j] = (data[i][j] - var_min) / (var_max - var_min);
+        }
+      }
+    }
+    return scaled_data;
+  }
+
+  // vector2d inverse_scale(const vector2d &scaled_data) {
+  //   cout << "lala1" << endl;
+  //   const size_t rows = scaled_data.size();
+  //   const size_t cols = scaled_data[0].size();
+  //
+  //   cout << "lala2" << endl;
+  //   vector2d data(rows, vector<T>(cols, 0));
+  //
+  //   for (size_t i = 0; i < rows; i++) {
+  //     for (size_t j = 0; j < cols; j++) {
+  //       cout << "lala3" << endl;
+  //       auto search = ranges.find(j);
+  //       // if ranges don't specify min and max for this variable
+  //       if (search == ranges.end()) {
+  //         data[i][j] = scaled_data[i][j];
+  //       } else {
+  //         auto var_min = ranges[i][0];
+  //         auto var_max = ranges[i][1];
+  //         cout << "lala4" << endl;
+  //         data[i][j] = (var_max - var_min) * scaled_data[i][j] + var_min;
+  //         cout << "lala5" << endl;
+  //       }
+  //     }
+  //   }
+  //   return data;
+  // }
+
+private:
+  map_ranges ranges;
+};
+
+class PredictionsScaler {
+  using vector2d = vector<vector<double>>;
+
+public:
+  PredictionsScaler(const vector2d &cons_range,
+                    const vector<size_t> &n_labels_per_cons)
+      : cons_range{cons_range}, n_labels_per_cons{n_labels_per_cons} {}
+
+  // vector2d scale(const vector2d &predictions) const {
+  //   const size_t rows = predictions.size();
+  //   const size_t cols = predictions[0].size();
+  //
+  //   vector2d predictions_scaled(rows, vector<T>(cols, 0));
+  //
+  //   for (size_t i = 0; i < rows; i++) {
+  //     for (size_t j = 0; j < cols; j++) {
+  //       auto var_min = ranges[j][0];
+  //       auto var_max = ranges[j][1];
+  //       predictions_scaled[i][j] =
+  //           (predictions[i][j] / (n_labels_per_cons[j] - 1) - var_min) /
+  //           (var_max - var_min);
+  //     }
+  //   }
+  //   return predictions_scaled;
+  // }
+
+  vector2d scale(const vector2d &scaled_data) const {
+    cout << "lala" << endl;
+    const size_t rows = scaled_data.size();
+    const size_t cols = scaled_data[0].size();
+    cout << "rows " << rows << endl;
+    cout << "cols " << cols << endl;
+
+    vector2d data(rows, vector<double>(cols, 0));
+    cout << "lala1" << endl;
+
+    for (size_t i = 0; i < rows; i++) {
+      for (size_t j = 0; j < cols; j++) {
+        cout << "lala2" << endl;
+        auto var_min = cons_range[j][0];
+        auto var_max = cons_range[j][1];
+        cout << "lala3" << endl;
+        data[i][j] = scaled_data[i][j] / (n_labels_per_cons[j] - 1);
+        data[i][j] = (var_max - var_min) * data[i][j] + var_min;
+      }
+    }
+    return data;
+  }
+
+private:
+  vector2d cons_range;
+  vector<size_t> n_labels_per_cons;
 };
 
 class TrefleFIS {
 public:
-  TrefleFIS(int a) : a(a){}; // TODO respect rule of 3/5/7
-  // private:
-  //   TrefleFIS(const SingletonFIS &fis) : fis(fis){};
-
-public:
   static TrefleFIS from_tff(const string &tff_str) {
     cout << "read from_tff" << endl;
-    return TrefleFIS(10);
+    JsonFISReader fis_reader(tff_str);
+
+    auto fis = fis_reader.read();
+    auto vars_range = fis_reader.get_vars_range();
+    auto cons_range = fis_reader.get_cons_range();
+    auto n_labels_per_cons = fis_reader.get_n_labels_per_cons();
+
+    ObservationsScaler observations_scaler(vars_range);
+    PredictionsScaler predictions_scaler(cons_range, n_labels_per_cons);
+
+    return TrefleFIS(fis, observations_scaler, predictions_scaler);
   }
+
   static TrefleFIS from_tff_file(const string &tff_file) {
+    // TODO
     cout << "read from_tff_file" << endl;
-    return TrefleFIS(20);
+    string TODO_CHANGE_ME_STR = "";
+    return from_tff(TODO_CHANGE_ME_STR);
   }
 
-  void predict() {
-    // auto rules = vector<FuzzyRule>{{0.0, 1.0}};
-    // auto default_rule = vector<DefaultFuzzyRule>{{0.0, 1.0}};
-    // SingletonFIS fis(rules, default_rule);
-    // string filepath = "/tmp/yolo.tff";
-    // TffFISWriter writer(fis, filepath);
-    // writer.write();
+  py_array_d predict(py_array_d &np_observations) {
+    cout << "predict !" << endl;
 
-    cout << "predict !" << a << endl;
+    vector<vector<double>> observations(np_observations.shape(0));
+    np_arr2d_to_vec2d(np_observations, observations);
+
+    // cout << "observations in C++" << endl;
+    // for (size_t i = 0; i < observations.size(); i++) {
+    //   for (size_t j = 0; j < observations[0].size(); j++) {
+    //     cout << observations[i][j] << ",";
+    //   }
+    //   cout << endl;
+    // }
+
+    observations = observations_scaler.scale(observations);
+
+    auto y_pred = fis.predict(observations);
+    cout << "toto4" << endl;
+
+    y_pred = predictions_scaler.scale(y_pred);
+    cout << "toto5" << endl;
+    return vec2d_to_np_vec2d(y_pred);
   }
-  // auto predict() { return fis.predict(); }
 
 private:
-  int a;
+  TrefleFIS(const SingletonFIS &fis,
+            const ObservationsScaler &observations_scaler,
+            const PredictionsScaler &predictions_scaler)
+      : fis{fis}, observations_scaler{observations_scaler},
+        predictions_scaler{predictions_scaler} {};
+
+private:
+  SingletonFIS fis;
+  ObservationsScaler observations_scaler;
+  PredictionsScaler predictions_scaler;
 };
-
-typedef py::array_t<double, py::array::c_style | py::array::forcecast>
-    py_array_d;
-typedef py::array_t<float, py::array::c_style | py::array::forcecast>
-    py_array_f;
-typedef py::array_t<int, py::array::c_style | py::array::forcecast> py_array_i;
-
-template <typename T>
-using py_array = py::array_t<T, py::array::c_style | py::array::forcecast>;
 
 class FISCocoEvalWrapper {
 public:
@@ -190,42 +370,6 @@ private:
                    const vector<size_t> &r_labels_ri,
                    const vector<double> cons_ri);
 
-  template <typename T, typename U>
-  void np_arr1d_to_vec(py_array<T> np_arr, vector<U> &arr, size_t n) {
-    auto arr_buf = np_arr.request();
-    auto ptr_arr = (int *)(arr_buf.ptr);
-    arr.assign(ptr_arr, ptr_arr + n);
-  }
-
-  // caller must init `arr` with already n rows
-  template <typename T, typename U>
-  void np_arr2d_to_vec2d(py_array<T> np_arr, vector<vector<U>> &arr) {
-    size_t rows = np_arr.shape(0);
-    size_t cols = np_arr.shape(1);
-
-    auto arr_buf = np_arr.request();
-    auto ptr_arr = (double *)(arr_buf.ptr);
-
-    for (size_t i = 0; i < rows; i++) {
-      auto offset = ptr_arr + (i * cols);
-      arr[i].assign(offset, offset + cols);
-    }
-  }
-
-  template <typename T>
-  py_array<T> vec2d_to_np_vec2d(const vector<vector<T>> &arr) {
-    const size_t rows = arr.size(), cols = arr[0].size();
-    auto np_arr = py_array<T>({rows, cols});
-    auto np_arr_raw = np_arr.mutable_unchecked();
-
-    for (size_t i = 0; i < rows; i++) {
-      for (size_t j = 0; j < cols; j++) {
-        np_arr_raw(i, j) = arr[i][j];
-      }
-    }
-    return np_arr;
-  }
-
 private:
   vector<vector<double>> X_train;
   const int n_vars;
@@ -285,7 +429,7 @@ PYBIND11_MODULE(pyfuge_c, m) {
            "couple");
 
   py::class_<TrefleFIS>(m, "TrefleFIS")
-      .def(py::init<int>())
+      // .def(py::init<int>())
       .def("predict", &TrefleFIS::predict, "predict one or more observations")
       .def("from_tff", &TrefleFIS::from_tff,
            "get a TrefleFIS instance from a tff str")
