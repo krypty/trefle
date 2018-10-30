@@ -1,25 +1,33 @@
+from abc import ABCMeta, abstractmethod
 from typing import Callable
 
-from pyfuge.evo.dataset.pf_dataset import PFDataset
-from pyfuge.evo.helpers.fis_individual import FISIndividual
 
-
-class Experiment:
-    def __init__(self, dataset: PFDataset, fis_individual: FISIndividual,
-                 fitness_func: Callable, **kwargs):
+class Experiment(metaclass=ABCMeta):
+    def __init__(self, fitness_func: Callable, **kwargs):
         """
 
-        :param dataset: a PyFUGE-formatted dataset
-        :param fis_individual: a class that uses an individual to return
-        predictions
         :param fitness_func: a function that will return a fitness scalar.
         :param kwargs: other experiment parameters
         """
-        self._dataset = dataset
-        self._fis_individual = fis_individual
         self._fitness_func = fitness_func
-
         self._kwargs = kwargs
 
+    def _post_init(self):
+        self._warn_unused_args()
+
+    def _warn_unused_args(self):
+        if len(self._kwargs) > 0:
+            cls_name = Experiment.__name__
+            unused_args = ", ".join(self._kwargs.keys())
+            print(
+                "[{}] warning: the following arguments have been "
+                "ignored: {}".format(cls_name, unused_args)
+            )
+
+    @abstractmethod
+    def get_logbook(self):
+        raise NotImplementedError()
+
+    @abstractmethod
     def run(self):
-        pass
+        raise NotImplementedError()

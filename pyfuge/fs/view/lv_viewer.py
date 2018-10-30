@@ -1,5 +1,3 @@
-from typing import List
-
 from pyfuge.fs.core.lv.linguistic_variable import \
     LinguisticVariable
 from pyfuge.fs.core.mf.lin_piece_wise_mf import \
@@ -17,7 +15,7 @@ class LinguisticVariableViewer(Viewer):
         super(LinguisticVariableViewer, self).__init__(ax)
         self.__lv = lv
 
-        self._viewers: List[MembershipFunctionViewer] = self.get_plot(self._ax)
+        self._viewers = self.get_plot(self._ax)
 
     def fuzzify(self, in_value):
         [v.fuzzify(in_value) for v in self._viewers]

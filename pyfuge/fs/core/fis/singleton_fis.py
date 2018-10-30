@@ -3,10 +3,8 @@ from itertools import chain
 from typing import List
 
 from pyfuge.fs.core.fis.fis import FIS
-from pyfuge.fs.core.mf.free_shape_mf import \
-    FreeShapeMF
-from pyfuge.fs.core.mf.singleton_mf import \
-    SingletonMF
+from pyfuge.fs.core.mf.free_shape_mf import FreeShapeMF
+from pyfuge.fs.core.mf.singleton_mf import SingletonMF
 from pyfuge.fs.core.rules.default_fuzzy_rule import DefaultFuzzyRule
 from pyfuge.fs.core.rules.fuzzy_rule import FuzzyRule
 
@@ -25,8 +23,7 @@ def are_all_consequents_singleton(rules: List[FuzzyRule]):
 
 
 class SingletonFIS(FIS):
-    def __init__(self,
-                 rules: List[FuzzyRule], default_rule: DefaultFuzzyRule = None):
+    def __init__(self, rules: List[FuzzyRule], default_rule: DefaultFuzzyRule = None):
         """
         Create a singleton fuzzy inference system. This class is not optimized
         for speed because it is more like a wrapper around the FIS class. This
@@ -37,12 +34,13 @@ class SingletonFIS(FIS):
         :param default_rule: see FIS docstring
         """
 
-        assert are_all_consequents_singleton(rules), \
-            "All consequents must be singleton when using a SingletonFIS"
+        assert are_all_consequents_singleton(
+            rules
+        ), "All consequents must be singleton when using a SingletonFIS"
 
-        super(SingletonFIS, self).__init__(aggr_func=None, defuzz_func=None,
-                                           rules=rules,
-                                           default_rule=default_rule)
+        super(SingletonFIS, self).__init__(
+            aggr_func=None, defuzz_func=None, rules=rules, default_rule=default_rule
+        )
 
     def _aggregate(self, rules_implicated_cons):
         aggregated_consequents = {}
@@ -60,20 +58,22 @@ class SingletonFIS(FIS):
                 cons_implicated_value = out_v_mf[i].mf_values[0]
                 label = rule.consequents[index].lv_value
 
-                rule_act_value = \
-                    rule.consequents[index].lv_name.ling_values[
-                        label].in_values[0]
+                rule_act_value = (
+                    rule.consequents[index].lv_name.ling_values[label].in_values[0]
+                )
 
                 numerator += cons_implicated_value * rule_act_value
                 denominator += cons_implicated_value
 
             # TODO: replace FreeShapeMF by lighter data structure for singl. fis
             aggregated_consequents[out_v_name] = FreeShapeMF(
-                in_values=[numerator / float(denominator)], mf_values=[1])
+                in_values=[numerator / float(denominator)], mf_values=[1]
+            )
 
         return aggregated_consequents
 
     def _defuzzify(self):
-        self._defuzzified_outputs = {k: v.in_values[0] for k, v in
-                                     self._aggregated_consequents.items()}
+        self._defuzzified_outputs = {
+            k: v.in_values[0] for k, v in self._aggregated_consequents.items()
+        }
         return self._defuzzified_outputs
