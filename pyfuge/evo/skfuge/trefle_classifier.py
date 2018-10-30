@@ -179,6 +179,7 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
         self._fis_ind.print_ind(ind_tuple)
 
         tff_fis = self._fis_ind.to_tff(ind_tuple)
+        open("/tmp/temp.tff", mode="w").write(tff_fis)
         fis = TffConverter.to_fis(tff_fis)
         return fis
 

@@ -236,6 +236,7 @@ if __name__ == "__main__":
 
     # converted_fis = TffConverter.to_fis(tff_str)
     # FISViewer(converted_fis).show()
+    tff_str = open("/tmp/temp.tff").read()
     trefle_fis = TffConverter.to_trefle_fis(tff_str)
     X_test = np.load("/tmp/X_test.npy")
     y_pred_expected = np.load("/tmp/y_pred.npy")
