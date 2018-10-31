@@ -5,9 +5,8 @@ py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
                                                   const string &ind_sp2) {
   return predict(ind_sp1, ind_sp2, X_train);
 }
-py::array_t<double> FISCocoEvalWrapper::predict_c_other(const string &ind_sp1,
-                                                        const string &ind_sp2,
-                                                        py_array_d np_other_X) {
+py::array_t<double> FISCocoEvalWrapper::predict_c_other(
+    const string &ind_sp1, const string &ind_sp2, py_array<double> np_other_X) {
   vector<vector<double>> other_X(np_other_X.shape(0));
   np_arr2d_to_vec2d(np_other_X, other_X);
 

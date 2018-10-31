@@ -9,13 +9,50 @@
 #include "linguisticvariable.h"
 #include "pybind_utils.h"
 #include "singleton_fis.h"
-#include "tff_fis_writer.h"
 #include "trilv.h"
+#include <fstream>
+#include <iostream>
 #include <pybind11/pybind11.h>
 #include <string>
 #include <unordered_map>
 
 using namespace std;
+
+class TffFISWriter {
+public:
+  TffFISWriter(const SingletonFIS &fis, size_t n_true_labels,
+               const vector<size_t> &n_cons_per_labels,
+               const vector<size_t> &n_classes_per_cons,
+               const vector<vector<double>> vars_range,
+               const vector<vector<double>> cons_range, const string &filepath)
+      : fis{fis}, n_true_labels{n_true_labels},
+        n_classes_per_cons{n_classes_per_cons},
+        n_cons_per_labels{n_cons_per_labels}, vars_range{vars_range},
+        cons_range{cons_range}, filepath{filepath} {};
+
+  virtual void write() {
+    JsonFISWriter writer(fis, n_true_labels, n_cons_per_labels,
+                         n_classes_per_cons, vars_range, cons_range,
+                         json_output);
+    writer.write();
+    std::ofstream fout(filepath);
+    if (fout) {
+      fout << json_output;
+    } else {
+      cerr << "cannot write in " << filepath << endl;
+    }
+  }
+
+private:
+  const SingletonFIS fis;
+  const size_t n_true_labels;
+  const vector<size_t> n_cons_per_labels;
+  const vector<size_t> n_classes_per_cons;
+  const vector<vector<double>> vars_range;
+  const vector<vector<double>> cons_range;
+  const string &filepath;
+  string json_output;
+};
 
 class ObservationsScaler {
   using vector2d = vector<vector<double>>;
@@ -142,7 +179,7 @@ public:
                      const int n_cons, const int n_bits_per_cons,
                      const int n_bits_per_label, const int dc_weight,
                      py_array<int> np_cons_n_labels,
-                     py_array<int> np_n_classes_per_cons,
+                     py_array<double> np_n_classes_per_cons,
                      py_array<int> np_default_cons,
                      py_array<double> np_vars_range,
                      py_array<double> np_cons_range)

@@ -17,6 +17,7 @@ if(OPENMP_FOUND)
 endif()
 include_directories(
     # ${SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/include
     ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/FISEval/include
     ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/FISEval/vendor/eigen
     ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/FISEval/vendor/catch2/single_include
