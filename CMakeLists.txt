@@ -15,6 +15,12 @@ if(OPENMP_FOUND)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
+
+set(SOURCES
+    ${SOURCE_DIR}/fiseval_bindings.cpp
+    ${SOURCE_DIR}/trefle_fis.cpp
+    )
+
 include_directories(
     # ${SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/include
@@ -25,7 +31,7 @@ include_directories(
 
 add_subdirectory(${SOURCE_DIR}/FISEval)
 add_subdirectory(${SOURCE_DIR}/pybind11)
-pybind11_add_module(pyfuge_c SHARED "${SOURCE_DIR}/fiseval_bindings.cpp" ${SOURCE_DIR}/FISEval)
+pybind11_add_module(pyfuge_c SHARED ${SOURCES} ${SOURCE_DIR}/FISEval)
 target_link_libraries(pyfuge_c PRIVATE pyfuge)
 
 message(STATUS "${SOURCES}")

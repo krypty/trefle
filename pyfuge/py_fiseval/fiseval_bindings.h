@@ -12,59 +12,11 @@
 #include "pybind_utils.h"
 #include "singleton_fis.h"
 #include "tff_fis_writer.h"
+#include "trefle_fis.h"
 #include "trilv.h"
 #include <pybind11/pybind11.h>
 #include <string>
 #include <unordered_map>
-
-class TrefleFIS {
-public:
-  static TrefleFIS from_tff(const string &tff_str) {
-    JsonFISReader fis_reader(tff_str);
-
-    auto fis = fis_reader.read();
-
-    auto vars_range = fis_reader.get_vars_range();
-    auto cons_range = fis_reader.get_cons_range();
-    auto n_labels_per_cons = fis_reader.get_n_labels_per_cons();
-
-    ObservationsScaler observations_scaler(vars_range);
-    PredictionsScaler predictions_scaler(cons_range, n_labels_per_cons);
-
-    return TrefleFIS(fis, observations_scaler, predictions_scaler);
-  }
-
-  static TrefleFIS from_tff_file(const string &tff_file) {
-    // TODO
-    cout << "read from_tff_file" << endl;
-    string TODO_CHANGE_ME_STR = "";
-    return from_tff(TODO_CHANGE_ME_STR);
-  }
-
-  py_array<double> predict(py_array<double> &np_observations) {
-    std::vector<std::vector<double>> observations(np_observations.shape(0));
-    np_arr2d_to_vec2d(np_observations, observations);
-
-    observations = observations_scaler.scale(observations);
-
-    auto y_pred = fis.predict(observations);
-
-    y_pred = predictions_scaler.scale(y_pred);
-    return vec2d_to_np_vec2d(y_pred);
-  }
-
-private:
-  TrefleFIS(const SingletonFIS &fis,
-            const ObservationsScaler &observations_scaler,
-            const PredictionsScaler &predictions_scaler)
-      : fis{fis}, observations_scaler{observations_scaler},
-        predictions_scaler{predictions_scaler} {};
-
-private:
-  SingletonFIS fis;
-  ObservationsScaler observations_scaler;
-  PredictionsScaler predictions_scaler;
-};
 
 class FISCocoEvalWrapper {
 public:
