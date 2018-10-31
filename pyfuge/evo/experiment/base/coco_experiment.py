@@ -226,7 +226,6 @@ class CocoExperiment(Experiment):
                 "sp1",
                 representatives_sp2,
                 CX_PROB,
-                MUT_PROB,
                 N_REPRESENTATIVES,
                 POP_SIZE,
                 N_ELITE,
@@ -241,7 +240,6 @@ class CocoExperiment(Experiment):
                 "sp2",
                 representatives_sp1,
                 CX_PROB,
-                MUT_PROB,
                 N_REPRESENTATIVES,
                 POP_SIZE,
                 N_ELITE,
@@ -281,7 +279,6 @@ def evolve_species(
     species_name,
     other_species_representatives,
     CX_PROB,
-    MUT_PROB,
     N_REPRESENTATIVES,
     POP_SIZE,
     N_ELITE,
@@ -296,8 +293,7 @@ def evolve_species(
     offspring = toolbox.select(species, POP_SIZE - N_ELITE)
 
     # (3) Crossover and Mutate offspring
-    offspring = varAnd(offspring, toolbox, CX_PROB, MUT_PROB)
-    # offspring = varAnd(offspring, toolbox, CX_PROB, mutpb=1)
+    offspring = varAnd(offspring, toolbox, CX_PROB, mutpb=1.0)
 
     # add elite to offspring
     offspring.extend(elite)
