@@ -17,8 +17,6 @@
 #include <string>
 #include <unordered_map>
 
-using namespace std;
-
 class TrefleFIS {
 public:
   static TrefleFIS from_tff(const string &tff_str) {
@@ -44,7 +42,7 @@ public:
   }
 
   py_array<double> predict(py_array<double> &np_observations) {
-    vector<vector<double>> observations(np_observations.shape(0));
+    std::vector<std::vector<double>> observations(np_observations.shape(0));
     np_arr2d_to_vec2d(np_observations, observations);
 
     observations = observations_scaler.scale(observations);
@@ -117,21 +115,24 @@ public:
 
 private:
   SingletonFIS extract_fis(const string &ind_sp1, const string &ind_sp2);
-  py::array_t<double> predict(const string &ind_sp1, const string &ind_sp2,
-                              const vector<vector<double>> &observations);
+  py::array_t<double>
+  predict(const string &ind_sp1, const string &ind_sp2,
+          const std::vector<std::vector<double>> &observations);
 
 private:
-  vector<LinguisticVariable> parse_ind_sp1(const string &ind_sp1);
+  std::vector<LinguisticVariable> parse_ind_sp1(const string &ind_sp1);
 
-  vector<vector<size_t>> extract_sel_vars(const string &ind_sp2,
-                                          size_t &offset);
-  vector<vector<size_t>> extract_r_lv(const string &ind_sp2, size_t &offset);
-  vector<vector<size_t>> extract_r_labels(const string &ind_sp2,
-                                          size_t &offset);
-  vector<vector<double>> extract_r_cons(const string &ind_sp2, size_t &offset);
+  std::vector<std::vector<size_t>> extract_sel_vars(const string &ind_sp2,
+                                                    size_t &offset);
+  std::vector<std::vector<size_t>> extract_r_lv(const string &ind_sp2,
+                                                size_t &offset);
+  std::vector<std::vector<size_t>> extract_r_labels(const string &ind_sp2,
+                                                    size_t &offset);
+  std::vector<std::vector<double>> extract_r_cons(const string &ind_sp2,
+                                                  size_t &offset);
 
   template <typename T>
-  vector<vector<T>> parse_bit_array(
+  std::vector<std::vector<T>> parse_bit_array(
       const string &bitarray, const size_t rows, const size_t cols,
       const size_t n_bits_per_elm,
       const std::function<T(const size_t v, const size_t row, const size_t col)>
@@ -155,17 +156,17 @@ private:
     return ((max_v - min_v) / n_classes) * v + min_v;
   }
 
-  bool are_all_labels_dc(const vector<size_t> labels_for_a_rule);
+  bool are_all_labels_dc(const std::vector<size_t> labels_for_a_rule);
 
   FuzzyRule
-  build_fuzzy_rule(const vector<size_t> &vars_rule_i,
-                   const unordered_map<size_t, size_t> &vars_lv_lookup,
-                   const vector<LinguisticVariable> &vec_lv,
-                   const vector<size_t> &r_labels_ri,
-                   const vector<double> cons_ri);
+  build_fuzzy_rule(const std::vector<size_t> &vars_rule_i,
+                   const std::unordered_map<size_t, size_t> &vars_lv_lookup,
+                   const std::vector<LinguisticVariable> &vec_lv,
+                   const std::vector<size_t> &r_labels_ri,
+                   const std::vector<double> cons_ri);
 
 private:
-  vector<vector<double>> X_train;
+  std::vector<std::vector<double>> X_train;
   const int n_vars;
   const int n_rules;
   const int n_max_vars_per_rule;
@@ -184,11 +185,11 @@ private:
   const int n_bits_per_cons;
   const int n_bits_per_label;
   const int dc_weight;
-  vector<size_t> cons_n_labels;
-  vector<size_t> n_classes_per_cons;
-  vector<double> default_cons;
-  vector<vector<double>> vars_range;
-  vector<vector<double>> cons_range;
+  std::vector<size_t> cons_n_labels;
+  std::vector<size_t> n_classes_per_cons;
+  std::vector<double> default_cons;
+  std::vector<std::vector<double>> vars_range;
+  std::vector<std::vector<double>> cons_range;
 };
 
 PYBIND11_MODULE(pyfuge_c, m) {
