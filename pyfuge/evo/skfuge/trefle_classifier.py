@@ -170,7 +170,7 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
     #
     #     return self._y_pred
 
-    def get_best_fuzzy_system(self):
+    def get_best_fuzzy_system_as_tff(self):
         self._ensure_fit()
 
         best_ind = self._best_ind
@@ -178,9 +178,12 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
 
         self._fis_ind.print_ind(ind_tuple)
 
-        tff_fis = self._fis_ind.to_tff(ind_tuple)
-        open("/tmp/temp.tff", mode="w").write(tff_fis)
-        fis = TffConverter.to_fis(tff_fis)
+        tff_str = self._fis_ind.to_tff(ind_tuple)
+        return tff_str
+
+    def get_best_fuzzy_system(self):
+        tff_str = self.get_best_fuzzy_system_as_tff()
+        fis = TffConverter.to_fis(tff_str)
         return fis
 
     def _ensure_fit(self):
