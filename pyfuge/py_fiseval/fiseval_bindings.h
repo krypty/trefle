@@ -7,6 +7,7 @@
 #include "json_fis_reader.h"
 #include "json_fis_writer.h"
 #include "linguisticvariable.h"
+#include "observations_scaler.h"
 #include "pybind_utils.h"
 #include "singleton_fis.h"
 #include "tff_fis_writer.h"
@@ -16,41 +17,6 @@
 #include <unordered_map>
 
 using namespace std;
-
-class ObservationsScaler {
-  using vector2d = vector<vector<double>>;
-  using map_ranges = unordered_map<size_t, vector<double>>;
-
-public:
-  ObservationsScaler(const map_ranges &vars_range) : vars_range{vars_range} {}
-
-  vector2d scale(const vector2d &observations) {
-    const size_t n_obs = observations.size();
-    const size_t n_vars = observations[0].size();
-
-    vector2d scaled_observations(n_obs, vector<double>(n_vars, 0));
-
-    for (size_t i = 0; i < n_obs; i++) {
-      for (size_t j = 0; j < n_vars; j++) {
-        auto search = vars_range.find(j);
-        // if we have not a range for this variable (i.e. it is not used by
-        // the fuzzy system) then we don't apply any normalization.
-        if (search == vars_range.end()) {
-          scaled_observations[i][j] = observations[i][j];
-        } else {
-          auto var_min = vars_range[j][0];
-          auto var_max = vars_range[j][1];
-          scaled_observations[i][j] =
-              (observations[i][j] - var_min) / (var_max - var_min);
-        }
-      }
-    }
-    return scaled_observations;
-  }
-
-private:
-  map_ranges vars_range;
-};
 
 class PredictionsScaler {
   using vector2d = vector<vector<double>>;
