@@ -92,6 +92,9 @@ def run():
     np.save("/tmp/y_pred", y_pred)
 
     # fis = clf.get_best_fuzzy_system()
+    tff_str = clf.get_best_fuzzy_system_as_tff()
+    open("/tmp/temp.tff", mode="w").write(tff_str)
+
     fis = clf.get_best_fuzzy_system()
     print("best fis is ", end="")
     print(fis)

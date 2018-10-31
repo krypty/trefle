@@ -156,95 +156,15 @@ class TffConverter:
 
 
 if __name__ == "__main__":
-    # from pyfuge.trefle.tffconverter import TffConverter as tamere
-
-    # obj = TrefleFIS(30)
-    # obj.predict()
-    #
-    # obj1 = TrefleFIS.from_tff("sjdlkaj")
-    # obj1.predict()
-    #
-    # obj2 = TrefleFIS.from_tff_file("sjdlkaj")
-    # obj2.predict()
-
-    # trefle_fis = TrefleFIS.from_tff("XXXX")
-    # y_pred = trefle_fis.predict(X_scaled)
-
-    tff_str = r"""
-   {
-        "cons_range": [
-                [0.0, 1.0],
-                [0.0, 3.0],
-                [20.051916073376123, 119.84553112721537]
-        ],
-        "default_rule": [1.0, 2.0, 1.0],
-        "linguistic_variables": {
-                "0": [9.707322580645162, 19.249451612903226, 24.70209677419355],
-                "12": [11.710806451612902, 11.710806451612902, 20.610774193548387],
-                "13": [6.802, 6.802, 75.88561290322582],
-                "19": [0.005146129032258064, 0.0072717935483870965, 0.011523122580645159],
-                "2": [104.47483870967741, 123.14709677419356, 127.81516129032258],
-                "25": [0.14411709677419354, 0.4945983870967741, 0.9034932258064516],
-                "27": [0.018774193548387094, 0.07509677419354838, 0.2722258064516129],
-                "4": [0.09193548387096774, 0.09908193548387097, 0.12409451612903225]
-        },
-        "n_classes_per_cons": [2, 4, 0],
-        "n_labels": 3,
-        "n_labels_per_cons": [2, 4, 3],
-        "rules": [
-                [
-                        [
-                                ["13", 0],
-                                ["19", 0],
-                                ["2", 1],
-                                ["27", 0]
-                        ],
-                        [1.0, 1.0, 0.0]
-                ],
-                [
-                        [
-                                ["12", 1],
-                                ["25", 2],
-                                ["0", 0]
-                        ],
-                        [1.0, 1.0, 2.0]
-                ],
-                [
-                        [
-                                ["4", 0],
-                                ["0", 2]
-                        ],
-                        [0.0, 0.0, 0.0]
-                ]
-        ],
-        "vars_range": {
-                "0": [6.981, 28.11],
-                "12": [0.757, 21.98],
-                "13": [6.802, 542.2],
-                "19": [0.0008948, 0.02286],
-                "2": [43.79, 188.5],
-                "25": [0.02729, 0.9327],
-                "27": [0.0, 0.291],
-                "4": [0.05263, 0.1634]
-        },
-        "version": 1
-}
- 
-    """
-
     import numpy as np
 
-    # converted_fis = TffConverter.to_fis(tff_str)
-    # FISViewer(converted_fis).show()
+    # run use_trefle.py before!
     tff_str = open("/tmp/temp.tff").read()
     trefle_fis = TffConverter.to_trefle_fis(tff_str)
     X_test = np.load("/tmp/X_test.npy")
     y_pred_expected = np.load("/tmp/y_pred.npy")
 
-    # X_test, X_scaler = minmax_norm(X_test)
-
     y_pred = trefle_fis.predict(X_test)
-
 
     # print(y_pred)
     # print("-----------")
