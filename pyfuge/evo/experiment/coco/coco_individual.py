@@ -252,8 +252,8 @@ class CocoIndividual(FISIndividual, Clonable):
 
         self._n_bits_sp1 = self._compute_needed_bits_for_sp1()
         self._n_bits_sp2 = self._compute_needed_bits_for_sp2()
-        self._ind_sp1_class = self._create_ind_class2(self._n_bits_sp1)
-        self._ind_sp2_class = self._create_ind_class2(self._n_bits_sp2)
+        self._ind_sp1_class = self._create_ind_class(self._n_bits_sp1)
+        self._ind_sp2_class = self._create_ind_class(self._n_bits_sp2)
 
         # contains True if i-th cons is a classification variable or False if regression
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
@@ -505,13 +505,7 @@ class CocoIndividual(FISIndividual, Clonable):
 
     @staticmethod
     def clone(ind: bitarray):
-        # print(type(ind))
-        # super().clone(ind)
-        # return ind.true_clone()
-
-        # return ind.copy()
-        # return ind.true_clone()
-        return ind.true_deep_copy()
+        return ind.deep_copy()
 
     # def _get_highest_n_classes_per_cons(self):
     #     n_classes_per_cons = np.apply_along_axis(
@@ -545,38 +539,7 @@ class CocoIndividual(FISIndividual, Clonable):
 
     @staticmethod
     def _create_ind_class(n_bits):
-        class FixedSizeBitArray(bitarray):
-            # we cannot override __init__ with bitarray because it is a C lib
-            # see: https://stackoverflow.com/questions/36950072/typeerror-object-init-takes-no-parameters?rq=1
-
-            def __new__(cls):
-                bin_str = format(randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits))
-                instance = super(FixedSizeBitArray, cls).__new__(cls, bin_str)
-                # setattr(instance, "fitness", creator.FitnessMax)
-                return instance
-
-            # def copy(self):
-            #     # d =  deepcopy(self)
-            #     # d.fitness = deepcopy(self.fitness)
-            #     # return d
-            #     other = super(FixedSizeBitArray, self).copy()
-            #     setattr(other, "fitness", self.fitness)
-            #     # other.fitness = self.fitness
-            #     # other.fitness = deepcopy(self.fitness)
-            #     # other.fitness.valid = False
-            #
-            #     return other
-
-            def true_clone(self):
-                other = super(FixedSizeBitArray, self).copy()
-                setattr(other, "fitness", self.fitness)
-                return other
-
-        return FixedSizeBitArray
-
-    @staticmethod
-    def _create_ind_class2(n_bits):
-        class FixedSizeBitArray2:
+        class FixedSizeBitArray:
             def __init__(self, bin_str=None):
                 if bin_str is None:
                     bin_str = format(
@@ -584,24 +547,22 @@ class CocoIndividual(FISIndividual, Clonable):
                     )
                 self.bits = bitarray(bin_str)
 
-            def true_deep_copy(self):
+            def deep_copy(self):
                 other = self.__class__(self.bits.to01())
-                # other.bits = self.bits.copy()
                 return other
 
             def __len__(self):
                 return self.bits.length()
 
             def __setitem__(self, key, value):
-                # print(key, "    ", value)
                 self.bits.__setitem__(key, value.bits)
 
             def __getitem__(self, item):
-                instance = FixedSizeBitArray2()
+                instance = FixedSizeBitArray()
                 instance.bits = self.bits[item]
                 return instance
 
-        return FixedSizeBitArray2
+        return FixedSizeBitArray
 
     @staticmethod
     def _create_vars_range(scaler):

@@ -125,11 +125,13 @@ class CocoExperiment(Experiment):
         # setup evo functions, they are common to both species
         toolbox.register("evaluate", eval_solution)
 
-        def yolo_twoPoints(ind1, ind2):
-
+        def two_point_crossover(ind1, ind2):
             """Executes a two-point crossover on the input :term:`sequence`
             individuals. The two individuals are modified in place and both keep
             their original length.
+            The reason we do not use tools.cxTwoPoint is because we must
+            make sure that a deep copy is performed while manipulating the
+            individuals.
 
             :param ind1: The first individual participating in the crossover.
             :param ind2: The second individual participating in the crossover.
@@ -147,13 +149,13 @@ class CocoExperiment(Experiment):
                 cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
             ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] = (
-                ind2[cxpoint1:cxpoint2].true_deep_copy(),
-                ind1[cxpoint1:cxpoint2].true_deep_copy(),
+                ind2[cxpoint1:cxpoint2].deep_copy(),
+                ind1[cxpoint1:cxpoint2].deep_copy(),
             )
 
             return ind1, ind2
 
-        toolbox.register("mate", yolo_twoPoints)
+        toolbox.register("mate", two_point_crossover)
         # toolbox.register("mate", tools.cxTwoPoint)
         # FIXME: mutFlipBit will produce invalid ind (in this example at least)
         # Will have to define our own mutate flip bit if we use bitarray
