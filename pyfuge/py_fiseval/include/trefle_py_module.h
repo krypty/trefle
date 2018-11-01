@@ -6,6 +6,12 @@
 #include "trefle_fis.h"
 #include <pybind11/pybind11.h>
 
+/**
+ * This class is the entrypoint to the C++ classes from Python's
+ * point of view.
+ * It should contains no logic but only gateways to C++ functionalities.
+ */
+
 PYBIND11_MODULE(pyfuge_c, m) {
   py::class_<FISCocoEvalWrapper>(m, "FISCocoEvalWrapper")
       // match the ctor of FISCocoEvalWrapper
