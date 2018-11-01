@@ -1,5 +1,4 @@
 import random
-from collections import Counter
 from functools import partial
 from itertools import product
 from typing import Callable
@@ -111,9 +110,6 @@ class CocoExperiment(Experiment):
             y_true = self._coco_ind.get_y_true()
 
             fitness = self._fitness_func(y_true, y_pred)
-            # print(ind_sp1)
-            # print("ind1 {}, ind2 {} fit: {:.3f}".format(ind_sp1.bits.to01(), ind_sp2.bits.to01(), fitness))
-            # print("hash ind1 {}, ind2 {} fit: {:.3f}".format(hash(ind_sp1.bits.to01()), hash(ind_sp2.bits.to01()), fitness))
             return (fitness,)  # DEAP expects a tuple for fitnesses
             # TODO: self._fitness_func(y_true, y_pred, ind=(ind_sp1, ind_sp2)
             #  gen=g, pop=pop)
@@ -182,22 +178,6 @@ class CocoExperiment(Experiment):
 
         all_species = {"sp1": species_sp1, "sp2": species_sp2}
 
-        # ind_1 = species_sp1[0]
-        # ind_1.fitness = (0.123,)
-        # ind_2 = species_sp1[1]
-
-        # print("A", ind_1.bits, ind_1.fitness)
-        # ind_1_copy = ind_1.true_deep_copy()
-        # ind_1_mutated, = toolbox.mutate(ind_1_copy)
-        # # pop = [ind_1]
-        # # offspring = [toolbox.clone(i) for i in pop]
-        # # offspring = varAnd(pop, toolbox, cxpb=0, mutpb=1)
-        # print("a", ind_1.bits, ind_1.fitness)
-        # print("b", ind_1_mutated.bits, ind_1_mutated.fitness)
-        # print("c", ind_2.bits, ind_2.fitness)
-        #
-        # assert False, "yololol"
-
         # In the generation 0 the representatives (best individual used in
         # co-evolution) are chosen randomly
         representatives_sp1 = [
@@ -249,17 +229,9 @@ class CocoExperiment(Experiment):
                 self._hof, all_species, "sp2", g, self._logbook, stats, verbose
             )
 
-            # print("Best fitness generation {gen}: {fit}"
-            #       .format(gen=g, fit=hof[0].fitness))
-
         couple = self._hof[0]
         print("ind with fitness {:.3f}".format(couple.fitness[0]))
         self._coco_ind.print_ind((couple.sp1, couple.sp2))
-
-        # print("theoretical reference")
-        # describe_individual(ind_speed=[MAX_SPEED, MAX_SPEED],
-        #                     ind_angle=[45, 45],
-        #                     fitness=[distance_range(MAX_SPEED, 45)])
 
     def get_top_n(self):
         return self._hof
@@ -303,10 +275,6 @@ def evolve_species(
         offspring, species_name, other_species_representatives, N_REPRESENTATIVES, hof
     )
 
-    yolo = [hash(off.bits.to01()) for off in offspring]
-    c = Counter(yolo)
-    print(c.most_common())
-
     # (5) Replace the current population by the offspring
     species[:] = offspring
 
@@ -317,9 +285,7 @@ def evolve_species(
 def evaluate_species(
     species, species_name, other_species_representatives, n_representatives, hof
 ):
-    # reevaluate only the individual that have been mutated/crossed.
-    # FIXME: is this still valid with coev?, because representative could have
-    # changed invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+    # consider all individuals as invalid and therefore ask for reevaluation
     invalid_ind = species
 
     species_indices = species_indices_dict[species_name]
@@ -327,7 +293,6 @@ def evaluate_species(
     fitnesses = list(
         map(partial_evaluate, product(invalid_ind, other_species_representatives))
     )
-    # print("fitness len", len(fitnesses))
 
     # Update Hall of Fame (i.e. the best individuals couples)
     update_hof(
