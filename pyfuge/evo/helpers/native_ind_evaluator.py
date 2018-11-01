@@ -1,4 +1,4 @@
-from pyfuge.py_fiseval import FISEvalWrapper
+from pyfuge.fuzzy_engine import FISEvalWrapper
 
 
 class NativeIndEvaluator:

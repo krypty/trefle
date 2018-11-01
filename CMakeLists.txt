@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(pyFUGE)
-set(SOURCE_DIR pyfuge/py_fiseval)
+set(SOURCE_DIR pyfuge/fuzzy_engine)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -24,10 +24,10 @@ set(SOURCES
 
 include_directories(
     # ${SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/include
-    ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/FISEval/include
-    ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/FISEval/vendor/eigen
-    ${CMAKE_SOURCE_DIR}/pyfuge/py_fiseval/FISEval/vendor/catch2/single_include
+    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/include
+    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/FISEval/include
+    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/FISEval/vendor/eigen
+    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/FISEval/vendor/catch2/single_include
     )
 
 add_subdirectory(${SOURCE_DIR}/FISEval)
