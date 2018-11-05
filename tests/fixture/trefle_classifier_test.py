@@ -39,9 +39,6 @@ class TrefleClassifierTest:
     def predict_X_test(self):
         return self._clf.predict(self._X_test)
 
-    def get_best_fuzzy_system(self):
-        return self._clf.get_best_fuzzy_system()
-
     def get_best_fuzzy_system_as_tff(self):
         return self._clf.get_best_fuzzy_system_as_tff()
 

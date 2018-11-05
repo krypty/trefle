@@ -1,6 +1,6 @@
 [submodule "pyfuge/py_fiseval/pybind11"]
 	path = pyfuge/fuzzy_engine/pybind11
 	url = https://github.com/pybind/pybind11.git
-[submodule "pyfuge/py_fiseval/FISEval"]
-	path = pyfuge/fuzzy_engine/FISEval
+[submodule "pyfuge/py_fiseval/trefle_engine"]
+	path = pyfuge/fuzzy_engine/trefle_engine
 	url = ../trefle_engine.git

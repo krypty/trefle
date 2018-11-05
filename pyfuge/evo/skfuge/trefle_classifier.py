@@ -9,7 +9,6 @@ from pyfuge.evo.experiment.base.coco_experiment import CocoExperiment
 from pyfuge.evo.experiment.coco.coco_individual import CocoIndividual
 from pyfuge.evo.experiment.view.coco_evolution_viewer import CocoEvolutionViewer
 from pyfuge.evo.helpers.fuzzy_labels import LabelEnum, Label3
-from pyfuge.trefle.tffconverter import TffConverter
 
 PERCENTAGE_ELITE = 0.1
 PERCENTAGE_HOF = 0.3
@@ -180,11 +179,6 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
 
         tff_str = self._fis_ind.to_tff(ind_tuple)
         return tff_str
-
-    def get_best_fuzzy_system(self):
-        tff_str = self.get_best_fuzzy_system_as_tff()
-        fis = TffConverter.to_fis(tff_str)
-        return fis
 
     def _ensure_fit(self):
         if getattr(self, "_fis_ind") is None:
