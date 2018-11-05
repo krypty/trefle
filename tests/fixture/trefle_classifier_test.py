@@ -5,7 +5,7 @@ from sklearn.datasets import load_iris
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
-from trefle.evo.skfuge.trefle_classifier import TrefleClassifier
+from trefle.trefle_classifier import TrefleClassifier
 
 
 def get_sample_data():

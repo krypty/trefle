@@ -2,7 +2,7 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 
-from trefle.evo.skfuge.trefle_classifier import TrefleClassifier
+from trefle.trefle_classifier import TrefleClassifier
 
 
 # @profile(sort="cumulative", filename="/tmp/pyfuge.profile")
