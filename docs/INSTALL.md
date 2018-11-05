@@ -11,7 +11,7 @@ pip install pyfuge
 Verify that it works with a Python terminal:
 
 ```python
-from pyfuge.evo.examples import evo_cancer
+from trefle.evo.examples import evo_cancer
 evo_cancer.run()
 ```
 
