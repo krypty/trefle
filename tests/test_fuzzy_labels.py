@@ -1,4 +1,4 @@
-from pyfuge.evo.helpers.fuzzy_labels import Label3, Label2, Label4
+from trefle.evo.helpers.fuzzy_labels import Label3, Label2, Label4
 
 
 def test_first_label_must_be_0():

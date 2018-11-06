@@ -74,7 +74,7 @@ Note: at the moment a simple evolutionary algorithm is used instead of the coope
 ```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
-from pyfuge.evo.skfuge.scikit_fuge import FugeClassifier
+from trefle.evo.skfuge.scikit_fuge import FugeClassifier
 from sklearn.metrics import accuracy_score
 
 # Load dataset

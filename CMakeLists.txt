@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
-project(pyFUGE)
-set(SOURCE_DIR pyfuge/fuzzy_engine)
+project(trefle)
+set(SOURCE_DIR trefle/fuzzy_engine)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -24,15 +24,16 @@ set(SOURCES
 
 include_directories(
     # ${SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/include
-    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/FISEval/include
-    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/FISEval/vendor/eigen
-    ${CMAKE_SOURCE_DIR}/pyfuge/fuzzy_engine/FISEval/vendor/catch2/single_include
+    ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/include
+    ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/include
+    ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/vendor/eigen
+    ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/vendor/catch2/single_include
+    ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/vendor/json/single_include
     )
 
-add_subdirectory(${SOURCE_DIR}/FISEval)
+add_subdirectory(${SOURCE_DIR}/trefle_engine)
 add_subdirectory(${SOURCE_DIR}/pybind11)
-pybind11_add_module(pyfuge_c SHARED ${SOURCES} ${SOURCE_DIR}/FISEval)
-target_link_libraries(pyfuge_c PRIVATE pyfuge)
+pybind11_add_module(trefle_engine SHARED ${SOURCES} ${SOURCE_DIR}/trefle_engine)
+target_link_libraries(trefle_engine PRIVATE trefle_engine_c)
 
 message(STATUS "${SOURCES}")
