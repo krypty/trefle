@@ -39,6 +39,7 @@ class Clonable(metaclass=ABCMeta):
     If the individuals of a FISIndividual subclass are not immutable then the
     class must provide a way to deep copy/clone the individual
     """
+
     @staticmethod
     def clone(ind):
         """
@@ -46,4 +47,4 @@ class Clonable(metaclass=ABCMeta):
             ind_copy = ind.copy()
             return ind_copy
         """
-        pass
+        raise NotImplementedError()
