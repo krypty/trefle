@@ -1,5 +1,6 @@
-import numpy as np
 from trefle_engine import TrefleFIS
+
+import numpy as np
 
 from tests.fixture.trefle_classifier_test import (
     get_sample_data,
