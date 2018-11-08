@@ -130,13 +130,15 @@ setup(
     python_requires=">=3.5",
     install_requires=[
         "deap==1.2.2",
-        "matplotlib==2.1.1",
         "pandas==0.22.0",
         "scikit-learn==0.19.1",
         "scipy>=1.0.0",  # TODO see why must be install manually
         "numpy==1.14.0",  # TODO see why must be install manually
         "bitarray==0.8.3",
     ],
+    extras_require={
+        "evo_plot": ["matplotlib==2.1.1"],
+    },
     setup_requires=["pytest-runner"],
     tests_require=["pytest==3.3.2"],
     zip_safe=False,
