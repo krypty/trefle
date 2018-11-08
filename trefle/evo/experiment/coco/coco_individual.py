@@ -9,6 +9,9 @@ from sklearn.preprocessing import MinMaxScaler
 
 from trefle.evo.experiment.coco.coco_individual_validator import \
     CocoIndividualValidator
+from trefle.evo.experiment.coco.fixed_size_bitarray_factory import (
+    FixedSizeBitArrayFactory,
+)
 from trefle.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
 from trefle.evo.helpers.fis_individual import FISIndividual, Clonable
 from trefle.evo.helpers.fuzzy_labels import LabelEnum, Label3
@@ -244,8 +247,8 @@ class CocoIndividual(FISIndividual, Clonable):
 
         self._n_bits_sp1 = self._compute_needed_bits_for_sp1()
         self._n_bits_sp2 = self._compute_needed_bits_for_sp2()
-        self._ind_sp1_class = self._create_ind_class(self._n_bits_sp1)
-        self._ind_sp2_class = self._create_ind_class(self._n_bits_sp2)
+        self._ind_sp1_class = FixedSizeBitArrayFactory.create(self._n_bits_sp1)
+        self._ind_sp2_class = FixedSizeBitArrayFactory.create(self._n_bits_sp2)
 
         # contains True if i-th cons is a classification variable or False if regression
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
@@ -374,33 +377,6 @@ class CocoIndividual(FISIndividual, Clonable):
     def print_ind(self, ind_tuple):
         ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
         self._nce.print_ind(ind_sp1, ind_sp2)
-
-    @staticmethod
-    def _create_ind_class(n_bits):
-        class FixedSizeBitArray:
-            def __init__(self, bin_str=None):
-                if bin_str is None:
-                    bin_str = format(
-                        randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits)
-                    )
-                self.bits = bitarray(bin_str)
-
-            def deep_copy(self):
-                other = self.__class__(self.bits.to01())
-                return other
-
-            def __len__(self):
-                return self.bits.length()
-
-            def __setitem__(self, key, value):
-                self.bits.__setitem__(key, value.bits)
-
-            def __getitem__(self, item):
-                instance = FixedSizeBitArray()
-                instance.bits = self.bits[item]
-                return instance
-
-        return FixedSizeBitArray
 
     @staticmethod
     def _minmax_norm(X_train):
