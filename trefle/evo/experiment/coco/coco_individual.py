@@ -23,6 +23,9 @@ class MFShape(Enum):
     TRAP_MF = 1
 
 
+def ensure(condition, msg="Assertion is incorrect"):
+    if not condition:
+        raise ValueError(msg)
 
 
 class CocoIndividual(FISIndividual, Clonable):
@@ -293,28 +296,24 @@ class CocoIndividual(FISIndividual, Clonable):
         return cons_scaler
 
     def _validate(self):
-        assert self._n_max_vars_per_rule > 0, "max_vars_per_rule > 0"
-        assert self._n_max_vars_per_rule <= self._n_vars
+        ensure(self._n_max_vars_per_rule > 0, "max_vars_per_rule > 0")
+        ensure(self._n_max_vars_per_rule <= self._n_vars)
 
-        assert self._dc_weight >= 0, "negative padding does not make sense"
-        assert log(self._p_positions_per_lv, 2) == ceil(
-            log(self._p_positions_per_lv, 2)
-        ), "p_positions_per_lv must be a multiple of 2"
-
-        assert self._p_positions_per_lv >= self._n_true_labels, (
-            "You must have at least as many p_positions as the n_labels_per_mf "
-            "you want to use "
+        ensure(self._dc_weight >= 0, "negative padding does not make sense")
+        ensure(
+            log(self._p_positions_per_lv, 2) == ceil(log(self._p_positions_per_lv, 2)),
+            "p_positions_per_lv must be a multiple of 2",
         )
 
-        # if self._problem_type == ProblemType.CLASSIFICATION:
-        #     msg = "You must have at least as many p_positions as the " \
-        #           "n_classes you want to target "
-        #     max_n_classes = self._get_highest_n_classes_per_cons()
-        #     self._p_positions_per_cons =
-        #     assert self._p_positions_per_cons >= max_n_classes, msg
-        # elif self._problem_type == ProblemType.REGRESSION:
+        ensure(
+            self._p_positions_per_lv >= self._n_true_labels,
+            (
+                "You must have at least as many p_positions as the n_labels_per_mf "
+                "you want to use "
+            ),
+        )
 
-        ## Validate the number of classes per consequent
+        # Validate the number of classes per consequent
         n_classes_per_cons_in_y = np.apply_along_axis(
             lambda c: len(np.unique(c)), arr=self._y, axis=0
         ).reshape(-1)
@@ -327,41 +326,47 @@ class CocoIndividual(FISIndividual, Clonable):
         # print(self._n_classes_per_cons)
         # print(n_classes_per_cons_in_y)
 
-        assert len(self._n_classes_per_cons) == len(n_classes_per_cons_in_y)
+        ensure(len(self._n_classes_per_cons) == len(n_classes_per_cons_in_y))
 
         n_cls_per_cons_zeroed = n_classes_per_cons_in_y.copy()
         # we don't want to compare the number of classes for continuous vars
         n_cls_per_cons_zeroed[self._n_classes_per_cons == 0] = 0
-        assert np.array_equal(
-            self._n_classes_per_cons.flatten(), n_cls_per_cons_zeroed.flatten()
-        ), msg.format(self._n_classes_per_cons, n_classes_per_cons_in_y)
+        ensure(
+            np.array_equal(
+                self._n_classes_per_cons.flatten(), n_cls_per_cons_zeroed.flatten()
+            ),
+            msg.format(self._n_classes_per_cons, n_classes_per_cons_in_y),
+        )
 
-        assert all(
-            [c >= 0 for c in self._n_classes_per_cons]
-        ), "n_classes values must be positive in n_classes_per_cons"
+        ensure(
+            all([c >= 0 for c in self._n_classes_per_cons]),
+            "n_classes values must be positive in n_classes_per_cons",
+        )
 
         mask = n_classes_per_cons_in_y == self._n_classes_per_cons
         # print("n cls per cons", self._n_classes_per_cons)
         # print("mask", mask)
-        assert all(
-            mask[self._n_classes_per_cons != 0]
-        ), "the n_classes per consequent does not match with what found on X_train"
+        ensure(
+            all(mask[self._n_classes_per_cons != 0]),
+            "the n_classes per consequent does not match with what found on X_train",
+        )
 
-        assert (
-            2 ** self._n_bits_per_lv >= self._n_max_vars_per_rule
-        ), "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule"
+        ensure(
+            (2 ** self._n_bits_per_lv >= self._n_max_vars_per_rule),
+            "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule",
+        )
 
-        # assert (
-        #     self._n_labels_cons >= 2
-        # ), "n_labels_cons must be >= 2 (i.e. at least LOW and HIGH)"
+        ensure(
+            issubclass(self._n_labels_cons, LabelEnum),
+            "n_labels _cons must an instance of a subclass of LabelEnum",
+        )
 
-        assert issubclass(
-            self._n_labels_cons, LabelEnum
-        ), "n_labels _cons must an instance of a subclass of LabelEnum"
-
-        assert self._default_cons.shape[0] == self._n_cons, (
-            "default_cons's shape doesn't match the number of "
-            "consequents retrieved using y_train"
+        ensure(
+            self._default_cons.shape[0] == self._n_cons,
+            (
+                "default_cons's shape doesn't match the number of "
+                "consequents retrieved using y_train"
+            ),
         )
 
         # we check if a cons is either an int or the same class as
@@ -374,12 +379,15 @@ class CocoIndividual(FISIndividual, Clonable):
             for c in self._default_cons
         ]
 
-        assert all(are_labels_or_int), (
-            "The default rule must only contain classes or labels"
-            " i.e. integer numbers. If a label is provide like LabelX.LOW"
-            " make sure that the X in LabelX is the same for both"
-            " n_labels_cons (currently set to {})"
-            " and default_cons".format(self._n_labels_cons.__name__)
+        ensure(
+            all(are_labels_or_int),
+            (
+                "The default rule must only contain classes or labels"
+                " i.e. integer numbers. If a label is provide like LabelX.LOW"
+                " make sure that the X in LabelX is the same for both"
+                " n_labels_cons (currently set to {})"
+                " and default_cons".format(self._n_labels_cons.__name__)
+            ),
         )
         #
         # # validate that the n classes per cons matches len(LabelX) used
@@ -407,14 +415,14 @@ class CocoIndividual(FISIndividual, Clonable):
                 except AttributeError:
                     yield a < b
 
-        # print("lalalala", self._cons_n_labels)
-
-        # assert (self._default_cons < self._cons_n_labels).all(), (
-        assert all(can_default_cons_fit_in_cons()), (
-            "Make sure that the default rule contains valid classes/labels \n"
-            "i.e. label is in [0, n_classes-1] or in case of regression in \n"
-            "[0, n_labels-1].\n"
-            "Expected: ({}) < {}".format(self._default_cons, self._cons_n_labels)
+        ensure(
+            all(can_default_cons_fit_in_cons()),
+            (
+                "Make sure that the default rule contains valid classes/labels \n"
+                "i.e. label is in [0, n_classes-1] or in case of regression in \n"
+                "[0, n_labels-1].\n"
+                "Expected: ({}) < {}".format(self._default_cons, self._cons_n_labels)
+            ),
         )
 
     def convert_to_fis(self, pyf_file):
