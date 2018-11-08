@@ -7,6 +7,8 @@ import numpy as np
 from bitarray import bitarray
 from sklearn.preprocessing import MinMaxScaler
 
+from trefle.evo.experiment.coco.coco_individual_validator import \
+    CocoIndividualValidator
 from trefle.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
 from trefle.evo.helpers.fis_individual import FISIndividual, Clonable
 from trefle.evo.helpers.fuzzy_labels import LabelEnum, Label3
@@ -21,11 +23,6 @@ It is defined like: n_bits_XXX = n_rows * n_cols * n_bits_per_element
 class MFShape(Enum):
     TRI_MF = 0
     TRAP_MF = 1
-
-
-def ensure(condition, msg="Assertion is incorrect"):
-    if not condition:
-        raise ValueError(msg)
 
 
 class CocoIndividual(FISIndividual, Clonable):
@@ -234,7 +231,9 @@ class CocoIndividual(FISIndividual, Clonable):
             self._n_cons = 1
 
         self._cons_n_labels = self._compute_cons_n_labels(self._n_classes_per_cons)
-        self._validate()
+
+        CocoIndividualValidator(self).validate()
+        self._default_cons = self._convert_labelenum_to_int(self._default_cons)
 
         self._n_bits_per_mf = ceil(log(self._p_positions_per_lv, 2))
         self._n_bits_per_ant = ceil(log(self._n_vars, 2))
@@ -288,119 +287,6 @@ class CocoIndividual(FISIndividual, Clonable):
         cons_scaler = MinMaxScaler()
         cons_scaler.fit(self._y.astype(np.double))
         return cons_scaler
-
-    def _validate(self):
-        ensure(self._n_max_vars_per_rule > 0, "max_vars_per_rule > 0")
-        ensure(self._n_max_vars_per_rule <= self._n_vars)
-
-        ensure(self._dc_weight >= 0, "negative padding does not make sense")
-        ensure(
-            log(self._p_positions_per_lv, 2) == ceil(log(self._p_positions_per_lv, 2)),
-            "p_positions_per_lv must be a multiple of 2",
-        )
-
-        ensure(
-            self._p_positions_per_lv >= self._n_true_labels,
-            (
-                "You must have at least as many p_positions as the n_labels_per_mf "
-                "you want to use "
-            ),
-        )
-
-        # Validate the number of classes per consequent
-        n_classes_per_cons_in_y = np.apply_along_axis(
-            lambda c: len(np.unique(c)), arr=self._y, axis=0
-        ).reshape(-1)
-        # force to have an array with a shape
-
-        msg = (
-            "the number of consequents indicated in n_class_per_cons does not "
-            "match what was computed on y_train. from user: {}, computed: {}"
-        )
-
-        ensure(len(self._n_classes_per_cons) == len(n_classes_per_cons_in_y))
-
-        n_cls_per_cons_zeroed = n_classes_per_cons_in_y.copy()
-        # we don't want to compare the number of classes for continuous vars
-        n_cls_per_cons_zeroed[self._n_classes_per_cons == 0] = 0
-        ensure(
-            np.array_equal(
-                self._n_classes_per_cons.flatten(), n_cls_per_cons_zeroed.flatten()
-            ),
-            msg.format(self._n_classes_per_cons, n_classes_per_cons_in_y),
-        )
-
-        ensure(
-            all([c >= 0 for c in self._n_classes_per_cons]),
-            "n_classes values must be positive in n_classes_per_cons",
-        )
-
-        mask = n_classes_per_cons_in_y == self._n_classes_per_cons
-        ensure(
-            all(mask[self._n_classes_per_cons != 0]),
-            "the n_classes per consequent does not match with what found on X_train",
-        )
-
-        ensure(
-            (2 ** self._n_bits_per_lv >= self._n_max_vars_per_rule),
-            "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule",
-        )
-
-        ensure(
-            issubclass(self._n_labels_cons, LabelEnum),
-            "n_labels _cons must an instance of a subclass of LabelEnum",
-        )
-
-        ensure(
-            self._default_cons.shape[0] == self._n_cons,
-            (
-                "default_cons's shape doesn't match the number of "
-                "consequents retrieved using y_train"
-            ),
-        )
-
-        # we check if a cons is either an int or the same class as
-        # self._n_labels_cons. For the latter we check like that instead of
-        # check issubclass because we do care that the label values of both
-        # n_labels_cons and default_cons are the same (e.g. if
-        # n_labels_cons's LOW = 0, then default_cons' LOW = 0 too)
-        are_labels_or_int = [
-            isinstance(c, (int, np.int64, self._n_labels_cons))
-            for c in self._default_cons
-        ]
-
-        ensure(
-            all(are_labels_or_int),
-            (
-                "The default rule must only contain classes or labels"
-                " i.e. integer numbers. If a label is provide like LabelX.LOW"
-                " make sure that the X in LabelX is the same for both"
-                " n_labels_cons (currently set to {})"
-                " and default_cons".format(self._n_labels_cons.__name__)
-            ),
-        )
-
-        # convert LabelEnum to int
-        self._default_cons = [
-            x if isinstance(x, (int, np.int64)) else x.value for x in self._default_cons
-        ]
-
-        def can_default_cons_fit_in_cons():
-            for a, b in zip(self._default_cons, self._cons_n_labels):
-                try:
-                    yield a.value < b
-                except AttributeError:
-                    yield a < b
-
-        ensure(
-            all(can_default_cons_fit_in_cons()),
-            (
-                "Make sure that the default rule contains valid classes/labels \n"
-                "i.e. label is in [0, n_classes-1] or in case of regression in \n"
-                "[0, n_labels-1].\n"
-                "Expected: ({}) < {}".format(self._default_cons, self._cons_n_labels)
-            ),
-        )
 
     def to_tff(self, ind_tuple):
         ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
@@ -526,3 +412,10 @@ class CocoIndividual(FISIndividual, Clonable):
     def _create_vars_range(scaler):
         vars_range = np.vstack((scaler.data_min_, scaler.data_max_)).T.astype(np.double)
         return vars_range
+
+    @staticmethod
+    def _convert_labelenum_to_int(labels_enums):
+        return [
+            cons if isinstance(cons, (int, np.int64)) else cons.value
+            for cons in labels_enums
+        ]
