@@ -17,14 +17,6 @@ class FISIndividual(metaclass=ABCMeta):
     def ind_length(self):
         return self._ind_len
 
-    def convert_to_fis(self, ind):
-        """
-        Convert an individual (evolution) to a FIS (i.e. a fuzzy system)
-        :param ind: an individual
-        :return: a FIS instance
-        """
-        raise NotImplementedError()
-
     def predict(self, ind):
         """
         Given an individual returns the y_pred for a given dataset.

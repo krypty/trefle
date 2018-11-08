@@ -7,6 +7,11 @@ import numpy as np
 from bitarray import bitarray
 from sklearn.preprocessing import MinMaxScaler
 
+from trefle.evo.experiment.coco.coco_individual_validator import \
+    CocoIndividualValidator
+from trefle.evo.experiment.coco.fixed_size_bitarray_factory import (
+    FixedSizeBitArrayFactory,
+)
 from trefle.evo.experiment.coco.native_coco_evaluator import NativeCocoEvaluator
 from trefle.evo.helpers.fis_individual import FISIndividual, Clonable
 from trefle.evo.helpers.fuzzy_labels import LabelEnum, Label3
@@ -21,12 +26,6 @@ It is defined like: n_bits_XXX = n_rows * n_cols * n_bits_per_element
 class MFShape(Enum):
     TRI_MF = 0
     TRAP_MF = 1
-
-
-def minmax_norm(X_train):
-    scaler = MinMaxScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    return X_train_scaled, scaler
 
 
 class CocoIndividual(FISIndividual, Clonable):
@@ -176,7 +175,6 @@ class CocoIndividual(FISIndividual, Clonable):
         p_positions_per_lv: int = 32,  # 5 bits
         dc_weight: int = 1,
         mfs_shape: MFShape = MFShape.TRI_MF,
-        # p_positions_per_cons: int = None,#32,  # 5 bits
         n_lv_per_ind_sp1: int = None,
     ):
         """
@@ -208,7 +206,7 @@ class CocoIndividual(FISIndividual, Clonable):
         """
 
         super().__init__()
-        self._X, self._X_scaler = minmax_norm(X_train)
+        self._X, self._X_scaler = CocoIndividual._minmax_norm(X_train)
         self._y = y_train
         self._n_rules = n_rules
         self._n_classes_per_cons = np.asarray(n_classes_per_cons)
@@ -220,9 +218,6 @@ class CocoIndividual(FISIndividual, Clonable):
         self._dc_weight = dc_weight
         self._mfs_shape = mfs_shape
 
-        # print("X")
-        # print(self._X)
-
         self._n_vars = self._X.shape[1]
 
         if self._n_max_vars_per_rule is None:
@@ -232,28 +227,28 @@ class CocoIndividual(FISIndividual, Clonable):
             n_lv_per_ind_sp1 = self._n_max_vars_per_rule
 
         self._n_bits_per_lv = ceil(log(n_lv_per_ind_sp1, 2))
-        # print("n bits per lv", self._n_bits_per_lv)
 
         try:
             self._n_cons = self._y.shape[1]
         except IndexError:  # y is 1d so each element is an output
-            self._n_cons = 1  # self._y.shape[0]
+            self._n_cons = 1
 
         self._cons_n_labels = self._compute_cons_n_labels(self._n_classes_per_cons)
-        self._validate()
+
+        CocoIndividualValidator(self).validate()
+        self._default_cons = self._convert_labelenum_to_int(self._default_cons)
 
         self._n_bits_per_mf = ceil(log(self._p_positions_per_lv, 2))
         self._n_bits_per_ant = ceil(log(self._n_vars, 2))
         self._n_bits_per_cons = self._compute_n_bits_per_cons()
-        # print("bits per cons ", self._n_bits_per_cons)
 
-        # chosen arbitrarily # ceil(log(self._n_true_labels + self._dc_padding, 2))
+        # chosen arbitrarily, enough to cover a high number of labels (i.e. 2**5=32)
         self._n_bits_per_label = 5
 
         self._n_bits_sp1 = self._compute_needed_bits_for_sp1()
         self._n_bits_sp2 = self._compute_needed_bits_for_sp2()
-        self._ind_sp1_class = self._create_ind_class(self._n_bits_sp1)
-        self._ind_sp2_class = self._create_ind_class(self._n_bits_sp2)
+        self._ind_sp1_class = FixedSizeBitArrayFactory.create(self._n_bits_sp1)
+        self._ind_sp2_class = FixedSizeBitArrayFactory.create(self._n_bits_sp2)
 
         # contains True if i-th cons is a classification variable or False if regression
         self._cons_type = [bool(c) for c in self._n_classes_per_cons]
@@ -286,159 +281,6 @@ class CocoIndividual(FISIndividual, Clonable):
             cons_range=self._cons_range,
         )
 
-    def _create_cons_scaler(self):
-        # y_pred returned by NativeCocoEvaluator are in range
-        # [0, n_class_per_cons-1] and it needs to be scaled back to
-        # [min_val_cons, max_val_cons] (which for binary and multiclass
-        # consequents do nothing but this is needed for continuous variables)
-
-        cons_scaler = MinMaxScaler()
-        cons_scaler.fit(self._y.astype(np.double))
-        return cons_scaler
-
-    def _validate(self):
-        assert self._n_max_vars_per_rule > 0, "max_vars_per_rule > 0"
-        assert self._n_max_vars_per_rule <= self._n_vars
-
-        assert self._dc_weight >= 0, "negative padding does not make sense"
-        assert log(self._p_positions_per_lv, 2) == ceil(
-            log(self._p_positions_per_lv, 2)
-        ), "p_positions_per_lv must be a multiple of 2"
-
-        assert self._p_positions_per_lv >= self._n_true_labels, (
-            "You must have at least as many p_positions as the n_labels_per_mf "
-            "you want to use "
-        )
-
-        # if self._problem_type == ProblemType.CLASSIFICATION:
-        #     msg = "You must have at least as many p_positions as the " \
-        #           "n_classes you want to target "
-        #     max_n_classes = self._get_highest_n_classes_per_cons()
-        #     self._p_positions_per_cons =
-        #     assert self._p_positions_per_cons >= max_n_classes, msg
-        # elif self._problem_type == ProblemType.REGRESSION:
-
-        ## Validate the number of classes per consequent
-        n_classes_per_cons_in_y = np.apply_along_axis(
-            lambda c: len(np.unique(c)), arr=self._y, axis=0
-        ).reshape(-1)
-        # force to have an array with a shape
-
-        msg = (
-            "the number of consequents indicated in n_class_per_cons does not "
-            "match what was computed on y_train. from user: {}, computed: {}"
-        )
-        # print(self._n_classes_per_cons)
-        # print(n_classes_per_cons_in_y)
-
-        assert len(self._n_classes_per_cons) == len(n_classes_per_cons_in_y)
-
-        n_cls_per_cons_zeroed = n_classes_per_cons_in_y.copy()
-        # we don't want to compare the number of classes for continuous vars
-        n_cls_per_cons_zeroed[self._n_classes_per_cons == 0] = 0
-        assert np.array_equal(
-            self._n_classes_per_cons.flatten(), n_cls_per_cons_zeroed.flatten()
-        ), msg.format(self._n_classes_per_cons, n_classes_per_cons_in_y)
-
-        assert all(
-            [c >= 0 for c in self._n_classes_per_cons]
-        ), "n_classes values must be positive in n_classes_per_cons"
-
-        mask = n_classes_per_cons_in_y == self._n_classes_per_cons
-        # print("n cls per cons", self._n_classes_per_cons)
-        # print("mask", mask)
-        assert all(
-            mask[self._n_classes_per_cons != 0]
-        ), "the n_classes per consequent does not match with what found on X_train"
-
-        assert (
-            2 ** self._n_bits_per_lv >= self._n_max_vars_per_rule
-        ), "n_lv_per_ind_sp1 must be at least equals to n_max_vars_per_rule"
-
-        # assert (
-        #     self._n_labels_cons >= 2
-        # ), "n_labels_cons must be >= 2 (i.e. at least LOW and HIGH)"
-
-        assert issubclass(
-            self._n_labels_cons, LabelEnum
-        ), "n_labels _cons must an instance of a subclass of LabelEnum"
-
-        assert self._default_cons.shape[0] == self._n_cons, (
-            "default_cons's shape doesn't match the number of "
-            "consequents retrieved using y_train"
-        )
-
-        # we check if a cons is either an int or the same class as
-        # self._n_labels_cons. For the latter we check like that instead of
-        # check issubclass because we do care that the label values of both
-        # n_labels_cons and default_cons are the same (e.g. if
-        # n_labels_cons's LOW = 0, then default_cons' LOW = 0 too)
-        are_labels_or_int = [
-            isinstance(c, (int, np.int64, self._n_labels_cons))
-            for c in self._default_cons
-        ]
-
-        assert all(are_labels_or_int), (
-            "The default rule must only contain classes or labels"
-            " i.e. integer numbers. If a label is provide like LabelX.LOW"
-            " make sure that the X in LabelX is the same for both"
-            " n_labels_cons (currently set to {})"
-            " and default_cons".format(self._n_labels_cons.__name__)
-        )
-        #
-        # # validate that the n classes per cons matches len(LabelX) used
-        # # in the default rule cons. Valid example: n_classes_per_cons=3,
-        # # default_cons = [Label3.LOW]. Invalid example: n_classes_per_cons=3,
-        # # default_cons = [Label6.LOW] because 6!=3.
-        # default_cons_filtered = [c for c in self._default_cons if isinstance(c, LabelEnum)]
-        # assert [for (cons, n_labels) in zip(self._default_cons, self._cons_n_labels)]
-        #
-        #
-        # # def valid(cons, n_labels):
-        #
-        #
-        # convert LabelEnum to int
-        self._default_cons = [
-            x if isinstance(x, (int, np.int64)) else x.value for x in self._default_cons
-        ]
-
-        def can_default_cons_fit_in_cons():
-            for a, b in zip(self._default_cons, self._cons_n_labels):
-                # print("a ", a)
-                # print("b ", b)
-                try:
-                    yield a.value < b
-                except AttributeError:
-                    yield a < b
-
-        # print("lalalala", self._cons_n_labels)
-
-        # assert (self._default_cons < self._cons_n_labels).all(), (
-        assert all(can_default_cons_fit_in_cons()), (
-            "Make sure that the default rule contains valid classes/labels \n"
-            "i.e. label is in [0, n_classes-1] or in case of regression in \n"
-            "[0, n_labels-1].\n"
-            "Expected: ({}) < {}".format(self._default_cons, self._cons_n_labels)
-        )
-
-    def convert_to_fis(self, pyf_file):
-        pass
-
-    def to_tff(self, ind_tuple):
-        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
-        return self._nce.to_tff(ind_sp1, ind_sp2)
-
-    def get_y_true(self):
-        return self._y
-
-    @staticmethod
-    def _extract_ind_tuple(ind_tuple):
-        # convert ind_sp{1,2} in string format to make it easy to use it C++
-        return ind_tuple[0].bits.to01(), ind_tuple[1].bits.to01()
-
-    def _post_predict(self, y_pred):
-        return self._scale_back_y(y_pred)
-
     def predict(self, ind_tuple, X=None):
         ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
 
@@ -450,17 +292,44 @@ class CocoIndividual(FISIndividual, Clonable):
 
         return self._post_predict(y_pred)
 
-    # def generate_sp1(self):
-    #     return self._generate_ind(self._n_bits_sp1)
-    #
-    # def generate_sp2(self):
-    #     return self._generate_ind(self._n_bits_sp2)
+    def to_tff(self, ind_tuple):
+        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
+        return self._nce.to_tff(ind_sp1, ind_sp2)
+
+    def get_y_true(self):
+        return self._y
+
+    def print_ind(self, ind_tuple):
+        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
+        self._nce.print_ind(ind_sp1, ind_sp2)
 
     def get_ind_sp1_class(self):
         return self._ind_sp1_class
 
     def get_ind_sp2_class(self):
         return self._ind_sp2_class
+
+    @staticmethod
+    def clone(ind: bitarray):
+        return ind.deep_copy()
+
+    def _create_cons_scaler(self):
+        # y_pred returned by NativeCocoEvaluator are in range
+        # [0, n_class_per_cons-1] and it needs to be scaled back to
+        # [min_val_cons, max_val_cons] (which for binary and multiclass
+        # consequents do nothing but this is needed for continuous variables)
+
+        cons_scaler = MinMaxScaler()
+        cons_scaler.fit(self._y.astype(np.double))
+        return cons_scaler
+
+    @staticmethod
+    def _extract_ind_tuple(ind_tuple):
+        # convert ind_sp{1,2} in string format to make it easy to use it C++
+        return ind_tuple[0].bits.to01(), ind_tuple[1].bits.to01()
+
+    def _post_predict(self, y_pred):
+        return self._scale_back_y(y_pred)
 
     @staticmethod
     def _generate_ind(n_bits):
@@ -485,36 +354,13 @@ class CocoIndividual(FISIndividual, Clonable):
             self._n_rules * self._n_max_vars_per_rule * self._n_bits_per_label
         )
 
-        # TODO check if we need an other matrix to store the LV for cons. I
-        # don't think so, because since n_cons << n_vars we can store all the
-        # consequents in the individual's genome.
-
         # bits for r_cons
-        # print("n rules", self._n_rules)
-        # print("n cons", self._n_cons)
-        # print("n bits per cons", self._n_bits_per_cons)
         n_bits_r_cons = self._n_rules * self._n_cons * self._n_bits_per_cons
 
         n_total_bits = n_bits_r_sel_vars + n_bits_r_lv + n_bits_r_labels + n_bits_r_cons
-
-        # for v in (n_bits_r_sel_vars, n_bits_r_lv, n_bits_r_labels, n_bits_r_cons):
-        #     print("v", v)
-
-        # print("n_total_bits", n_total_bits)
-        return int(n_total_bits)
-
-    @staticmethod
-    def clone(ind: bitarray):
-        return ind.deep_copy()
-
-    # def _get_highest_n_classes_per_cons(self):
-    #     n_classes_per_cons = np.apply_along_axis(
-    #         lambda c: len(np.unique(c)), arr=self._X, axis=0
-    #     )
-    #     return np.max(n_classes_per_cons)
+        return int(n_total_bits)  # int cast because of the multiple ceil() used above
 
     def _compute_n_bits_per_cons(self):
-        # print("n class er cons", self._n_classes_per_cons)
         n_max_classes = max(self._n_classes_per_cons)
 
         # if all consequents are continuous variables (i.e. regression
@@ -527,44 +373,25 @@ class CocoIndividual(FISIndividual, Clonable):
         cons_n_labels[cons_n_labels == 0] = self._n_labels_cons.len()
         return cons_n_labels
 
-    # @staticmethod
     def _scale_back_y(self, y):
         # -1 because y is in [0, cons_n_labels-1]
         y_ = y / (self._cons_n_labels - 1)
         return self._cons_scaler.inverse_transform(y_)
 
-    def print_ind(self, ind_tuple):
-        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
-        self._nce.print_ind(ind_sp1, ind_sp2)
-
     @staticmethod
-    def _create_ind_class(n_bits):
-        class FixedSizeBitArray:
-            def __init__(self, bin_str=None):
-                if bin_str is None:
-                    bin_str = format(
-                        randint(0, (2 ** n_bits) - 1), "0{}b".format(n_bits)
-                    )
-                self.bits = bitarray(bin_str)
-
-            def deep_copy(self):
-                other = self.__class__(self.bits.to01())
-                return other
-
-            def __len__(self):
-                return self.bits.length()
-
-            def __setitem__(self, key, value):
-                self.bits.__setitem__(key, value.bits)
-
-            def __getitem__(self, item):
-                instance = FixedSizeBitArray()
-                instance.bits = self.bits[item]
-                return instance
-
-        return FixedSizeBitArray
+    def _minmax_norm(X_train):
+        scaler = MinMaxScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        return X_train_scaled, scaler
 
     @staticmethod
     def _create_vars_range(scaler):
         vars_range = np.vstack((scaler.data_min_, scaler.data_max_)).T.astype(np.double)
         return vars_range
+
+    @staticmethod
+    def _convert_labelenum_to_int(labels_enums):
+        return [
+            cons if isinstance(cons, (int, np.int64)) else cons.value
+            for cons in labels_enums
+        ]
