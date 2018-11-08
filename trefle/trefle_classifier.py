@@ -1,21 +1,18 @@
 from math import ceil
-from typing import Type
+from typing import Type, List, Callable
 
-import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import mean_squared_error
 
 from trefle.evo.experiment.base.coco_experiment import CocoExperiment
 from trefle.evo.experiment.coco.coco_individual import CocoIndividual
-from trefle.evo.experiment.view.coco_evolution_viewer import CocoEvolutionViewer
 from trefle.evo.helpers.fuzzy_labels import LabelEnum, Label3
-
-PERCENTAGE_ELITE = 0.1
-PERCENTAGE_HOF = 0.3
 
 
 class TrefleClassifier(BaseEstimator, ClassifierMixin):
     _fitness_function_signature = "def fit(y_true, y_pred): return fitness"
+    _PERCENTAGE_ELITE = 0.1
+    _PERCENTAGE_HOF = 0.3
 
     @staticmethod
     def _default_fit_func(y_true, y_pred):
@@ -24,36 +21,45 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
     def __init__(
         self,
         # fuzzy systems parameters
-        n_rules,
-        n_classes_per_cons,
-        default_cons,
-        n_max_vars_per_rule,
-        n_labels_per_mf,
+        n_rules: int,
+        n_classes_per_cons: List[int],
+        default_cons: List[int],
+        n_max_vars_per_rule: int,
+        n_labels_per_mf: int,
         n_labels_per_cons: Type[LabelEnum] = Label3,
         p_positions_per_lv: int = 32,
         dc_weight: int = 1,
-        n_lv_per_ind_sp1=None,
+        n_lv_per_ind_sp1: int = None,
         # cooperative-coevolution parameters
-        pop_size=80,
-        n_generations=100,
-        n_representatives=4,
-        crossover_prob=0.5,
-        # crossover_prob=0,
-        mutation_prob=0.03,
-        # mutation_prob=1,
-        n_elite=None,
-        halloffame_size=None,
-        fitness_function=None,
+        pop_size: int = 80,
+        n_generations: int = 100,
+        n_representatives: int = 4,
+        crossover_prob: float = 0.5,
+        mutation_prob: float = 0.03,
+        n_elite: int = None,
+        halloffame_size: int = None,
+        fitness_function: Callable = None,
         # other parameters
-        verbose=False,
+        verbose: bool = False,
     ):
         """
 
         :param n_rules:
+        :param n_classes_per_cons:
+        :param default_cons:
+        :param n_max_vars_per_rule:
         :param n_labels_per_mf:
+        :param n_labels_per_cons:
+        :param p_positions_per_lv:
+        :param dc_weight:
+        :param n_lv_per_ind_sp1:
         :param pop_size:
         :param n_generations:
-        :param halloffame:
+        :param n_representatives:
+        :param crossover_prob:
+        :param mutation_prob:
+        :param n_elite:
+        :param halloffame_size:
         :param fitness_function: a function like fitness(y_true, y_pred) that
         returns a scalar value. The higher this value is the better the fitness.
         Be careful to use classification metrics on a classification and vice
@@ -100,10 +106,12 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
             )
 
         if self.n_elite is None:
-            self.n_elite = int(ceil(PERCENTAGE_ELITE * self.pop_size))
+            self.n_elite = int(ceil(TrefleClassifier._PERCENTAGE_ELITE * self.pop_size))
 
         if self.halloffame_size is None:
-            self.halloffame_size = int(ceil(PERCENTAGE_HOF * self.pop_size))
+            self.halloffame_size = int(
+                ceil(TrefleClassifier._PERCENTAGE_HOF * self.pop_size)
+            )
 
     def fit(self, X, y):
         self._validate()
@@ -122,7 +130,7 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
             n_lv_per_ind_sp1=self.n_lv_per_ind_sp1,
         )
 
-        exp = CocoExperiment(
+        self._experiment = CocoExperiment(
             coco_ind=self._fis_ind,
             n_generations=self.n_generations,
             pop_size=self.pop_size,
@@ -133,41 +141,17 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
             halloffame_size=self.halloffame_size,
             fitness_func=self.fitness_function,
         )
-        exp.run()
+        self._experiment.run()
 
-        if self.verbose:
-            logbook = exp.get_logbook()
-            CocoEvolutionViewer.plot_fitness(logbook)
-
-        self._best_ind = exp.get_top_n()[0]
+        self._best_ind = self._experiment.get_top_n()[0]
         return self
 
     def predict(self, X):
         self._ensure_fit()
 
-        # var_ranges = IndEvaluatorUtils.compute_vars_range(X)
-
-        # ind_evaluator = NativeIndEvaluator(
-        #     ind_n=len(self._best_ind),
-        #     observations=X,
-        #     n_rules=self.n_rules,
-        #     max_vars_per_rule=self._n_vars,  # TODO remove me
-        #     n_labels=len(self._mf_label_names),
-        #     n_consequents=len(self._default_rule_output),
-        #     default_rule_cons=np.array(self._default_rule_output),
-        #     vars_ranges=var_ranges,
-        #     labels_weights=self._labels_weights,
-        # )
-
         ind_tuple = (self._best_ind.sp1, self._best_ind.sp2)
         y_pred = self._fis_ind.predict(ind_tuple, X)
-        # return self._compute_y_pred_bin(y_pred)
         return y_pred
-
-    # def get_last_unthresholded_predictions(self):
-    #     self._ensure_fit()
-    #
-    #     return self._y_pred
 
     def get_best_fuzzy_system_as_tff(self):
         self._ensure_fit()
@@ -180,15 +164,10 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
         tff_str = self._fis_ind.to_tff(ind_tuple)
         return tff_str
 
+    def get_experiment_logbook(self):
+        self._ensure_fit()
+        return self._experiment.get_logbook()
+
     def _ensure_fit(self):
         if getattr(self, "_fis_ind") is None:
             raise ValueError("You must use fit() first")
-
-    @staticmethod
-    def _compute_y_pred_bin(y_pred):
-        if y_pred.shape[1] > 1:
-            # return the class with the highest output
-            return np.argmax(y_pred, axis=1)
-        else:
-            # output is binary
-            return np.round(y_pred)
