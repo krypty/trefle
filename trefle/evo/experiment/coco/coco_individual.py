@@ -23,10 +23,6 @@ class MFShape(Enum):
     TRAP_MF = 1
 
 
-def minmax_norm(X_train):
-    scaler = MinMaxScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    return X_train_scaled, scaler
 
 
 class CocoIndividual(FISIndividual, Clonable):
@@ -208,7 +204,7 @@ class CocoIndividual(FISIndividual, Clonable):
         """
 
         super().__init__()
-        self._X, self._X_scaler = minmax_norm(X_train)
+        self._X, self._X_scaler = CocoIndividual._minmax_norm(X_train)
         self._y = y_train
         self._n_rules = n_rules
         self._n_classes_per_cons = np.asarray(n_classes_per_cons)
@@ -563,6 +559,12 @@ class CocoIndividual(FISIndividual, Clonable):
                 return instance
 
         return FixedSizeBitArray
+
+    @staticmethod
+    def _minmax_norm(X_train):
+        scaler = MinMaxScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        return X_train_scaled, scaler
 
     @staticmethod
     def _create_vars_range(scaler):
