@@ -281,31 +281,6 @@ class CocoIndividual(FISIndividual, Clonable):
             cons_range=self._cons_range,
         )
 
-    def _create_cons_scaler(self):
-        # y_pred returned by NativeCocoEvaluator are in range
-        # [0, n_class_per_cons-1] and it needs to be scaled back to
-        # [min_val_cons, max_val_cons] (which for binary and multiclass
-        # consequents do nothing but this is needed for continuous variables)
-
-        cons_scaler = MinMaxScaler()
-        cons_scaler.fit(self._y.astype(np.double))
-        return cons_scaler
-
-    def to_tff(self, ind_tuple):
-        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
-        return self._nce.to_tff(ind_sp1, ind_sp2)
-
-    def get_y_true(self):
-        return self._y
-
-    @staticmethod
-    def _extract_ind_tuple(ind_tuple):
-        # convert ind_sp{1,2} in string format to make it easy to use it C++
-        return ind_tuple[0].bits.to01(), ind_tuple[1].bits.to01()
-
-    def _post_predict(self, y_pred):
-        return self._scale_back_y(y_pred)
-
     def predict(self, ind_tuple, X=None):
         ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
 
@@ -317,11 +292,44 @@ class CocoIndividual(FISIndividual, Clonable):
 
         return self._post_predict(y_pred)
 
+    def to_tff(self, ind_tuple):
+        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
+        return self._nce.to_tff(ind_sp1, ind_sp2)
+
+    def get_y_true(self):
+        return self._y
+
+    def print_ind(self, ind_tuple):
+        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
+        self._nce.print_ind(ind_sp1, ind_sp2)
+
     def get_ind_sp1_class(self):
         return self._ind_sp1_class
 
     def get_ind_sp2_class(self):
         return self._ind_sp2_class
+
+    @staticmethod
+    def clone(ind: bitarray):
+        return ind.deep_copy()
+
+    def _create_cons_scaler(self):
+        # y_pred returned by NativeCocoEvaluator are in range
+        # [0, n_class_per_cons-1] and it needs to be scaled back to
+        # [min_val_cons, max_val_cons] (which for binary and multiclass
+        # consequents do nothing but this is needed for continuous variables)
+
+        cons_scaler = MinMaxScaler()
+        cons_scaler.fit(self._y.astype(np.double))
+        return cons_scaler
+
+    @staticmethod
+    def _extract_ind_tuple(ind_tuple):
+        # convert ind_sp{1,2} in string format to make it easy to use it C++
+        return ind_tuple[0].bits.to01(), ind_tuple[1].bits.to01()
+
+    def _post_predict(self, y_pred):
+        return self._scale_back_y(y_pred)
 
     @staticmethod
     def _generate_ind(n_bits):
@@ -352,10 +360,6 @@ class CocoIndividual(FISIndividual, Clonable):
         n_total_bits = n_bits_r_sel_vars + n_bits_r_lv + n_bits_r_labels + n_bits_r_cons
         return int(n_total_bits)  # int cast because of the multiple ceil() used above
 
-    @staticmethod
-    def clone(ind: bitarray):
-        return ind.deep_copy()
-
     def _compute_n_bits_per_cons(self):
         n_max_classes = max(self._n_classes_per_cons)
 
@@ -373,10 +377,6 @@ class CocoIndividual(FISIndividual, Clonable):
         # -1 because y is in [0, cons_n_labels-1]
         y_ = y / (self._cons_n_labels - 1)
         return self._cons_scaler.inverse_transform(y_)
-
-    def print_ind(self, ind_tuple):
-        ind_sp1, ind_sp2 = self._extract_ind_tuple(ind_tuple)
-        self._nce.print_ind(ind_sp1, ind_sp2)
 
     @staticmethod
     def _minmax_norm(X_train):
