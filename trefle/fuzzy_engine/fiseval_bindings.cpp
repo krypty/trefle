@@ -70,7 +70,7 @@ SingletonFIS FISCocoEvalWrapper::extract_fis(const string &ind_sp1,
     }
     auto fuzzy_rule = build_fuzzy_rule(sel_vars[i], vars_lv_lookup, vec_lv,
                                        r_labels[i], r_cons[i]);
-    fuzzy_rules.push_back(fuzzy_rule);
+    fuzzy_rules.push_back(std::move(fuzzy_rule));
   }
 
   DefaultFuzzyRule dfr(default_cons);
@@ -132,7 +132,7 @@ FISCocoEvalWrapper::parse_ind_sp1(const string &ind_sp1) {
     sort(row.begin(), row.end());
     TriLV lv(row);
 
-    vec_lv.push_back(lv);
+    vec_lv.push_back(std::move(lv));
   }
   return vec_lv;
 }
@@ -287,7 +287,7 @@ FuzzyRule FISCocoEvalWrapper::build_fuzzy_rule(
     }
 
     Antecedent ant(vec_lv[vars_lv_lookup.at(var_idx)], mf_idx);
-    ants.push_back(std::pair<size_t, Antecedent>(var_idx, ant));
+    ants.emplace_back(var_idx, ant);
   }
   return FuzzyRule(ants, cons_ri);
 }
