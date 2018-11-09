@@ -40,15 +40,9 @@ public:
         dc_weight(dc_weight), n_classes_per_cons(n_cons, 0),
         cons_n_labels(n_cons, 0), vars_range(np_vars_range.shape(0)),
         cons_range(np_cons_range.shape(0)) {
-    // cout << "hello from FISCocoEvalWrapper " << n_bits_per_mf << ", "
-    // << n_true_labels << ", " << n_bits_per_lv << endl;
 
     np_arr1d_to_vec(np_cons_n_labels, cons_n_labels, n_cons);
     np_arr1d_to_vec(np_n_classes_per_cons, n_classes_per_cons, n_cons);
-
-    // for (int i = 0; i < cons_n_labels.size(); i++) {
-    //   cout << "cons n labels " << cons_n_labels[i] << endl;
-    // }
 
     np_arr2d_to_vec2d(np_X_train, X_train);
 
