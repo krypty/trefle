@@ -11,7 +11,8 @@ PATH=/opt/python/cp${PYVERSION}-cp${PYVERSION}m/bin:$PATH
 
 cd /PyFUGE
 mkdir -p dist
-pip install cmake twine wheel
+# use 0.31.1 because of this issue: https://github.com/pypa/auditwheel/issues/102 
+pip install -U cmake twine wheel==0.31.1
 python setup.py build
 python setup.py sdist bdist_wheel
 cd dist

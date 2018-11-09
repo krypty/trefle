@@ -42,11 +42,7 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
 
-        # # add vcpkg to toolpath chain
-        # toolchain_path = os.path.join(os.environ["VCPKG_ROOT"], "scripts",
-        #                               "buildsystems", "vcpkg.cmake")
         cmake_args = [
-            # '-DCMAKE_TOOLCHAIN_FILE={}'.format(toolchain_path),
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
         ]
@@ -111,7 +107,7 @@ trefle_module = CMakeExtension("trefle")
 
 setup(
     name="trefle",
-    version="0.1.4",
+    version="0.1.1",
     description="Trefle stands for Trefle is a Revised and Evolutionary-based "
     "Fuzzy Logic Engine. It is an implementation of the FuzzyCoCo "
     "algorithm i.e. a scikit-learn compatible estimator that use "

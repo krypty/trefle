@@ -9,7 +9,7 @@ read PYPI_USER
 echo -n PyPI password:
 read -s PYPI_PASS
 
-for pyversion in 34 35 36
+for pyversion in 35 36 37
 do
 	echo "\n\n"
 	echo "***************************************************"
