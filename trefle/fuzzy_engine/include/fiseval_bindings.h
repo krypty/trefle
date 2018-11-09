@@ -108,7 +108,7 @@ private:
     return ((max_v - min_v) / n_classes) * v + min_v;
   }
 
-  bool are_all_labels_dc(const std::vector<size_t> labels_for_a_rule);
+  bool are_all_labels_dc(const std::vector<size_t> &labels_for_a_rule);
 
   FuzzyRule
   build_fuzzy_rule(const std::vector<size_t> &vars_rule_i,

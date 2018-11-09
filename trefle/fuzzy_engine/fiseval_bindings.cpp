@@ -261,7 +261,7 @@ vector<vector<double>> FISCocoEvalWrapper::extract_r_cons(const string &ind_sp2,
 }
 
 bool FISCocoEvalWrapper::are_all_labels_dc(
-    const vector<size_t> labels_for_a_rule) {
+    const vector<size_t> &labels_for_a_rule) {
   for (size_t label : labels_for_a_rule) {
     if (label != dc_idx) {
       return false;
