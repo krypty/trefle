@@ -36,7 +36,6 @@ include_directories(
     # ${SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/include
     ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/include
-    ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/vendor/eigen
     ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/vendor/catch2/single_include
     ${CMAKE_SOURCE_DIR}/trefle/fuzzy_engine/trefle_engine/vendor/json/single_include
     )

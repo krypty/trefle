@@ -2,7 +2,6 @@
 #define FISEVAL_BINDINGS_H
 
 #include "default_fuzzy_rule.h"
-#include "fis.h"
 #include "fuzzy_rule.h"
 #include "json_fis_reader.h"
 #include "json_fis_writer.h"
