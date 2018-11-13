@@ -1,7 +1,7 @@
 #ifndef TREFLE_PY_MODULE_H
 #define TREFLE_PY_MODULE_H
 
-#include "fiseval_bindings.h"
+#include "fis_coco_eval_wrapper.h"
 #include "pybind_utils.h"
 #include "trefle_fis.h"
 #include <pybind11/pybind11.h>

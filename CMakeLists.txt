@@ -27,7 +27,7 @@ endif()
 
 
 set(SOURCES
-    ${SOURCE_DIR}/fiseval_bindings.cpp
+    ${SOURCE_DIR}/fis_coco_eval_wrapper.cpp
     ${SOURCE_DIR}/trefle_fis.cpp
     ${SOURCE_DIR}/trefle_py_module.cpp
     )

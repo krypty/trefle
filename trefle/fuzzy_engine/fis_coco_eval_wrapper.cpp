@@ -1,4 +1,4 @@
-#include "fiseval_bindings.h"
+#include "fis_coco_eval_wrapper.h"
 #include "singleton_fis.h"
 
 py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
