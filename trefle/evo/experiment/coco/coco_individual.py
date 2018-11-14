@@ -391,7 +391,13 @@ class CocoIndividual(FISIndividual, Clonable):
 
     @staticmethod
     def _convert_labelenum_to_int(labels_enums):
+        def is_int_or_numpy_int(v):
+            try:
+                return issubclass(v.dtype.type, (int, np.integer))
+            except:
+                return False
+
         return [
-            cons if isinstance(cons, (int, np.int64)) else cons.value
+            cons if is_int_or_numpy_int(cons) else cons.value
             for cons in labels_enums
         ]

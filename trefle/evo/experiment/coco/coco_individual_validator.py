@@ -97,7 +97,7 @@ class CocoIndividualValidator:
         # n_labels_cons and default_cons are the same (e.g. if
         # n_labels_cons's LOW = 0, then default_cons' LOW = 0 too)
         are_labels_or_int = [
-            isinstance(c, (int, np.int64, self._coco_ind._n_labels_cons))
+            isinstance(c, (int, np.integer, self._coco_ind._n_labels_cons))
             for c in self._coco_ind._default_cons
         ]
 
