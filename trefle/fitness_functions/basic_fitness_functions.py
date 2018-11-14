@@ -31,14 +31,14 @@ def weighted_binary_classif_metrics(
 
     All weights are expected to be positive numbers.
 
-    :param acc_w: 
+    :param acc_w:
     :param sen_w:
     :param spe_w:
     :param f1_w:
-    :param ppv_w: 
-    :param npv_w: 
-    :param fpr_w: 
-    :param fnr_w: 
+    :param ppv_w:
+    :param npv_w:
+    :param fpr_w:
+    :param fnr_w:
     :param fdr_w:
     :param mse_w:
     :return:
@@ -50,7 +50,8 @@ def weighted_binary_classif_metrics(
     if all([not hasattr(v, "__iter__") for v in kwargs.values()]):
         # all arguments of this function are single value (let's hope scalars)
 
-        assert sum(kwargs.values()) > 0, "you must at least have a weight > 0"
+        if sum(kwargs.values()) <= 0:
+            raise ValueError("you must at least have a weight > 0")
 
         return _build_weighted_binary_classif_metrics(**kwargs)
     else:
