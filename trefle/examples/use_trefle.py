@@ -72,13 +72,10 @@ def run():
     model = clf.fit(X_train, y_train)
 
     # Make predictions
-    np.save("/tmp/X_test", X_test)
     y_pred = clf.predict(X_test)
-    np.save("/tmp/y_pred", y_pred)
 
     # fis = clf.get_best_fuzzy_system()
     tff_str = clf.get_best_fuzzy_system_as_tff()
-    open("/tmp/temp.tff", mode="w").write(tff_str)
 
     # fis = clf.get_best_fuzzy_system()
     # print("best fis is ", end="")
