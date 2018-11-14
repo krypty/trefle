@@ -18,6 +18,7 @@ Start by getting the sources as described in [INSTALL.md](docs/INSTALL.md)
 Then in the project root folder, create the binary wheel:
 
 ```bash
+git clone --recursive <this_repo>
 pip install wheel twine
 python setup.py build
 python setup.py sdist bdist_wheel
@@ -61,6 +62,41 @@ python setup.py sdist bdist_wheel
 cd dist
 auditwheel repair xxx-linux-x86_64.whl
 twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
+```
+## Instructions to deploy on Mac OS X
+
+Open a terminal and:
+
+```bash
+git clone --recursive <this_repo>
+cd trefle
+brew update
+brew install pyenv
+brew install gcc --without-multilib
+pyenv install 3.5.6
+pyenv install 3.6.7
+pyenv install 3.7.1
+echo 'eval "$(pyenv init -)"' >> ~/.bash_profile 
+echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bash_profile # then restart the terminal
+```
+Then for each Python P_XXX version in (3.5.6, 3.6.7, 3.7.1) do:
+
+```bash
+# create a virtualenv for this version (only do it once per version)
+pyenv virtualenv P_XXX trefle-P_XXX # e.g. trefle-3.5.6
+
+# activate the virtual env (this and the following commands have to be done
+# every time)
+pyenv activate trefle-P_XXX
+
+# check the version with `python -V`
+export CC=/usr/local/bin/gcc-8
+export CXX=/usr/local/bin/g++-8
+pip install cmake wheel twine
+python setup.py build
+python setup.py sdist bdist_wheel
+twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
+rm -rf build dist
 ```
 
 ## Test the uploaded binary wheel from `test.pypi.org`
