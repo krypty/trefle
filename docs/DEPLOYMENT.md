@@ -15,6 +15,12 @@ Start by getting the sources as described in [INSTALL.md](docs/INSTALL.md)
 
 ## Create a binary wheel for Windows x64
 
+The following commands assume that you have a virtualenv using the Python version you want to.
+
+If you don't know how to start it is recommended to use Anaconda and create n virtualenv where
+n is the number of Python versions you want to support. For example, create a virtual env
+called `trefle-py-35`, `trefle-py-36` and `trefle-py-37` (e.g. `conda create -n trefle-py-35 python=3.5`)
+
 Then in the project root folder, create the binary wheel:
 
 ```bash
@@ -76,7 +82,7 @@ brew install gcc --without-multilib
 pyenv install 3.5.6
 pyenv install 3.6.7
 pyenv install 3.7.1
-echo 'eval "$(pyenv init -)"' >> ~/.bash_profile 
+echo 'eval "$(pyenv init -)"' >> ~/.bash_profile
 echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bash_profile # then restart the terminal
 ```
 Then for each Python P_XXX version in (3.5.6, 3.6.7, 3.7.1) do:
