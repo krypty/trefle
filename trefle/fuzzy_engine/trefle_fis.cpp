@@ -2,6 +2,9 @@
 #include "json_fis_reader.h"
 #include "observations_scaler.h"
 #include "predictions_scaler.h"
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -21,10 +24,15 @@ TrefleFIS TrefleFIS::from_tff(const string &tff_str) {
 }
 
 TrefleFIS TrefleFIS::from_tff_file(const string &tff_file) {
-  // TODO
   cout << "read from_tff_file" << endl;
-  string TODO_CHANGE_ME_STR = "";
-  return from_tff(TODO_CHANGE_ME_STR);
+
+  ifstream f(tff_file.c_str());
+  if (!f.good()) {
+    throw std::invalid_argument("Specified tff file does not exist");
+  }
+  std::stringstream buffer;
+  buffer << f.rdbuf();
+  return from_tff(buffer.str());
 }
 
 py_array<double> TrefleFIS::predict(py_array<double> &np_observations) {
