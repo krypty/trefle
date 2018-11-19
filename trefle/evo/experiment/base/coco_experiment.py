@@ -43,6 +43,7 @@ class CocoExperiment(Experiment):
         n_elite: int,
         halloffame_size: int,
         fitness_func: Callable,
+        verbose: bool,
     ):
         super().__init__(fitness_func)
         self._coco_ind = coco_ind
@@ -53,14 +54,13 @@ class CocoExperiment(Experiment):
         self._mutation_prob = mutation_prob
         self._n_elite = n_elite
         self._halloffame_size = halloffame_size
+        self._verbose = verbose
         self._post_init()
 
     def run(self):
         self.coop()
 
     def coop(self):
-        verbose = True
-
         # Cooperative-Coevolution parameters
         N_GEN = self._n_generations
         POP_SIZE = self._pop_size
@@ -214,7 +214,7 @@ class CocoExperiment(Experiment):
                 self._hof,
             )
             update_logbook(
-                self._hof, all_species, "sp1", g, self._logbook, stats, verbose
+                self._hof, all_species, "sp1", g, self._logbook, stats, self._verbose
             )
 
             representatives_sp2 = evolve_species(
@@ -228,7 +228,7 @@ class CocoExperiment(Experiment):
                 self._hof,
             )
             update_logbook(
-                self._hof, all_species, "sp2", g, self._logbook, stats, verbose
+                self._hof, all_species, "sp2", g, self._logbook, stats, self._verbose
             )
 
         couple = self._hof[0]

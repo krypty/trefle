@@ -140,6 +140,7 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
             n_elite=self.n_elite,
             halloffame_size=self.halloffame_size,
             fitness_func=self.fitness_function,
+            verbose=self.verbose
         )
         self._experiment.run()
 
