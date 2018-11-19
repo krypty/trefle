@@ -6,6 +6,7 @@ set -e
 PYPI_USER=$1
 PYPI_PASS=$2
 PYVERSION=$3
+PYPI_URL=$4
 
 PATH=/opt/python/cp${PYVERSION}-cp${PYVERSION}m/bin:$PATH
 
@@ -17,6 +18,6 @@ python setup.py build
 python setup.py sdist bdist_wheel
 cd dist
 auditwheel repair *.whl
-twine upload -u $PYPI_USER -p $PYPI_PASS --repository-url "https://test.pypi.org/legacy/" wheelhouse/*
+twine upload -u $PYPI_USER -p $PYPI_PASS --repository-url $PYPI_URL wheelhouse/*
 
 rm -rf /PyFUGE/dist
