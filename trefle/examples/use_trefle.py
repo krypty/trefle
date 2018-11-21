@@ -2,6 +2,7 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 
+from trefle.fitness_functions.output_thresholder import round_to_cls
 from trefle.trefle_classifier import TrefleClassifier
 
 
@@ -39,13 +40,6 @@ def run():
     # Split our data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
-    def round_to_cls(arr, n_classes):
-        bins = np.linspace(0, n_classes - 1, n_classes + 1)
-        # print(bins)
-        c = np.searchsorted(bins, arr)
-        c -= 1
-        c = np.clip(c, 0, n_classes - 1)
-        return c
 
     def fit(y_true, y_pred):
         y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
