@@ -1,4 +1,5 @@
 import random
+import warnings
 from functools import partial
 from itertools import product
 from typing import Callable
@@ -87,21 +88,27 @@ class CocoExperiment(Experiment):
         if isinstance(self._coco_ind, fis_individual.Clonable):
             toolbox.register("clone", self._coco_ind.clone)
 
-        # Setup sp1 species
-        creator.create(
-            "IndividualSp1",
-            self._coco_ind.get_ind_sp1_class(),
-            fitness=creator.FitnessMax,
-        )
-        toolbox.register("species_sp1", tools.initRepeat, list, creator.IndividualSp1)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            # Setup sp1 species
+            creator.create(
+                "IndividualSp1",
+                self._coco_ind.get_ind_sp1_class(),
+                fitness=creator.FitnessMax,
+            )
+            toolbox.register(
+                "species_sp1", tools.initRepeat, list, creator.IndividualSp1
+            )
 
-        # Setup angle species
-        creator.create(
-            "IndividualSp2",
-            self._coco_ind.get_ind_sp2_class(),
-            fitness=creator.FitnessMax,
-        )
-        toolbox.register("species_sp2", tools.initRepeat, list, creator.IndividualSp2)
+            # Setup sp2 species
+            creator.create(
+                "IndividualSp2",
+                self._coco_ind.get_ind_sp2_class(),
+                fitness=creator.FitnessMax,
+            )
+            toolbox.register(
+                "species_sp2", tools.initRepeat, list, creator.IndividualSp2
+            )
 
         def eval_solution(species_indices, ind_tuple):
             ind_sp1 = ind_tuple[species_indices[0]]
