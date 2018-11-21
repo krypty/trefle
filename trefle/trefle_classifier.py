@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error
 from trefle.evo.experiment.base.coco_experiment import CocoExperiment
 from trefle.evo.experiment.coco.coco_individual import CocoIndividual
 from trefle.evo.helpers.fuzzy_labels import LabelEnum, Label3
+from trefle.fitness_functions.output_thresholder import round_to_cls
 
 
 class TrefleClassifier(BaseEstimator, ClassifierMixin):
@@ -140,7 +141,7 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
             n_elite=self.n_elite,
             halloffame_size=self.halloffame_size,
             fitness_func=self.fitness_function,
-            verbose=self.verbose
+            verbose=self.verbose,
         )
         self._experiment.run()
 
@@ -152,6 +153,15 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
 
         ind_tuple = (self._best_ind.sp1, self._best_ind.sp2)
         y_pred = self._fis_ind.predict(ind_tuple, X)
+        return y_pred
+
+    def predict_classes(self, X):
+        y_pred = self.predict(X)
+
+        for i, n_classes in enumerate(self.n_classes_per_cons):
+            if n_classes > 0:  # not a continuous variable
+                toto = round_to_cls(y_pred[:, i], n_classes)
+                y_pred[:, i] = toto
         return y_pred
 
     def get_best_fuzzy_system_as_tff(self):
