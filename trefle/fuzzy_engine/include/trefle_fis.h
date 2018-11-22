@@ -13,6 +13,7 @@ public:
   static TrefleFIS from_tff_file(const string &tff_file);
 
   py_array<double> predict(py_array<double> &np_observations);
+  void describe();
 
 private:
   TrefleFIS(const SingletonFIS &fis,

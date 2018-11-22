@@ -48,7 +48,9 @@ PYBIND11_MODULE(trefle_engine, m) {
       .def("from_tff", &TrefleFIS::from_tff,
            "get a TrefleFIS instance from a tff str")
       .def("from_tff_file", &TrefleFIS::from_tff_file,
-           "get a TrefleFIS instance from a tff file");
+           "get a TrefleFIS instance from a tff file")
+      .def("describe", &TrefleFIS::describe,
+           "print a description of this fuzzy system");
 }
 
 #endif // TREFLE_PY_MODULE_H

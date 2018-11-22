@@ -46,3 +46,5 @@ py_array<double> TrefleFIS::predict(py_array<double> &np_observations) {
   y_pred = predictions_scaler.scale(y_pred);
   return vec2d_to_np_vec2d(y_pred);
 }
+
+void TrefleFIS::describe() { cout << fis << endl; }
