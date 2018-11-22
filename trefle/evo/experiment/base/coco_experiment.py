@@ -201,7 +201,6 @@ class CocoExperiment(Experiment):
         # reached.
         self._hof = HallOfFame(maxsize=HOF_SIZE)
 
-        print("Generation 0")
         evaluate_species(
             all_species["sp1"], "sp1", representatives_sp2, N_REPRESENTATIVES, self._hof
         )
@@ -220,9 +219,7 @@ class CocoExperiment(Experiment):
                 N_ELITE,
                 self._hof,
             )
-            update_logbook(
-                self._hof, all_species, "sp1", g, self._logbook, stats, self._verbose
-            )
+            self._update_logbook(self._hof, all_species, "sp1", g, self._logbook, stats)
 
             representatives_sp2 = evolve_species(
                 all_species,
@@ -234,25 +231,21 @@ class CocoExperiment(Experiment):
                 N_ELITE,
                 self._hof,
             )
-            update_logbook(
-                self._hof, all_species, "sp2", g, self._logbook, stats, self._verbose
-            )
-
-        couple = self._hof[0]
-        print("ind with fitness {:.3f}".format(couple.fitness[0]))
-        self._coco_ind.print_ind((couple.sp1, couple.sp2))
+            self._update_logbook(self._hof, all_species, "sp2", g, self._logbook, stats)
 
     def get_top_n(self):
         return self._hof
 
+    def _update_logbook(self, hof, all_species, species_name, g, logbook, stats):
+        avg_hof = np.mean([pair.fitness for pair in hof.items])
+        record = stats.compile(all_species[species_name])
+        logbook.record(avg_hof=avg_hof, gen=g, species=species_name, **record)
 
-def update_logbook(hof, all_species, species_name, g, logbook, stats, verbose):
-    avg_hof = np.mean([pair.fitness for pair in hof.items])
-    record = stats.compile(all_species[species_name])
-    logbook.record(avg_hof=avg_hof, gen=g, species=species_name, **record)
+        self._print_if_verbose(logbook.stream)
 
-    if verbose:
-        print(logbook.stream)
+    def _print_if_verbose(self, text):
+        if self._verbose:
+            print(text)
 
 
 def evolve_species(
