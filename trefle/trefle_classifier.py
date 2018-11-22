@@ -167,13 +167,20 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
     def get_best_fuzzy_system_as_tff(self):
         self._ensure_fit()
 
-        best_ind = self._best_ind
-        ind_tuple = (best_ind.sp1, best_ind.sp2)
-
-        self._fis_ind.print_ind(ind_tuple)
+        ind_tuple = self._get_ind_tuple(self._best_ind)
 
         tff_str = self._fis_ind.to_tff(ind_tuple)
         return tff_str
+
+    def print_best_fuzzy_system(self):
+        self._ensure_fit()
+        ind_tuple = self._get_ind_tuple(self._best_ind)
+        self._fis_ind.print_ind(ind_tuple)
+
+    @staticmethod
+    def _get_ind_tuple(ind):
+        ind_tuple = (ind.sp1, ind.sp2)
+        return ind_tuple
 
     def get_experiment_logbook(self):
         self._ensure_fit()
