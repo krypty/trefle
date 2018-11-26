@@ -1,4 +1,5 @@
 #include "trefle_fis.h"
+#include "fis_viewer.h"
 #include "json_fis_reader.h"
 #include "observations_scaler.h"
 #include "predictions_scaler.h"
@@ -20,7 +21,7 @@ TrefleFIS TrefleFIS::from_tff(const string &tff_str) {
   ObservationsScaler observations_scaler(vars_range);
   PredictionsScaler predictions_scaler(cons_range, n_labels_per_cons);
 
-  return TrefleFIS(fis, observations_scaler, predictions_scaler);
+  return TrefleFIS(fis, observations_scaler, predictions_scaler, vars_range);
 }
 
 TrefleFIS TrefleFIS::from_tff_file(const string &tff_file) {
@@ -47,4 +48,8 @@ py_array<double> TrefleFIS::predict(py_array<double> &np_observations) {
   return vec2d_to_np_vec2d(y_pred);
 }
 
-void TrefleFIS::describe() { cout << fis << endl; }
+void TrefleFIS::describe() {
+  FISViewer fis_viewer(fis, vars_range);
+  fis_viewer.describe();
+}
+

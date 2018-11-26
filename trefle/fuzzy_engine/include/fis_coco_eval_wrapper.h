@@ -110,6 +110,10 @@ private:
                    const std::vector<size_t> &r_labels_ri,
                    const std::vector<double> cons_ri);
 
+  unordered_map<size_t, vector<double>>
+  get_partial_vars_range(const vector<vector<double>> &vars_range,
+                         const set<size_t> &used_vars);
+
 private:
   std::vector<std::vector<double>> X_train;
   const int n_vars;

@@ -1,4 +1,5 @@
 #include "fis_coco_eval_wrapper.h"
+#include "fis_viewer.h"
 #include "singleton_fis.h"
 
 py::array_t<double> FISCocoEvalWrapper::predict_c(const string &ind_sp1,
@@ -15,7 +16,11 @@ py::array_t<double> FISCocoEvalWrapper::predict_c_other(
 void FISCocoEvalWrapper::print_ind(const string &ind_sp1,
                                    const string &ind_sp2) {
   auto fis = extract_fis(ind_sp1, ind_sp2);
-  cout << fis << endl;
+
+  auto partial_vars_range =
+      get_partial_vars_range(vars_range, fis.get_used_vars());
+  FISViewer fis_viewer(fis, partial_vars_range);
+  fis_viewer.describe();
 }
 
 string FISCocoEvalWrapper::to_tff(const string &ind_sp1,
@@ -76,7 +81,6 @@ SingletonFIS FISCocoEvalWrapper::extract_fis(const string &ind_sp1,
   DefaultFuzzyRule dfr(default_cons);
 
   SingletonFIS fis(fuzzy_rules, dfr);
-
   return fis;
 }
 
@@ -290,4 +294,15 @@ FuzzyRule FISCocoEvalWrapper::build_fuzzy_rule(
     ants.emplace_back(var_idx, ant);
   }
   return FuzzyRule(ants, cons_ri);
+}
+
+unordered_map<size_t, vector<double>>
+FISCocoEvalWrapper::get_partial_vars_range(
+    const vector<vector<double>> &vars_range, const set<size_t> &used_vars) {
+
+  unordered_map<size_t, vector<double>> partial_vars_range;
+  for (size_t var_idx : used_vars) {
+    partial_vars_range.emplace(var_idx, vars_range[var_idx]);
+  }
+  return partial_vars_range;
 }
