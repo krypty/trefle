@@ -11,6 +11,12 @@ class ObservationsScaler {
 public:
   ObservationsScaler(const map_ranges &vars_range) : vars_range{vars_range} {}
 
+  double scale(size_t var_idx, double value) {
+    auto var_min = vars_range[var_idx][0];
+    auto var_max = vars_range[var_idx][1];
+    return (value - var_min) / (var_max - var_min);
+  }
+
   vector2d scale(const vector2d &observations) {
     const size_t n_obs = observations.size();
     const size_t n_vars = observations[0].size();
@@ -27,8 +33,7 @@ public:
         } else {
           auto var_min = vars_range[j][0];
           auto var_max = vars_range[j][1];
-          scaled_observations[i][j] =
-              (observations[i][j] - var_min) / (var_max - var_min);
+          scaled_observations[i][j] = scale(j, observations[i][j]);
         }
       }
     }
