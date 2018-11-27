@@ -24,7 +24,7 @@ class NativeCocoEvaluator:
         vars_range: np.array,
         cons_range: np.array,
     ):
-        self._fiseval = FISCocoEvalWrapper(
+        self._eval_wrapper = FISCocoEvalWrapper(
             X_train,
             n_vars,
             n_rules,
@@ -46,13 +46,13 @@ class NativeCocoEvaluator:
 
     def predict_native(self, ind_sp1: str, ind_sp2: str, other_X: np.array = None):
         if other_X is None:
-            y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2)
+            y_pred = self._eval_wrapper.bind_predict(ind_sp1, ind_sp2)
         else:
-            y_pred = self._fiseval.bind_predict(ind_sp1, ind_sp2, other_X)
+            y_pred = self._eval_wrapper.bind_predict(ind_sp1, ind_sp2, other_X)
         return y_pred
 
     def print_ind(self, ind_sp1: str, ind_sp2: str):
-        self._fiseval.print_ind(ind_sp1, ind_sp2)
+        self._eval_wrapper.print_ind(ind_sp1, ind_sp2)
 
     def to_tff(self, ind_sp1: str, ind_sp2: str):
-        return self._fiseval.to_tff(ind_sp1, ind_sp2)
+        return self._eval_wrapper.to_tff(ind_sp1, ind_sp2)
