@@ -32,24 +32,68 @@ class CocoIndividual(FISIndividual, Clonable):
     """
     This class creates two individuals i.e. one to represent the membership
     functions and the other to represent the rules, called respectively
-    specie 1 (sp1) and specie 2 (sp2)
+    specie 1 (sp1) and specie 2 (sp2). Each of these species is basically
+    an 1d array of bits. This array is then split into n matrices (where n
+    differs from sp1 and sp2) which are used to build the fuzzy system.
 
     Reference: Carlos Pena's thesis Table 3.1 chapter Application Example The
-    Iris Problem
+    Iris Problem although this implementation is an exact reproduction of what
+    is described there.
+
+    In short the process to transform these 1d arrays of bits to a fuzzy system
+    is. This process is done in the C++ part in fis_coco_eval_wrapper.cpp's
+    extract_XXX() methods. Here are the main steps of this process:
+      1. Extract from the 1d array of bits n matrices
+         "110001111011000110"  ->  [110 001  and   [ 000
+                                    111 011]         110 ]
+      2. Convert the bit matrices into "business" matrices i.e. matrices
+      with numbers that represents something for the fuzzy system (e.g. the
+      index of the variable to used for a particular antecedent.
+         [110 001  and   [ 000     -> [6  1    and [0
+          111 011]         110 ]       7  3]        6]
+      For example this could means that the 2nd rule uses the var 7 and 3 and
+      set the consequent to 6th class.
+
+      3. Uses these matrices to build the fuzzy system and all their parts (
+      fuzzy rules, linguistic variables,...)
+
 
     **Specie 1 - the MFs**
-    The shape of sp1 is the following:
-        [ v0p0, v0p1, ..., v0pK, v1p0, v1p2, ..., v1pK, ...]
+    The shape of the 1d bit array of sp1 is the following:
+        [ lv0p0, lv0p1, ..., lv0pK, lv1p0, lv1p2, ..., lv1pK,
+          lv2p0, lv2p1, ..., lvIp0, lvIp1, ...., ...,  lvIpK ]
+
+    Where:
+        K = p_position_per_lv
+        I = n_lv_per_ind_sp1
+
+    An individual of sp1 (i.e. an instance of this bit array) can been seen as
+    a pool of linguistic variables defined by their respective p-points. The
+    size of the pool is I.
+
+    This bit array will be converted to a matrix called r_mfs.
+
+    r_mfs is a KxI matrix like this:
+
+        ^                ||<------------- p_positions --------->|
+        |          |-----||-------|-------|-------|-----|-------|
+    n_lv_per_ind   | lv0 || lv0p0 | lv0p1 | lv0p2 | ... | lv0pK |
+        |          | lv1 || lv1p0 | lv1p1 | lv1p2 | ... | lv1pK |
+        v          | lvI || lvIp0 | lvIp1 | lvIp2 | ... | lvIpK |
 
 
-    Meaning: vipj is the j-th point (or p position) of the i-th variable.
-    For example, for triangular MF (triMF) the value v4p1 is represented by:
+    Meaning: lvipj is the j-th point (or p position) of the i-th linguistic
+    variable of the pool. lvipj values are in [0, 1]. This kind of represents the
+    percentage of a variable (which needs to be scaled in [0,1] beforehand).
+    You might want to pre-process outliers before running TrefleClassifier.
+    For example, for a triangular LV (triLV) the value lv4p1 is represented by
+    'p1' on the x-axis:
 
 
         Membership functions for variable 4
       ^
       | low      medium           high
-    1 |XXXXX       X          XXXXXXXXXXXX
+    1 |    X       X          XX
       |     X     X  X       XX
       |      X   X    X    XX
       |       X X      XX X
@@ -57,48 +101,53 @@ class CocoIndividual(FISIndividual, Clonable):
       |      X  X     XX   XX
       |     X    X XX       XX
       |    X       X          XX
-    0 +-------------------------------------->
-           p0     p1          p2
+    0 +--------------------------------------> 1
+           p0     *p1*        p2
 
-    In vipK the "K" defines the number of labels a linguistic variable has. For
-    example, if K=3 then the linguistic variables created will use 3 membership
-    functions to represent the LOW, MEDIUM and HIGH labels. This "k" letter is
-    also called n_true_labels in the code.
-
-    The vipj value is in the interval [min(var_i), max(var_i)] computed from the
-    dataset (i.e. X_train). A vipj value is represented as a binary number to
-    let the evolutionary algorithm manipulate it.
+    In "lvipK" the "K" defines the number of p-positions a linguistic variable has.
+    In the case of a triangular membership function (as it has been implemented
+    so far), the number of p-positions (i.e. K) is >= n_labels (i.e. the
+    linguistic labels like LOW, MEDIUM and HIGH).
 
     The resolution (i.e. the number of possible values that a p position can
     take is defined by the p_positions_per_lv. So the number of bits needed to
-    represented the desired p_positions_per_lv is:
+    represent the desired p_positions_per_lv is:
     n_bits_per_mf = ceil(log2(p_positions_per_lv))
 
-    In total there are:
-        n_bits_per_mf = ceil(log2(p_positions_per_lv))
-        n_bits_for_all_vars = n_vars * n_bits_per_mf * n_true_labels
-        TODO: n_vars or n_max_vars_per_rule ?
+    The total number of bits used is given by _compute_needed_bits_for_sp1()
+
+
+    **Specie 2 - the rules**
 
 
 
+    **THIS IS OUTDATED** !!!
+    r_sel_vars
+    r_lv
+    r_labels
+    r_cons
 
-    **Specie 2 - the rules** There are two parameters Aij and Cij.
-    The shape of sp2 is the following:
-        [ r0a0, r0a1,...r0aN, r1a0, r1a1,..rMaN, r0mf0, r0mf1, r0mfN..r1mf0,
-        r1mf1,..rMmfN, r0c0, r0c1,...r0cJ, r1c0, r1c1,...rMcJ ]
 
-    where:
+    The shape of the 1d bit array of sp2 is the following:
+        [ r0a0,   r0a1, ... r0aN,   r1a0,   r1a1, ... rMaN,
+          r0lv0,  r0lv1,... r0lvN,  r1lv0,  r1lv1,... rMlvN,
+          r0lbl0, r0lbl1,...r0lblN, r1lbl0, r1lbl1,...rMlblN,
+          r0c0, r0c1,...r0cJ, r1c0, r1c1,...rMcJ ]
+
+    Where:
         M = n_rules
         N = n_max_vars_per_rule
         J = n_consequents i.e. number of output variables that are NOT mutually
             exclusive
 
-    Aij parameter indicates which antecedents/variables are used by the
-    model/fis for all its rules.
+    The rules are composed of two parts. The antecedents (Aij) and the
+    consequents (Cij).
 
-    It consists of two "matrices" let's call them r_ants and r_mfs.
+    The Aij part indicates which antecedents/variables are used by the
+    model/fis for all its rules. It consists of three "matrices" let's call
+    them r_sel_vars, r_lv and r_labels.
 
-    r_ants is a NxM matrix like this:
+    r_sel_vars is a NxM matrix like this:
 
         ^             ||<----- n_max_vars_per_rule ----->|
         |     |-------||------|------|------|-----|------|
@@ -108,37 +157,60 @@ class CocoIndividual(FISIndividual, Clonable):
 
     A single element e.g. r1a2 is a link/"pointer" to the variable index/number
     to use for the 3rd antecedent (a2) of the 2nd rule (r1). A single element
-    is in the interval [0, n_vars -1] where n_vars is deduced from X_train.
+    is in the interval [0, n_vars-1] where n_vars is deduced from X_train.
 
 
-    r_mfs is a NxM matrix like this:
+    r_lv is a NxM matrix like this:
 
         ^             ||<------- n_max_vars_per_rule ------->|
         |     |-------||-------|-------|-------|-----|-------|
-    n_rules   | rule0 || r0mf0 | r0mf1 | r0mf2 | ... | r0mfN |
-        |     | rule1 || r1mf0 | r1mf1 | r1mf2 | ... | r1mfN |
-        v     | ruleM || rMmf0 | rMmf1 | rMmf2 | ... | rMmfN |
+    n_rules   | rule0 || r0lv0 | r0lv1 | r0lv2 | ... | r0lvN |
+        |     | rule1 || r1lv0 | r1lv1 | r1lv2 | ... | r1lvN |
+        v     | ruleM || rMlv0 | rMlv1 | rMlv2 | ... | rMlvN |
 
-    A single element e.g. r1mf2 is a link/"pointer" to the membership function
-    index (by index we mean for example 0 for LOW, 1 for MEDIUM, 2 for HIGH, ...
-    last for DONT_CARE) to use for the variable/antecedent r1a2 of the r_ants
-    "matrix". For example if r1a2=6, r1mf2=2 and n_true_labels=4 (i.e. VERY LOW,
-    LOW, MEDIUM, HIGH) then it would mean that the 3rd antecedent (a2) of the
-    2nd rule (r1) is "5th variable is MEDIUM". (5th because of "=6" and MEDIUM
-    because of mf=2 with n_true_labels=4). A single element is in the interval
-    [0, (n_true_labels + dc_weight)-1]. With dc_weight=1 all mf have the
-    TODO change dc_weight comment
-    same probability to be chosen. To increase the probability to chose/select
-    a DC, increase dc_weight.
+    A single element e.g. r0lv2 is a link/"pointer" to a linguistic variable
+    defined in an individual from sp1. This element's value is a number
+    representing the index of the lv (i.e. a number in [0, I-1] where I
+    is n_lv_per_ind) to use from the paired ind_sp1. For example if r0lv2=4 then
+    the linguistic variable used for the variable of the 1st rule (r0) and the 3rd (lv2)
+    antecedent will be the 5th row of the matrix r_mfs of the paired ind_sp1.
+    Note: since elements of r_lv (i.e. antecedents) are pointers to a
+    linguistic variable (lvI) it is possible that:
+       1. 2 or more antecedents points to the same lvI (i.e. surjectivity)
+       2. Not all lvI are pointed by an element (i.e. injectivity)
+       3. 2 antecedents or more use the same variable but point to different lvI
+
+    The point 3. is a problem because the interpretability criteria tell us that
+    a fuzzy variable should use the same definition across all rules. To fix this
+    problem, we only keep the last definition of a variable. This is done in
+    the C++ part with the map vars_lv_lookup.
+
+    r_labels is a NxM matrix like this:
+
+        ^             ||<--------- n_max_vars_per_rule --------->|
+        |     |-------||--------|--------|--------|-----|--------|
+    n_rules   | rule0 || r0lbl0 | r0lbl1 | r0lbl2 | ... | r0lblN |
+        |     | rule1 || r1lbl0 | r1lbl1 | r1lbl2 | ... | r1lblN |
+        v     | ruleM || rMlbl0 | rMlbl1 | rMlbl2 | ... | rMlblN |
+
+    A single element e.g. r1mf2 is a link/"pointer" to a linguistic label
+    (by label we mean for example 0 for LOW, 1 for MEDIUM, 2 for HIGH, ...
+    last for DONT_CARE) to use for the variable/antecedent r1a2 of the
+    r_sel_vars "matrix". For example if r1a2=6, r1lbl2=2 and n_true_labels=4
+    (i.e. VERY LOW, LOW, MEDIUM, HIGH) then it would mean that the 3rd
+    antecedent (a2) of the 2nd rule (r1) is "5th variable is MEDIUM". (5th
+    because of "=6" and MEDIUM because of lbl=2 with n_true_labels=4). A single
+    element is in the interval [0, (n_true_labels + dc_weight)-1].
+    With dc_weight=1 all labels have the same probability to be chosen.
+    To increase the probability to chose/select a DC, increase dc_weight.
 
 
-    The other parameter, Cij indicates which consequents class
-    (in a classification problem) or a real value (in a regression problem) are
-    used by the model/fis for all its rules.
+    The other part of sp2 is Cij. It defines the consequents (i.e. classes
+    in a classification problem or a label in a regression problem) that are
+    used by the model/fis for all its rules. It consists of a single "matrix"
+    let's call it r_cons.
 
-    It consists of a single "matrix" let's call it r_cons.
-
-    r_cons is a NxJ matrix like:
+    r_cons is a JxM matrix like:
 
 
         ^             ||<-------- n_consequents -------->|
@@ -148,18 +220,18 @@ class CocoIndividual(FISIndividual, Clonable):
         v     | ruleM || rMc0 | rMc1 | rMc2 | ... | rMcJ |
 
     A single element e.g. r1c2 is either a class in [0, n_classes-1] if the
-    the problem is a classification problem, or a real value if the problem
+    the problem is a classification problem, or a label if the problem
     is a regression problem.
     All columns/consequents are NOT mutually exclusive. Therefore, for iris
     classification problem, you surely want to have 1 consequent that can take
     the values {0, 1, 2} mapped to "virginica", "setosa", "versicolor" since
     they ARE mutually exclusive.
+    Therefore, if you want to transform this iris problem into a one-hot version
+    of it, create 3 consequents with 2 classes per consequent.
     You can even have a mixed problem (classification and regression). For
     example, just add a column/consequent to the previous iris example. Let's
-    call this new consequent the pollen concentration (i.e. a real value of an
-    arbitrary unit. Note: here the value is always a positive
-    number but negative numbers are supported too.
-
+    call this new consequent the pollen concentration (i.e. a label, let's say
+    LOW. This label is a positive integer in [0, n_labels_per_cons-1].
     """
 
     def __init__(
@@ -174,7 +246,6 @@ class CocoIndividual(FISIndividual, Clonable):
         n_labels_per_cons: Type[LabelEnum] = Label3,
         p_positions_per_lv: int = 32,  # 5 bits
         dc_weight: int = 1,
-        mfs_shape: MFShape = MFShape.TRI_MF,
         n_lv_per_ind_sp1: int = None,
     ):
         """
@@ -186,23 +257,32 @@ class CocoIndividual(FISIndividual, Clonable):
         where n_class_consX is the number of classes for the X-th consequent.
         If the consequent is a continuous variable (i.e. regression) set the
         value to 0.
-        :param n_max_vars_per_rule:
-        :param n_labels_per_mf:
+        :param n_max_vars_per_rule: Maximum number of variables to use for a
+        single rule. Use this parameter to reduce the size of the fuzzy system.
+        :param n_labels_per_mf: number of labels per membership function. For
+        example, n_labels_per_mf=4 will correspond to "low, medium, high,
+        very high"
         :param p_positions_per_lv: Integer to represent the
         number of p positions (i.e. the possible values the membership functions
         (MFs) of a linguistic variable (LV) can take). For example, if
         p_positions_per_lv=4, then a MF's inflexion points will be at 0%, 33%,
-        66% 100% of the variable range. The linguistic variable will be cut in
-        p_positions_per_lv. This value must be a multiple of 2.
-        :param dc_weight: integer. If =1 and
-        n_labels_per_mf=3 -> [0,1,2,3] where 3 is DONT_CARE, =2 -> [0,1,2,3,
-        4] where 3 and 4 is DONT_CARE, ... TODO: improve this comment
-        :param mfs_shape:
-        :param n_lv_per_ind_sp1: Integer to represent the number of MF encoded
-        per individual of sp1. Must be >= n_max_vars_per_rule, ideally a
+        66% 100% of the variable range. In others words, the linguistic variable
+        will be cut in p_positions_per_lv. This value must be a multiple of 2.
+        :param dc_weight: integer. Set the don't care weight. If dc_weight=k
+        then a variable v has k more chance to be a don't care. Setting
+        dc_weight=0 will lead to create rules that have exactly
+        n_max_vars_per_rule. Setting dc_weight to a big number will to lead
+        less rules than n_rules because all their antecedents will be set to
+        don't care.
+        :param n_lv_per_ind_sp1: This is an advanced parameter. it's an integer
+        to represent the number of MF encoded per individual of sp1. In other
+        words it is the pool of MF where the linguistic variable from ind_sp2
+        will be defined from. Must be >= n_max_vars_per_rule, ideally a
         multiple of 2. If not will be ceil-ed to the closest multiple of 2. If
         the problem you try to solve is big you maybe should increase this
-        number
+        number. By default, this value is set (before ceiling) to
+        n_max_vars_per_rule * n_rules. This ensures that each LV can have its
+        own MF.
         """
 
         super().__init__()
@@ -216,7 +296,7 @@ class CocoIndividual(FISIndividual, Clonable):
         self._n_labels_cons = n_labels_per_cons
         self._p_positions_per_lv = p_positions_per_lv
         self._dc_weight = dc_weight
-        self._mfs_shape = mfs_shape
+        self._mfs_shape = MFShape.TRI_MF
 
         self._n_vars = self._X.shape[1]
 
@@ -224,7 +304,7 @@ class CocoIndividual(FISIndividual, Clonable):
             self._n_max_vars_per_rule = self._n_vars
 
         if n_lv_per_ind_sp1 is None:
-            n_lv_per_ind_sp1 = self._n_max_vars_per_rule
+            n_lv_per_ind_sp1 = self._n_max_vars_per_rule * self._n_rules
 
         self._n_bits_per_lv = ceil(log(n_lv_per_ind_sp1, 2))
 
@@ -398,6 +478,5 @@ class CocoIndividual(FISIndividual, Clonable):
                 return False
 
         return [
-            cons if is_int_or_numpy_int(cons) else cons.value
-            for cons in labels_enums
+            cons if is_int_or_numpy_int(cons) else cons.value for cons in labels_enums
         ]
