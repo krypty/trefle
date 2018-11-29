@@ -1,17 +1,17 @@
 # Deployment on PyPI
 
-Note you must increment the version every time you upload to (test)PyPI
+**Note** you must increment the version every time you upload to (test)PyPI
 
-Note you must repeat these instructions for every Python version you want to support. At the moment, trefle should compile on Python >= 3.5
+**Note** you must repeat these instructions for every Python version you want to support. At the moment, trefle should compile on Python >= 3.5
 
 This means that for each new release you must create, at least, a:
   * Windows 64 bits binary wheel for Python 3.X
   * Linux (manylinux) 64 bits binary wheel for Python 3.X
   * Mac OS X 64 binary wheel for Python 3.X
 
-**Note** you must repeat the 3 steps above for each Python 3.X release. So if you want to support Python 3.5, 3.6 and 3.7 you must produce 4x3 builds.
+**Note** you must repeat the 3 steps above for each Python 3.X release. So if you want to support Python 3.5, 3.6 and 3.7 you must produce 3x3 builds.
 
-Start by getting the sources as described in [INSTALL.md](docs/INSTALL.md)
+Start by getting the sources as described in [BUILD_FROM_SOURCES.md](docs/BUILD_FROM_SOURCES.md)
 
 ## Create a binary wheel for Windows x64
 
