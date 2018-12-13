@@ -1,3 +1,5 @@
+from trefle_engine import TrefleFIS
+
 from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
@@ -40,7 +42,6 @@ def run():
     # Split our data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
-
     def fit(y_true, y_pred):
         y_pred_thresholded = round_to_cls(y_pred, n_classes=2)
         fitness_val = accuracy_score(y_true, y_pred_thresholded)
@@ -68,8 +69,12 @@ def run():
     # Make predictions
     y_pred = clf.predict(X_test)
 
-    # fis = clf.get_best_fuzzy_system()
+    clf.print_best_fuzzy_system()
     tff_str = clf.get_best_fuzzy_system_as_tff()
+    print(tff_str)
+
+    yolo = TrefleFIS.from_tff(tff_str)
+    yolo.describe()
 
     # fis = clf.get_best_fuzzy_system()
     # print("best fis is ", end="")

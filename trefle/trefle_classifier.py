@@ -160,8 +160,7 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
 
         for i, n_classes in enumerate(self.n_classes_per_cons):
             if n_classes > 0:  # not a continuous variable
-                toto = round_to_cls(y_pred[:, i], n_classes)
-                y_pred[:, i] = toto
+                y_pred[:, i] = round_to_cls(y_pred[:, i], n_classes)
         return y_pred
 
     def get_best_fuzzy_system_as_tff(self):
