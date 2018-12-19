@@ -132,7 +132,7 @@ In short, as a user this algorithm will give you a model that is interpretable a
 1. Load dataset
 2. Configure experiment i.e. the number of rules, the number of generations and other fuzzy systems or evolutionary parameters
 3. Create two initial populations (also called "species"; one for the fuzzy rules and the other for the
-variable definition). Both represent individuals as a list of bits.
+variables definition). Both represent individuals as a list of bits.
 4. Run evolutionary algorithm. It will perform the following steps.
     1. Select
     2. Crossover
@@ -161,3 +161,6 @@ There is no documentation like a Sphinx one. Start by looking in the [docs](docs
 * [Gary Marigliano](https://github.com/krypty)
 * Carlos Andrés PEÑA REYES
 * [CI4CB Team](http://iict-space.heig-vd.ch/cpn/)
+
+![ci4cb_logo](assets/img/ci4cb_logo.png)
+![heigvd_logo](assets/img/heigvd_logo.png)
