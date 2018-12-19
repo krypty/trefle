@@ -99,7 +99,7 @@ See other examples in the **examples** folder.
 
 * [Binary problem](examples/01_binary_problem.py)
 * [Multiclass problem](examples/02_multiclass_problem.py)
-* [Multiclass one-hot problem](examples/03_multiclass_problem_hot_problem.py)
+* [Multiclass one-hot problem](examples/03_multiclass_one_hot_problem.py)
 * [Regression problem](examples/04_regression_problem.py)
 
 
