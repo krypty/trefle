@@ -1,6 +1,6 @@
 # Trefle — A scikit-learn compatible classifier using interpretable fuzzy systems
 
-Trefle is a **scikit-learn compatible** estimator implementing the [FuzzyCoCo algorithm](#fuzzycoco-algorithm) that use a cooperative coevolution algorithm to find and build interpretable fuzzy systems.
+Trefle is a **scikit-learn compatible** estimator implementing the [FuzzyCoCo algorithm](#fuzzycoco-algorithm) that uses a cooperative coevolution algorithm to find and build interpretable fuzzy systems.
 
 Here is a basic example using Wisconsin Breast Cancer Dataset, a binary classification problem, from scikit-learn:
 ```python
@@ -48,7 +48,7 @@ clf = TrefleClassifier(
 )
 
 # Train our classifier
-model = clf.fit(X_train, y_train)
+clf.fit(X_train, y_train)
 
 # Make predictions
 y_pred = clf.predict_classes(X_test)
@@ -95,7 +95,12 @@ pip install trefle
 
 ## Examples of use
 
-See other examples in [docs/EXAMPLES.md](docs/EXAMPLES.md).
+See other examples in the **examples** folder.
+
+* [Binary problem](examples/01_binary_problem.py)
+* [Multiclass problem](examples/02_multiclass_problem.py)
+* [Multiclass one-hot problem](examples/03_multiclass_problem_hot_problem.py)
+* [Regression problem](examples/04_regression_problem.py)
 
 
 ## Cool features
@@ -110,7 +115,7 @@ See other examples in [docs/EXAMPLES.md](docs/EXAMPLES.md).
 * [Import and Export](docs/COOL_FEATURES.md#import-and-export) the best fuzzy system for future use in an interoperable format
 * Fine tune your best fuzzy system using the companion library [LFA Toolbox](https://github.com/iict/lfa_toolbox). Add or remove a fuzzy rule to increase either the performance or interpretability of the fuzzy system. Or tweak the membership functions.
 * The fuzzy engine is implemented in C++14 allowing Trefle to be quite fast and use all the CPU cores
-* Last but not least, Trefle is a recursive accronym like GNU which is cool. It stands for **T**refle is a **R**evised and **E**volutionary-based **F**uzzy **L**ogic **E**ngine. And trefle also means clover in French.
+* Last but not least, Trefle is a recursive acronym like GNU which is cool. It stands for **T**refle is a **R**evised and **E**volutionary-based **F**uzzy **L**ogic **E**ngine. And trefle also means clover in French.
 
 ## What are fuzzy logic and FuzzyCoco algorithm?
 
@@ -145,7 +150,7 @@ Both are available in the `docs` folder.
 
 # Build from sources
 
-See [docs/BUILD_FROM_SOURCES.md](docs/BUILD_FROM_SOURCES.md).
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 # Where is the doc?!
 
@@ -153,6 +158,6 @@ There is no documentation like a Sphinx one. Start by looking in the [docs](docs
 
 # Credits
 
-* Gary Marigliano
+* [Gary Marigliano](https://github.com/krypty)
 * Carlos Andrés PEÑA REYES
 * [CI4CB Team](http://iict-space.heig-vd.ch/cpn/)
