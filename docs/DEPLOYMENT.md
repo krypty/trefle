@@ -11,8 +11,6 @@ This means that for each new release you must create, at least, a:
 
 **Note** you must repeat the 3 steps above for each Python 3.X release. So if you want to support Python 3.5, 3.6 and 3.7 you must produce 3x3 builds.
 
-Start by getting the sources as described in [BUILD_FROM_SOURCES.md](docs/BUILD_FROM_SOURCES.md)
-
 ## Create a binary wheel for Windows x64
 
 The following commands assume that you have a virtualenv using the Python version you want to.
