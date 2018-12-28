@@ -16,16 +16,26 @@ class LElem:
     def is_dc(self):
         return self._is_dc
 
+    def __len__(self):
+        return self._parent.len()
+
+    def __repr__(self):
+        return "{} from class {}".format(self.value, self._parent.__name__)
+
 
 class LabelEnum:
     pass
 
 
 class Label2(LabelEnum):
-    _name = "L2"
-    LOW = LElem(_name, 0)
-    HIGH = LElem(_name, 1)
-    DC = LElem(_name, 2, is_dc=True)
+    def LOW(self=None):
+        return LElem(Label2, value=0)
+
+    def HIGH(self=None):
+        return LElem(Label2, value=1)
+
+    def DC(self=None):
+        return LElem(Label2, value=2, is_dc=True)
 
     @staticmethod
     def len():
@@ -33,11 +43,17 @@ class Label2(LabelEnum):
 
 
 class Label3(LabelEnum):
-    _name = "L3"
-    LOW = LElem(_name, 0)
-    MEDIUM = LElem(_name, 1)
-    HIGH = LElem(_name, 2)
-    DC = LElem(_name, 3, is_dc=True)
+    def LOW(self=None):
+        return LElem(Label3, value=0)
+
+    def MEDIUM(self=None):
+        return LElem(Label3, value=1)
+
+    def HIGH(self=None):
+        return LElem(Label3, value=2)
+
+    def DC(self=None):
+        return LElem(Label3, value=3, is_dc=True)
 
     @staticmethod
     def len():
@@ -45,12 +61,20 @@ class Label3(LabelEnum):
 
 
 class Label4(LabelEnum):
-    _name = "L4"
-    LOW = LElem(_name, 0)
-    MEDIUM = LElem(_name, 1)
-    HIGH = LElem(_name, 2)
-    VERY_HIGH = LElem(_name, 3)
-    DC = LElem(_name, 4, is_dc=True)
+    def LOW(self=None):
+        return LElem(Label4, value=0)
+
+    def MEDIUM(self=None):
+        return LElem(Label4, value=1)
+
+    def HIGH(self=None):
+        return LElem(Label4, value=2)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label4, value=3)
+
+    def DC(self=None):
+        return LElem(Label4, value=4, is_dc=True)
 
     @staticmethod
     def len():
@@ -58,13 +82,23 @@ class Label4(LabelEnum):
 
 
 class Label5(LabelEnum):
-    _name = "L5"
-    VERY_LOW = LElem(_name, 0)
-    LOW = LElem(_name, 1)
-    MEDIUM = LElem(_name, 2)
-    HIGH = LElem(_name, 3)
-    VERY_HIGH = LElem(_name, 4)
-    DC = LElem(_name, 5, is_dc=True)
+    def VERY_LOW(self=None):
+        return LElem(Label5, value=0)
+
+    def LOW(self=None):
+        return LElem(Label5, value=1)
+
+    def MEDIUM(self=None):
+        return LElem(Label5, value=2)
+
+    def HIGH(self=None):
+        return LElem(Label5, value=3)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label5, value=4)
+
+    def DC(self=None):
+        return LElem(Label5, value=5, is_dc=True)
 
     @staticmethod
     def len():
@@ -72,14 +106,26 @@ class Label5(LabelEnum):
 
 
 class Label6(LabelEnum):
-    _name = "L6"
-    VERY_LOW = LElem(_name, 0)
-    LOW = LElem(_name, 1)
-    MEDIUM = LElem(_name, 2)
-    HIGH = LElem(_name, 3)
-    VERY_HIGH = LElem(_name, 4)
-    VERY_VERY_HIGH = LElem(_name, 5)
-    DC = LElem(_name, 6, is_dc=True)
+    def VERY_LOW(self=None):
+        return LElem(Label6, value=0)
+
+    def LOW(self=None):
+        return LElem(Label6, value=1)
+
+    def MEDIUM(self=None):
+        return LElem(Label6, value=2)
+
+    def HIGH(self=None):
+        return LElem(Label6, value=3)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label6, value=4)
+
+    def VERY_VERY_HIGH(self=None):
+        return LElem(Label6, value=5)
+
+    def DC(self=None):
+        return LElem(Label6, value=6, is_dc=True)
 
     @staticmethod
     def len():
@@ -87,15 +133,29 @@ class Label6(LabelEnum):
 
 
 class Label7(LabelEnum):
-    _name = "L7"
-    VERY_VERY_LOW = LElem(_name, 0)
-    VERY_LOW = LElem(_name, 1)
-    LOW = LElem(_name, 2)
-    MEDIUM = LElem(_name, 3)
-    HIGH = LElem(_name, 4)
-    VERY_HIGH = LElem(_name, 5)
-    VERY_VERY_HIGH = LElem(_name, 6)
-    DC = LElem(_name, 7, is_dc=True)
+    def VERY_VERY_LOW(self=None):
+        return LElem(Label7, value=0)
+
+    def VERY_LOW(self=None):
+        return LElem(Label7, value=1)
+
+    def LOW(self=None):
+        return LElem(Label7, value=2)
+
+    def MEDIUM(self=None):
+        return LElem(Label7, value=3)
+
+    def HIGH(self=None):
+        return LElem(Label7, value=4)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label7, value=5)
+
+    def VERY_VERY_HIGH(self=None):
+        return LElem(Label7, value=6)
+
+    def DC(self=None):
+        return LElem(Label7, value=7, is_dc=True)
 
     @staticmethod
     def len():
@@ -103,16 +163,32 @@ class Label7(LabelEnum):
 
 
 class Label8(LabelEnum):
-    _name = "L8"
-    VERY_VERY_LOW = LElem(_name, 0)
-    VERY_LOW = LElem(_name, 1)
-    LOW = LElem(_name, 2)
-    MEDIUM = LElem(_name, 3)
-    HIGH = LElem(_name, 4)
-    VERY_HIGH = LElem(_name, 5)
-    VERY_VERY_HIGH = LElem(_name, 6)
-    VERY_VERY_VERY_HIGH = LElem(_name, 7)
-    DC = LElem(_name, 8, is_dc=True)
+    def VERY_VERY_LOW(self=None):
+        return LElem(Label8, value=0)
+
+    def VERY_LOW(self=None):
+        return LElem(Label8, value=1)
+
+    def LOW(self=None):
+        return LElem(Label8, value=2)
+
+    def MEDIUM(self=None):
+        return LElem(Label8, value=3)
+
+    def HIGH(self=None):
+        return LElem(Label8, value=4)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label8, value=5)
+
+    def VERY_VERY_HIGH(self=None):
+        return LElem(Label8, value=6)
+
+    def VERY_VERY_VERY_HIGH(self=None):
+        return LElem(Label8, value=7)
+
+    def DC(self=None):
+        return LElem(Label8, value=8, is_dc=True)
 
     @staticmethod
     def len():
@@ -120,17 +196,35 @@ class Label8(LabelEnum):
 
 
 class Label9(LabelEnum):
-    _name = "L9"
-    VERY_VERY_VERY_LOW = LElem(_name, 0)
-    VERY_VERY_LOW = LElem(_name, 1)
-    VERY_LOW = LElem(_name, 2)
-    LOW = LElem(_name, 3)
-    MEDIUM = LElem(_name, 4)
-    HIGH = LElem(_name, 5)
-    VERY_HIGH = LElem(_name, 6)
-    VERY_VERY_HIGH = LElem(_name, 7)
-    VERY_VERY_VERY_HIGH = LElem(_name, 8)
-    DC = LElem(_name, 9, is_dc=True)
+    def VERY_VERY_VERY_LOW(self=None):
+        return LElem(Label9, value=0)
+
+    def VERY_VERY_LOW(self=None):
+        return LElem(Label9, value=1)
+
+    def VERY_LOW(self=None):
+        return LElem(Label9, value=2)
+
+    def LOW(self=None):
+        return LElem(Label9, value=3)
+
+    def MEDIUM(self=None):
+        return LElem(Label9, value=4)
+
+    def HIGH(self=None):
+        return LElem(Label9, value=5)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label9, value=6)
+
+    def VERY_VERY_HIGH(self=None):
+        return LElem(Label9, value=7)
+
+    def VERY_VERY_VERY_HIGH(self=None):
+        return LElem(Label9, value=8)
+
+    def DC(self=None):
+        return LElem(Label9, value=9, is_dc=True)
 
     @staticmethod
     def len():
@@ -138,18 +232,38 @@ class Label9(LabelEnum):
 
 
 class Label10(LabelEnum):
-    _name = "L10"
-    VERY_VERY_VERY_LOW = LElem(_name, 0)
-    VERY_VERY_LOW = LElem(_name, 1)
-    VERY_LOW = LElem(_name, 2)
-    LOW = LElem(_name, 3)
-    MEDIUM = LElem(_name, 4)
-    HIGH = LElem(_name, 5)
-    VERY_HIGH = LElem(_name, 6)
-    VERY_VERY_HIGH = LElem(_name, 7)
-    VERY_VERY_VERY_HIGH = LElem(_name, 8)
-    VERY_VERY_VERY_VERY_HIGH = LElem(_name, 9)
-    DC = LElem(_name, 10, is_dc=True)
+    def VERY_VERY_VERY_LOW(self=None):
+        return LElem(Label10, value=0)
+
+    def VERY_VERY_LOW(self=None):
+        return LElem(Label10, value=1)
+
+    def VERY_LOW(self=None):
+        return LElem(Label10, value=2)
+
+    def LOW(self=None):
+        return LElem(Label10, value=3)
+
+    def MEDIUM(self=None):
+        return LElem(Label10, value=4)
+
+    def HIGH(self=None):
+        return LElem(Label10, value=5)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label10, value=6)
+
+    def VERY_VERY_HIGH(self=None):
+        return LElem(Label10, value=7)
+
+    def VERY_VERY_VERY_HIGH(self=None):
+        return LElem(Label10, value=8)
+
+    def VERY_VERY_VERY_VERY_HIGH(self=None):
+        return LElem(Label10, value=9)
+
+    def DC(self=None):
+        return LElem(Label10, value=10, is_dc=True)
 
     @staticmethod
     def len():
@@ -157,19 +271,41 @@ class Label10(LabelEnum):
 
 
 class Label11(LabelEnum):
-    _name = "L11"
-    VERY_VERY_VERY_VERY_LOW = LElem(_name, 0)
-    VERY_VERY_VERY_LOW = LElem(_name, 1)
-    VERY_VERY_LOW = LElem(_name, 2)
-    VERY_LOW = LElem(_name, 3)
-    LOW = LElem(_name, 4)
-    MEDIUM = LElem(_name, 5)
-    HIGH = LElem(_name, 6)
-    VERY_HIGH = LElem(_name, 7)
-    VERY_VERY_HIGH = LElem(_name, 8)
-    VERY_VERY_VERY_HIGH = LElem(_name, 9)
-    VERY_VERY_VERY_VERY_HIGH = LElem(_name, 10)
-    DC = LElem(_name, 11, is_dc=True)
+    def VERY_VERY_VERY_VERY_LOW(self=None):
+        return LElem(Label11, value=0)
+
+    def VERY_VERY_VERY_LOW(self=None):
+        return LElem(Label11, value=1)
+
+    def VERY_VERY_LOW(self=None):
+        return LElem(Label11, value=2)
+
+    def VERY_LOW(self=None):
+        return LElem(Label11, value=3)
+
+    def LOW(self=None):
+        return LElem(Label11, value=4)
+
+    def MEDIUM(self=None):
+        return LElem(Label11, value=5)
+
+    def HIGH(self=None):
+        return LElem(Label11, value=6)
+
+    def VERY_HIGH(self=None):
+        return LElem(Label11, value=7)
+
+    def VERY_VERY_HIGH(self=None):
+        return LElem(Label11, value=8)
+
+    def VERY_VERY_VERY_HIGH(self=None):
+        return LElem(Label11, value=9)
+
+    def VERY_VERY_VERY_VERY_HIGH(self=None):
+        return LElem(Label11, value=10)
+
+    def DC(self=None):
+        return LElem(Label11, value=11, is_dc=True)
 
     @staticmethod
     def len():
@@ -177,38 +313,9 @@ class Label11(LabelEnum):
 
 
 if __name__ == "__main__":
+    print(Label3.LOW().value)
+    print(len(Label2.LOW()))
 
-    def toto(label):
-        print(label)
-        print("is zero", label.value == 0)
-        print(isinstance(label, Label2))
-        print("is dc", label.is_dc())
-        print("")
-        print("")
-        print("")
+    toto = Label5
 
-    toto(Label2.LOW)
-    toto(Label2.HIGH)
-    toto(Label3.DC)
-    toto(Label2.DC)
-    print(Label2.DC)
-
-    print("must be false", Label3.LOW == Label2.LOW)
-    print("must be false", Label3.LOW == Label2.LOW)
-    print("must be true", Label3.LOW == Label3.LOW)
-
-    print(Label2.LOW)
-    print(Label2.HIGH)
-    print(Label2.DC)
-    print(Label3.DC)
-
-    # print(Label3.__members__.values())
-    # print(Label9.__members__.values())
-
-    a = Label4.DC
-    print("issss", a.is_dc())
-    print("issss", a.value)
-
-    # print(len(Label5))
-    # print(len(a.__class__))
-    # print(a.len())
+    assert issubclass(toto, LabelEnum)

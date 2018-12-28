@@ -2,7 +2,7 @@ from math import log, ceil
 
 import numpy as np
 
-from trefle.evo.helpers.fuzzy_labels import LabelEnum
+from trefle.evo.helpers.fuzzy_labels import LabelEnum, LElem
 
 
 def ensure(condition, msg="Assertion is incorrect"):
@@ -36,6 +36,11 @@ class CocoIndividualValidator:
                 "You must have at least as many p_positions as the n_labels_per_mf "
                 "you want to use "
             ),
+        )
+
+        ensure(
+            issubclass(self._coco_ind._n_labels_cons, LabelEnum),
+            "You must use a subclass of LabelEnum (e.g. Label4) for n_labels_per_cons",
         )
 
         # Validate the number of classes per consequent
@@ -97,7 +102,7 @@ class CocoIndividualValidator:
         # n_labels_cons and default_cons are the same (e.g. if
         # n_labels_cons's LOW = 0, then default_cons' LOW = 0 too)
         are_labels_or_int = [
-            isinstance(c, (int, np.integer, self._coco_ind._n_labels_cons))
+            isinstance(c, (int, np.integer, LElem))
             for c in self._coco_ind._default_cons
         ]
 
@@ -113,20 +118,26 @@ class CocoIndividualValidator:
         )
 
         def can_default_cons_fit_in_cons():
-            for a, b in zip(
+
+            for default_cons, n_labels_for_cons in zip(
                 self._coco_ind._default_cons, self._coco_ind._cons_n_labels
             ):
-                try:
-                    yield a.value < b
-                except AttributeError:
-                    yield a < b
+                if isinstance(default_cons, LElem):
+                    # regression: make sure both a and b are LabelX
+                    # (not LabelX and LabelY)
+                    yield len(default_cons) == n_labels_for_cons
+                else:
+                    # classification: make sure the specified class can fit in
+                    # the consequent
+                    yield default_cons < n_labels_for_cons
 
         ensure(
             all(can_default_cons_fit_in_cons()),
             (
                 "Make sure that the default rule contains valid classes/labels \n"
                 "i.e. label is in [0, n_classes-1] or in case of regression in \n"
-                "[0, n_labels-1].\n"
+                "[0, n_labels-1] Check the parameters 'n_labels_per_cons' and \n"
+                " 'default_cons' .\n"
                 "Expected: ({}) < {}".format(
                     self._coco_ind._default_cons, self._coco_ind._cons_n_labels
                 )

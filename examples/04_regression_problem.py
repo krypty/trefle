@@ -5,7 +5,7 @@ from sklearn.datasets import load_boston
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
-from trefle.evo.helpers.fuzzy_labels import Label4
+from trefle.evo.helpers.fuzzy_labels import Label4, Label6, Label5, Label3
 from trefle.trefle_classifier import TrefleClassifier
 
 
@@ -41,7 +41,7 @@ def main():
         #                          # we use a label e.g.
         #                          # "[...] THEN temperature is LOW"
         n_labels_per_mf=2,  # use 2 labels LOW, HIGH (for the antecedents)
-        default_cons=[3],  # default rule yield the 4th (and last) label
+        default_cons=[Label4.MEDIUM()],  # default rule yield the 4th (and last) label
         n_max_vars_per_rule=5,
         n_generations=40,
         fitness_function=fit,
