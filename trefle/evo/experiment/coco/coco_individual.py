@@ -250,30 +250,63 @@ class CocoIndividual(FISIndividual, Clonable):
     ):
         """
 
-        :param X_train:
-        :param y_train:
-        :param n_rules:
+        :param X_train: a 2d numpy array representing the train data. Each
+        column is a variable and each row is an observation.
+
+        :param y_train: a 2d numpy array representing the output classes/values
+        for the train data. Each column is a mutually exclusive output (either
+        a class or a regression value) and each row is the outputs for an
+        observation.
+
+        :param n_rules: the number of rules the fuzzy system have. The total
+        number of rules is n_rules + 1 (the default rule).
+
         :param n_classes_per_cons: [n_classes_cons0, n_classes_cons1, ...]
         where n_class_consX is the number of classes for the X-th consequent.
         If the consequent is a continuous variable (i.e. regression) set the
         value to 0.
+
+        :param default_cons: array of numbers to set the default consequent(s)
+        for the default rule. For a consequent representing a class, specify the
+        class directly. For a consequent representing a continuous variable,
+        specify LabelXXX.YYY (where XXX is the same number as n_labels_per_cons,
+        e.g. Label3 and YYY is a label value of this class, e.g. Label3.LOW()).
+        Example: for a problem with 2 consequents where the 1st represents a
+        class (e.g. n_classes=6) and the 2nd is a continuous variable (e.g.
+        split with n_labels_per_cons=Label4) then you can set
+        default_cons=[3, Label4.HIGH()]
+
         :param n_max_vars_per_rule: Maximum number of variables to use for a
         single rule. Use this parameter to reduce the size of the fuzzy system.
+
         :param n_labels_per_mf: number of labels per membership function. For
         example, n_labels_per_mf=4 will correspond to "low, medium, high,
         very high"
+
+        :param n_labels_per_mf: number of labels per membership function. For
+        example, n_labels_per_mf=4 will correspond to "low, medium, high,
+        very high"
+
+        :param n_labels_per_cons: number of labels per membership function for
+        the consequents (singleton MFs). For example, use 4 to have LOW, MEDIUM,
+        HIGH, VERY_HIGH labels. These labels are equally spaced in the range
+        (i.e. definition domain of y_train) so when n_labels_per_cons=4, LOW is
+        set to 1/4 of abs(cons_min - cons_max).
+
         :param p_positions_per_lv: Integer to represent the
         number of p positions (i.e. the possible values the membership functions
         (MFs) of a linguistic variable (LV) can take). For example, if
         p_positions_per_lv=4, then a MF's inflexion points will be at 0%, 33%,
         66% 100% of the variable range. In others words, the linguistic variable
         will be cut in p_positions_per_lv. This value must be a multiple of 2.
+
         :param dc_weight: integer. Set the don't care weight. If dc_weight=k
         then a variable v has k more chance to be a don't care. Setting
         dc_weight=0 will lead to create rules that have exactly
         n_max_vars_per_rule. Setting dc_weight to a big number will to lead
         less rules than n_rules because all their antecedents will be set to
         don't care.
+
         :param n_lv_per_ind_sp1: This is an advanced parameter. it's an integer
         to represent the number of MF encoded per individual of sp1. In other
         words it is the pool of MF where the linguistic variable from ind_sp2

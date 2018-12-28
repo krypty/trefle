@@ -27,7 +27,11 @@ species_indices_dict = {"sp1": [0, 1], "sp2": [1, 0]}
 class CocoExperiment(Experiment):
     """
     A class that performs an experiment using a cooperative-coevolution
-    algorithm with DEAP library.
+    algorithm with DEAP library. The logic of cooperative-coevolution is handled
+    by this class and it is does not need to know how the individuals are
+    encoded nor how they are combined to make predictions.
+    The individuals' encoding and evaluation/prediction are done by a
+    CocoIndividual object.
     """
 
     def get_logbook(self):
@@ -46,6 +50,35 @@ class CocoExperiment(Experiment):
         fitness_func: Callable,
         verbose: bool,
     ):
+        """
+
+        :param coco_ind: an instance of CocoIndividual that knows how the
+        individuals are encoded and evaluated.
+        :param n_generations: number of generations to run the evolution
+        :param pop_size: population size for specie 1 and specie 2
+        :param n_representatives: number of representatives (i.e. individuals)
+        to select to mate with the other specie. The representatives are
+        composed of randomly selected individuals and of the best ones.
+        :param crossover_prob: crossover probability for specie 1 and specie 2
+        :param mutation_prob: mutation probability for specie 1 and specie 2.
+        Every single individual in the population can mutate
+        (i.e. inter-individual mutation probability=1) but the individual itself
+        (i.e. intra-individual mutation probability or "the bits inside the
+        individual") will mutate with a probability of `mutation_prob`.
+        :param n_elite: keep the `n_elite` best individuals between generation
+        g and g+1 to avoid losing good individuals. This is done separately
+        for both specie 1 and specie 2.
+        :param halloffame_size: keep `halloffame_size` couples (i.e. an
+        individual from specie 1 and one for specie 2) that have the highest
+        fitness across all generations. This is what is left/returned after the
+        evolution process. The top 1 couple from the hall of fame is the couple
+        with the highest fitness over all generations.
+        :param fitness_func: a callable with the signature `f(y_true, y_pred)`
+        that return a number. The higher this number is the higher the fitness
+        value is.
+        :param verbose: if True a log with statistics about the populations
+        will be printed out.
+        """
         super().__init__(fitness_func)
         self._coco_ind = coco_ind
         self._n_generations = n_generations

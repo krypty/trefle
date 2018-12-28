@@ -45,8 +45,9 @@ class TrefleClassifier(BaseEstimator, ClassifierMixin):
     ):
         """
 
-        :param n_rules:
-        :param n_classes_per_cons:
+        The documentation for the fuzzy systems parameters is in CocoIndividual
+        class and for the evolutionary parameters it is in CocoExperiment class
+
         :param default_cons:
         :param n_max_vars_per_rule:
         :param n_labels_per_mf:
