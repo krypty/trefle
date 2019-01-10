@@ -113,7 +113,7 @@ See other examples in the **examples** folder.
 * [Evolutionary parameters](docs/COOL_FEATURES.md#trefleclassifier-parameters) are customizable e.g. number of generations, population size, hall of fame size,...
 * [Custom fitness function](docs/COOL_FEATURES.md#custom-fitness-function)
 * [Import and Export](docs/COOL_FEATURES.md#import-and-export) the best fuzzy system for future use in an interoperable format
-* Fine tune your best fuzzy system using the companion library [LFA Toolbox](https://github.com/iict/lfa_toolbox). Add or remove a fuzzy rule to increase either the performance or interpretability of the fuzzy system. Or tweak the membership functions.
+* Fine tune your best fuzzy system using the companion library [LFA Toolbox](https://github.com/krypty/lfa_toolbox). Add or remove a fuzzy rule to increase either the performance or interpretability of the fuzzy system. Or tweak the membership functions.
 * The fuzzy engine is implemented in C++14 allowing Trefle to be quite fast and use all the CPU cores
 * Last but not least, Trefle is a recursive acronym like GNU which is cool. It stands for **T**refle is a **R**evised and **E**volutionary-based **F**uzzy **L**ogic **E**ngine. And trefle also means clover in French.
 
@@ -142,7 +142,7 @@ variables definition). Both represent individuals as a list of bits.
     5. Save the best couple (i.e. the combination of an individual from pop1 and one from pop2)
     6. Repeat these steps until max generations is reached
 5. Retrieve best individual couple i.e. the best fuzzy system
-6. Optionally use the [LFA Toolbox](https://github.com/iict/lfa_toolbox) to visualize or fine tune it
+6. Optionally use the [LFA Toolbox](https://github.com/krypty/lfa_toolbox) to visualize or fine tune it
 
 # Deployment and Tests
 
