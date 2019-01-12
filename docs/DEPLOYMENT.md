@@ -13,6 +13,17 @@ This means that for each new release you must create, at least, a:
 
 ## Create a binary wheel for Windows x64
 
+Only 32 bits binaries are produced.
+
+Requires
+
+* Windows 10 (32 or 64 bits)
+* Anaconda Python 3.7 32bits (!)
+* [Build tools for Visual Studio 2017](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017)
+  * Select "Windows 10 SDK"
+
+
+
 The following commands assume that you have a virtualenv using the Python version you want to.
 
 If you don't know how to start it is recommended to use Anaconda and create n virtualenv where
@@ -23,7 +34,7 @@ Then in the project root folder, create the binary wheel:
 
 ```bash
 git clone --recursive <this_repo>
-pip install wheel twine
+pip install cmake wheel twine
 python setup.py build
 python setup.py sdist bdist_wheel
 ```
