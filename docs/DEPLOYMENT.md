@@ -85,7 +85,7 @@ Then for each Python P_XXX version in (3.5.6, 3.6.7, 3.7.1) do:
 
 ```bash
 # create a virtualenv for this version (only do it once per version)
-pyenv virtualenv P_XXX trefle-P_XXX # e.g. trefle-3.5.6
+pyenv virtualenv P_XXX trefle-P_XXX # e.g. pyenv virtualenv 3.5.6 trefle-3.5.6
 
 # activate the virtual env (this and the following commands have to be done
 # every time)
@@ -97,7 +97,7 @@ export CXX=/usr/local/bin/g++-8
 pip install cmake wheel twine
 python setup.py build
 python setup.py sdist bdist_wheel
-twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
+twine upload --repository-url https://test.pypi.org/legacy/ dist/trefle-[...]-x86_64.whl
 rm -rf build dist
 ```
 
