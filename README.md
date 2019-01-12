@@ -1,6 +1,6 @@
 # Trefle — A scikit-learn compatible classifier using interpretable fuzzy systems
 
-Trefle is a **scikit-learn compatible** estimator implementing the [FuzzyCoCo algorithm](#fuzzycoco-algorithm) that uses a cooperative coevolution algorithm to find and build interpretable fuzzy systems.
+[Trefle](https://github.com/krypty/trefle) is a **scikit-learn compatible** estimator implementing the [FuzzyCoCo algorithm](#fuzzycoco-algorithm) that uses a cooperative coevolution algorithm to find and build interpretable fuzzy systems.
 
 Here is a basic example using Wisconsin Breast Cancer Dataset, a binary classification problem, from scikit-learn:
 ```python
