@@ -10,8 +10,13 @@ using `GridSearchCV`. You can see an example of that in the file
 
 ## TrefleClassifier parameters
 
+`TrefleClassifier` class has a lot of parameters you can tune. Fortunately, most
+of them use default values that "are good enough" for small problems.
 
-
+There are two kinds of parameters, fuzzy systems and evolutionary parameters.
+These parameters are listed in `TrefleClassifier` class and are detailed in
+the classes [`CocoIndividual`](/trefle/evo/experiment/coco/coco_individual.py)
+and [`CocoExperiment`](/trefle/evo/experiment/base/coco_experiment.py).
 
 ## Custom fitness function
 
