@@ -7,6 +7,8 @@ import numpy as np
 from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.metrics import confusion_matrix, f1_score, mean_squared_error
 
+from trefle.fitness_functions.output_thresholder import round_to_cls
+
 
 def weighted_binary_classif_metrics(
     acc_w=None,
@@ -129,7 +131,8 @@ def _build_weighted_binary_classif_metrics(
             tot_w = 0
             fit = 0
 
-            tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+            y_pred_bin = round_to_cls(y_pred, n_classes=2)
+            tn, fp, fn, tp = confusion_matrix(y_true, y_pred_bin).ravel()
 
             # some metrics are set to 0 (np.nan_to_num) because we want to
             # avoid infinite numbers e.g. when dividing by 0. Oddly, we need
@@ -156,7 +159,7 @@ def _build_weighted_binary_classif_metrics(
                 # f1score, ignore ill-defined value, it will be set to 0
                 with catch_warnings():
                     filterwarnings("ignore", category=UndefinedMetricWarning)
-                    f1 = f1_score(y_true, y_pred)
+                    f1 = f1_score(y_true, y_pred_bin)
                     fit += f1_w * f1
                     tot_w += f1_w
 
@@ -201,8 +204,11 @@ def _build_weighted_binary_classif_metrics(
 
 
 if __name__ == "__main__":
+    # WIP do not use yet
+
     y_true = np.array([1, 0, 0, 0, 1, 0, 1, 0, 1, 1])
-    y_pred = np.array([0, 0, 0, 0, 1, 0, 1, 0, 1, 1])
+    y_pred = np.array([1.9, 0.22, 0.34, 0.32, 0.9, 0.1, 0.88, 0.1, 1.0, 0.81])
+    y_pred_bin = np.array([0, 0, 0, 0, 1, 0, 1, 0, 1, 1])
 
     fit_functions = weighted_binary_classif_metrics(
         acc_w=1.0,
@@ -212,9 +218,9 @@ if __name__ == "__main__":
 
     for f in fit_functions:
         print("function weights", f)
-        print(f(y_true, y_pred))
+        print(f(y_true, y_pred_bin))
 
     print("single")
     fit_f = weighted_binary_classif_metrics(ppv_w=1)
 
-    print("lala: ", fit_f(y_true, y_pred))
+    print("fit_f: ", fit_f(y_true, y_pred))
