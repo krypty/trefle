@@ -33,7 +33,7 @@ def main():
 
     # Initialize our classifier
     clf = TrefleClassifier(
-        n_rules=3,
+        n_rules=5,
         n_classes_per_cons=[0],  # In regression, there is no class (i.e. 0)
         n_labels_per_cons=Label4,  # use 4 labels LOW, MEDIUM, HIGH, VERY HIGH
         #                          # for the consequent
@@ -41,9 +41,9 @@ def main():
         #                          # we use a label e.g.
         #                          # "[...] THEN temperature is LOW"
         n_labels_per_mf=2,  # use 2 labels LOW, HIGH (for the antecedents)
-        default_cons=[Label4.MEDIUM()],  # default rule yield the 4th (and last) label
-        n_max_vars_per_rule=5,
-        n_generations=40,
+        default_cons=[Label4.VERY_HIGH()],  # default rule yield the 4th (and last) label
+        n_max_vars_per_rule=2,
+        n_generations=30,
         fitness_function=fit,
         verbose=True,
     )
