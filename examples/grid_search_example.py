@@ -109,4 +109,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print("[warning] this example can take a while to run")
     main()
