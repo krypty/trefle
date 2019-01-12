@@ -137,4 +137,6 @@ setup(
     tests_require=["pytest==3.3.2"],
     zip_safe=False,
     include_package_data=True,
+    license="GPL",
+    classifier=["License :: OSI Approved :: GNU General Public License v3 (GPLv3)"],
 )
