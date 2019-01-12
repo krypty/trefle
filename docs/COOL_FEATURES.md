@@ -20,6 +20,11 @@ and [`CocoExperiment`](/trefle/evo/experiment/base/coco_experiment.py).
 
 ## Custom fitness function
 
+You can change the fitness function to make Trefle generate models that match
+your criteria. For example you might want to have models that have a high
+sensibility.
+Check [/examples/grid_search_example.py](/examples/grid_search_example.py) out.
+
 
 ## Import and export
 
